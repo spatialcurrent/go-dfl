@@ -83,6 +83,8 @@ func ParseFunction(s string, remainder string, re *regexp.Regexp) (Node, error) 
 		root.(*GreaterThan).Left = left
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
+	case *Equal:
+		root.(*Equal).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}

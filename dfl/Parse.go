@@ -40,6 +40,8 @@ func ParseValue(s string, remainder string) (Node, error) {
 		root.(*GreaterThan).Left = left
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
+	case *Equal:
+		root.(*Equal).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
@@ -81,6 +83,8 @@ func ParseAttribute(in string) (Node, error) {
 		root.(*GreaterThan).Left = left
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
+	case *Equal:
+		root.(*Equal).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
 	}
@@ -124,6 +128,8 @@ func ParseSub(s string, remainder string) (Node, error) {
 		root.(*GreaterThan).Left = left
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
+	case *Equal:
+		root.(*Equal).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
@@ -212,6 +218,14 @@ func Parse(in string) (Node, error) {
 						return right, err
 					}
 					return &GreaterThanOrEqual{&BinaryOperator{Right: right}}, nil
+
+				} else if s_lc == "==" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Equal{&BinaryOperator{Right: right}}, nil
 
 				} else if s_lc == "not" {
 
