@@ -11,31 +11,31 @@ import (
 
 func ParseFunctionArguments(in string) ([]string, error) {
 
-  args := []string{}
+	args := []string{}
 
-  re2, err := regexp.Compile("(\\s*)(?P<value>((\"([^\"]+?)\")|([^,\\s]+)))(\\s*)")
-  if err != nil {
-    return args, err
-  }
+	re2, err := regexp.Compile("(\\s*)(?P<value>((\"([^\"]+?)\")|([^,\\s]+)))(\\s*)")
+	if err != nil {
+		return args, err
+	}
 
-  for _, m2 := range re2.FindAllStringSubmatch(in, -1) {
-    g2 := map[string]string{}
-    for i, name := range re2.SubexpNames() {
-      if i != 0 {
-        g2[name] = m2[i]
-      }
-    }
-    if value, ok := g2["value"]; ok {
-      value = strings.TrimSpace(value)
-      if strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\"") {
-        args = append(args, value[1:len(value)-1])
-      } else {
-        args = append(args, value)
-      }
-    }
-  }
+	for _, m2 := range re2.FindAllStringSubmatch(in, -1) {
+		g2 := map[string]string{}
+		for i, name := range re2.SubexpNames() {
+			if i != 0 {
+				g2[name] = m2[i]
+			}
+		}
+		if value, ok := g2["value"]; ok {
+			value = strings.TrimSpace(value)
+			if strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\"") {
+				args = append(args, value[1:len(value)-1])
+			} else {
+				args = append(args, value)
+			}
+		}
+	}
 
-  return args, nil
+	return args, nil
 }
 
 func ParseFunction(s string, remainder string, re *regexp.Regexp) (Node, error) {
@@ -84,7 +84,7 @@ func ParseFunction(s string, remainder string, re *regexp.Regexp) (Node, error) 
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for "+s+".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
 
 	return root, nil

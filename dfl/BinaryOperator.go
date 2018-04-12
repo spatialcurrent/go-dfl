@@ -1,6 +1,6 @@
 package dfl
 
 type BinaryOperator struct {
-	Left Node
-  Right Node
+	Left  Node
+	Right Node
 }

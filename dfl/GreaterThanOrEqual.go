@@ -5,13 +5,13 @@ type GreaterThanOrEqual struct {
 }
 
 func (gte GreaterThanOrEqual) Dfl() string {
-  return "("+gte.Left.Dfl() + " > "+ gte.Right.Dfl()+")"
+	return "(" + gte.Left.Dfl() + " > " + gte.Right.Dfl() + ")"
 }
 
 func (gte GreaterThanOrEqual) Map() map[string]interface{} {
 	return map[string]interface{}{
-	  "op": ">=",
-		"left": gte.Left.Map(),
+		"op":    ">=",
+		"left":  gte.Left.Map(),
 		"right": gte.Right.Map(),
 	}
 }

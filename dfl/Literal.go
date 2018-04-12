@@ -5,11 +5,11 @@ type Literal struct {
 }
 
 func (l Literal) Dfl() string {
-	return "\""+l.Value+"\""
+	return "\"" + l.Value + "\""
 }
 
 func (l Literal) Map() map[string]interface{} {
 	return map[string]interface{}{
-	  "value": l.Value,
+		"value": l.Value,
 	}
 }

@@ -41,7 +41,7 @@ func ParseValue(s string, remainder string) (Node, error) {
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for "+s+".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
 	return root, nil
 }
@@ -50,11 +50,11 @@ func ParseAttribute(in string) (Node, error) {
 
 	end := strings.Index(strings.TrimLeftFunc(in, unicode.IsSpace), " ")
 	if end == -1 {
-		return &Attribute{Name:strings.TrimSpace(in)[1:]}, nil
+		return &Attribute{Name: strings.TrimSpace(in)[1:]}, nil
 	}
 
 	if len(strings.TrimSpace(in[end:])) == 0 {
-		return &Attribute{Name:in[1:end]}, nil
+		return &Attribute{Name: in[1:end]}, nil
 	}
 
 	left := &Attribute{Name: in[1:end]}
@@ -82,7 +82,7 @@ func ParseAttribute(in string) (Node, error) {
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for "+in+".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
 	}
 	return root, nil
 
@@ -94,7 +94,7 @@ func ParseSub(s string, remainder string) (Node, error) {
 		return Parse(s)
 	}
 
-  var root Node
+	var root Node
 	left, err := Parse(s)
 	if err != nil {
 		return root, err
@@ -125,23 +125,23 @@ func ParseSub(s string, remainder string) (Node, error) {
 	case *GreaterThanOrEqual:
 		root.(*GreaterThanOrEqual).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for "+s+".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
 
 	return root, nil
 }
 
 func Parse(in string) (Node, error) {
-  var root Node
+	var root Node
 
 	if len(in) == 0 {
 		return root, errors.New("Error: Input string is empty.")
 	}
 
-  re, err := regexp.Compile("(\\s*)(?P<name>([a-zA-Z_\\d]+))(\\s*)\\((\\s*)(?P<args>(.)*?)(\\s*)\\)(\\s*)")
-  if err != nil {
-    return root, err
-  }
+	re, err := regexp.Compile("(\\s*)(?P<name>([a-zA-Z_\\d]+))(\\s*)\\((\\s*)(?P<args>(.)*?)(\\s*)\\)(\\s*)")
+	if err != nil {
+		return root, err
+	}
 
 	if strings.HasPrefix(strings.TrimLeftFunc(in, unicode.IsSpace), "@") {
 		return ParseAttribute(in)
@@ -150,9 +150,9 @@ func Parse(in string) (Node, error) {
 		parentheses := 0
 		for i, c := range in {
 
-	    s := strings.TrimSpace(in[0:i+1])
-	    s_lc := strings.ToLower(s)
-	    remainder := strings.TrimSpace(in[i+1:])
+			s := strings.TrimSpace(in[0 : i+1])
+			s_lc := strings.ToLower(s)
+			remainder := strings.TrimSpace(in[i+1:])
 
 			if c == '(' {
 				parentheses += 1
@@ -160,11 +160,11 @@ func Parse(in string) (Node, error) {
 				parentheses -= 1
 			}
 
-      if parentheses == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
-				if len(s) >= 2  && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
-					return ParseValue(s[1:len(s) - 1], remainder)
-				} else if len(s) >= 2  && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
-					return ParseSub(s[1: len(s) - 1], remainder)
+			if parentheses == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
+				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+					return ParseValue(s[1:len(s)-1], remainder)
+				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
+					return ParseSub(s[1:len(s)-1], remainder)
 				} else if s_lc == "and" {
 
 					right, err := Parse(remainder)
@@ -250,8 +250,8 @@ func Parse(in string) (Node, error) {
 				}
 			}
 
-	  }
+		}
 	}
 
-  return root, errors.New("Invalid expression syntax for \""+in+"\".")
+	return root, errors.New("Invalid expression syntax for \"" + in + "\".")
 }
