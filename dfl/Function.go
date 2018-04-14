@@ -32,3 +32,11 @@ func (f Function) Map() map[string]interface{} {
 		"arguments": f.Arguments,
 	}
 }
+
+func (f Function) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+	if v, ok := funcs[f.Name]; ok {
+		return v(ctx, f.Arguments)
+	} else {
+		return "", nil
+	}
+}

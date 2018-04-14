@@ -1,7 +1,7 @@
 package dfl
 
 type LessThan struct {
-	*BinaryOperator
+	*NumericBinaryOperator
 }
 
 func (lt LessThan) Dfl() string {
@@ -14,4 +14,14 @@ func (lt LessThan) Map() map[string]interface{} {
 		"left":  lt.Left.Map(),
 		"right": lt.Right.Map(),
 	}
+}
+
+func (lt LessThan) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+
+	v, err := lt.EvaluateAndCompare(ctx, funcs)
+	if err != nil {
+		return false, err
+	}
+
+	return v < 0, nil
 }

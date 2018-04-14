@@ -1,5 +1,9 @@
 package dfl
 
+import (
+	"github.com/pkg/errors"
+)
+
 type Or struct {
 	*BinaryOperator
 }
@@ -14,4 +18,26 @@ func (o Or) Map() map[string]interface{} {
 		"left":  o.Left.Map(),
 		"right": o.Right.Map(),
 	}
+}
+
+func (o Or) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+	lv, err := o.Left.Evaluate(ctx, funcs)
+	if err != nil {
+		return false, err
+	}
+	switch lv.(type) {
+	case bool:
+		if lv.(bool) {
+			return true, nil
+		}
+		rv, err := o.Right.Evaluate(ctx, funcs)
+		if err != nil {
+			return false, err
+		}
+		switch rv.(type) {
+		case bool:
+			return rv.(bool), nil
+		}
+	}
+	return false, errors.New("Error evaulating expression " + o.Dfl())
 }

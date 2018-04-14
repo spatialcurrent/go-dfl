@@ -1,6 +1,7 @@
 package dfl
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -10,13 +11,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ParseValue(s string, remainder string) (Node, error) {
+func ParseLiteral(v interface{}, remainder string) (Node, error) {
 
 	if len(remainder) == 0 {
-		return &Literal{Value: s}, nil
+		return &Literal{Value: v}, nil
 	}
 
-	left := &Literal{Value: s}
+	left := &Literal{Value: v}
 	root, err := Parse(remainder)
 	if err != nil {
 		return root, err
@@ -42,8 +43,14 @@ func ParseValue(s string, remainder string) (Node, error) {
 		root.(*GreaterThanOrEqual).Left = left
 	case *Equal:
 		root.(*Equal).Left = left
+	case *NotEqual:
+		root.(*NotEqual).Left = left
+	case *Add:
+		root.(*Add).Left = left
+	case *Subtract:
+		root.(*Subtract).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + fmt.Sprint(v) + ".  Root is not a binary operator")
 	}
 	return root, nil
 }
@@ -85,6 +92,12 @@ func ParseAttribute(in string) (Node, error) {
 		root.(*GreaterThanOrEqual).Left = left
 	case *Equal:
 		root.(*Equal).Left = left
+	case *NotEqual:
+		root.(*NotEqual).Left = left
+	case *Add:
+		root.(*Add).Left = left
+	case *Subtract:
+		root.(*Subtract).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
 	}
@@ -130,6 +143,12 @@ func ParseSub(s string, remainder string) (Node, error) {
 		root.(*GreaterThanOrEqual).Left = left
 	case *Equal:
 		root.(*Equal).Left = left
+	case *NotEqual:
+		root.(*NotEqual).Left = left
+	case *Add:
+		root.(*Add).Left = left
+	case *Subtract:
+		root.(*Subtract).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
@@ -168,7 +187,7 @@ func Parse(in string) (Node, error) {
 
 			if parentheses == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
-					return ParseValue(s[1:len(s)-1], remainder)
+					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
 					return ParseSub(s[1:len(s)-1], remainder)
 				} else if s_lc == "and" {
@@ -193,7 +212,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &LessThan{&BinaryOperator{Right: right}}, nil
+					return &LessThan{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if s_lc == "<=" {
 
@@ -201,7 +220,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &LessThanOrEqual{&BinaryOperator{Right: right}}, nil
+					return &LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if s_lc == ">" {
 
@@ -209,7 +228,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &GreaterThan{&BinaryOperator{Right: right}}, nil
+					return &GreaterThan{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if s_lc == ">=" {
 
@@ -217,7 +236,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &GreaterThanOrEqual{&BinaryOperator{Right: right}}, nil
+					return &GreaterThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if s_lc == "==" {
 
@@ -225,7 +244,31 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &Equal{&BinaryOperator{Right: right}}, nil
+					return &Equal{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
+				} else if s_lc == "!=" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &NotEqual{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
+				} else if s_lc == "+" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Add{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
+				} else if s_lc == "-" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Subtract{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if s_lc == "not" {
 
@@ -261,6 +304,8 @@ func Parse(in string) (Node, error) {
 
 				} else if re.MatchString(s) {
 					return ParseFunction(s, remainder, re)
+				} else {
+					return ParseLiteral(TryConvertString(s), remainder)
 				}
 			}
 

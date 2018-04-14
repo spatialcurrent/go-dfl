@@ -2,14 +2,58 @@
 
 # Description
 
-**go-dfl** is a Go implementation of the Dynamic Filter Language (DFL)
+**go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).
 
 # Usage
+
+You can import **go-dfl** as a library with:
 
 ```
 import (
   "github.com/spatialcurrent/go-dfl/dfl"
 )
+```
+
+You can also test DFL filtering using a command line tool:
+
+```
+Usage: dfl -filter INPUT [-verbose] [-version] [-help] [A=1] [B=2]
+Options:
+  -filter string
+    	The DFL expression to evaulate
+  -help
+    	Print help
+  -verbose
+    	Provide verbose output
+  -version
+    	Prints version to stdout
+
+```
+
+# Examples:
+
+```
+./dfl -verbose -filter '@pop > (10 - 2)' craft=brewery name=Stone pop=10
+true
+Done in 7.354125ms
+```
+
+```
+./dfl -verbose -filter '@craft like "brewery"' craft=brewery name=Stone pop=10
+true
+Done in 3.44965ms
+```
+
+```
+./dfl -verbose -filter '@craft like "brew%"' craft=brewery name=Stone pop=10
+true
+Done in 4.159278ms
+```
+
+```
+./dfl -verbose -filter '@craft ilike "Stone%"' craft=brewery name=Atlas pop=10
+false
+Done in 4.439012ms
 ```
 
 # Contributing

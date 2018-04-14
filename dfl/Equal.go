@@ -1,17 +1,27 @@
 package dfl
 
 type Equal struct {
-	*BinaryOperator
+	*NumericBinaryOperator
 }
 
-func (l Like) Dfl() string {
-	return "(" + l.Left.Dfl() + " == " + l.Right.Dfl() + ")"
+func (e Equal) Dfl() string {
+	return "(" + e.Left.Dfl() + " == " + e.Right.Dfl() + ")"
 }
 
-func (l Like) Map() map[string]interface{} {
+func (e Equal) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"op":    "equal",
-		"left":  l.Left.Map(),
-		"right": l.Right.Map(),
+		"left":  e.Left.Map(),
+		"right": e.Right.Map(),
 	}
+}
+
+func (e Equal) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+
+	v, err := e.EvaluateAndCompare(ctx, funcs)
+	if err != nil {
+		return false, err
+	}
+
+	return v == 0, nil
 }

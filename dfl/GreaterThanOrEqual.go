@@ -1,7 +1,7 @@
 package dfl
 
 type GreaterThanOrEqual struct {
-	*BinaryOperator
+	*NumericBinaryOperator
 }
 
 func (gte GreaterThanOrEqual) Dfl() string {
@@ -14,4 +14,14 @@ func (gte GreaterThanOrEqual) Map() map[string]interface{} {
 		"left":  gte.Left.Map(),
 		"right": gte.Right.Map(),
 	}
+}
+
+func (gte GreaterThanOrEqual) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+
+	v, err := gte.EvaluateAndCompare(ctx, funcs)
+	if err != nil {
+		return false, err
+	}
+
+	return v >= 0, nil
 }
