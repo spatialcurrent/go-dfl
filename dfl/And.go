@@ -20,7 +20,7 @@ func (a And) Map() map[string]interface{} {
 	}
 }
 
-func (a And) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (a And) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := a.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

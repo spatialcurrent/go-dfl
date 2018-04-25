@@ -16,7 +16,7 @@ func (gt GreaterThan) Map() map[string]interface{} {
 	}
 }
 
-func (gt GreaterThan) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (gt GreaterThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := gt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

@@ -4,7 +4,7 @@ type NumericBinaryOperator struct {
 	*BinaryOperator
 }
 
-func (nbo NumericBinaryOperator) EvaluateAndCompare(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (int, error) {
+func (nbo NumericBinaryOperator) EvaluateAndCompare(ctx map[string]interface{}, funcs FunctionMap) (int, error) {
 
 	lv, rv, err := nbo.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

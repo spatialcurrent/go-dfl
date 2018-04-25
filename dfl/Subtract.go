@@ -16,7 +16,7 @@ func (s Subtract) Map() map[string]interface{} {
 	}
 }
 
-func (s Subtract) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (s Subtract) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := s.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

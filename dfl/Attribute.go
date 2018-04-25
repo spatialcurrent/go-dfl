@@ -14,10 +14,14 @@ func (a Attribute) Map() map[string]interface{} {
 	}
 }
 
-func (a Attribute) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (a Attribute) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	if v, ok := ctx[a.Name]; ok {
 		return v, nil
 	} else {
 		return "", nil
 	}
+}
+
+func (a Attribute) Attributes() []string {
+	return []string{a.Name}
 }

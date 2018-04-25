@@ -19,7 +19,7 @@ func (n Not) Map() map[string]interface{} {
 	}
 }
 
-func (n Not) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (n Not) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	v, err := n.Node.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err
@@ -29,4 +29,8 @@ func (n Not) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[stri
 		return !(v.(bool)), nil
 	}
 	return false, errors.New("Error evaulating expression " + n.Dfl())
+}
+
+func (n Not) Attributes() []string {
+	return n.Node.Attributes()
 }

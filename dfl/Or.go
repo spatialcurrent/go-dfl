@@ -20,7 +20,7 @@ func (o Or) Map() map[string]interface{} {
 	}
 }
 
-func (o Or) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (o Or) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := o.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

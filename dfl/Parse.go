@@ -1,7 +1,6 @@
 package dfl
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -10,100 +9,6 @@ import (
 import (
 	"github.com/pkg/errors"
 )
-
-func ParseLiteral(v interface{}, remainder string) (Node, error) {
-
-	if len(remainder) == 0 {
-		return &Literal{Value: v}, nil
-	}
-
-	left := &Literal{Value: v}
-	root, err := Parse(remainder)
-	if err != nil {
-		return root, err
-	}
-	switch root.(type) {
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	default:
-		return root, errors.New("Invalid expression syntax for " + fmt.Sprint(v) + ".  Root is not a binary operator")
-	}
-	return root, nil
-}
-
-func ParseAttribute(in string) (Node, error) {
-
-	end := strings.Index(strings.TrimLeftFunc(in, unicode.IsSpace), " ")
-	if end == -1 {
-		return &Attribute{Name: strings.TrimSpace(in)[1:]}, nil
-	}
-
-	if len(strings.TrimSpace(in[end:])) == 0 {
-		return &Attribute{Name: in[1:end]}, nil
-	}
-
-	left := &Attribute{Name: in[1:end]}
-	root, err := Parse(in[end:])
-	if err != nil {
-		return root, err
-	}
-	switch root.(type) {
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	default:
-		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
-	}
-	return root, nil
-
-}
 
 func ParseSub(s string, remainder string) (Node, error) {
 
@@ -173,6 +78,7 @@ func Parse(in string) (Node, error) {
 	} else {
 
 		parentheses := 0
+		squarebrackets := 0
 		for i, c := range in {
 
 			s := strings.TrimSpace(in[0 : i+1])
@@ -183,11 +89,17 @@ func Parse(in string) (Node, error) {
 				parentheses += 1
 			} else if c == ')' {
 				parentheses -= 1
+			} else if squarebrackets == 0 && c == '[' {
+				squarebrackets += 1
+			} else if squarebrackets == 1 && c == ']' {
+				squarebrackets -= 1
 			}
 
-			if parentheses == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
+			if parentheses == 0 && squarebrackets == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
+				} else if len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
+					return ParseArray(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
 					return ParseSub(s[1:len(s)-1], remainder)
 				} else if s_lc == "and" {

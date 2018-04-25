@@ -16,7 +16,7 @@ func (lt LessThan) Map() map[string]interface{} {
 	}
 }
 
-func (lt LessThan) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (lt LessThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

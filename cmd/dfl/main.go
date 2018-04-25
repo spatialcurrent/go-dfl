@@ -20,8 +20,8 @@ import (
 
 var GO_DFL_VERSION = "0.0.1"
 
-func dfl_build_funcs() map[string]func(map[string]interface{}, []string) (interface{}, error) {
-	funcs := map[string]func(map[string]interface{}, []string) (interface{}, error){}
+func dfl_build_funcs() dfl.FunctionMap {
+	funcs := dfl.FunctionMap{}
 
 	funcs["len"] = func(ctx map[string]interface{}, args []string) (interface{}, error) {
 		if len(args) != 1 {

@@ -26,7 +26,7 @@ func (i ILike) Map() map[string]interface{} {
 	}
 }
 
-func (i ILike) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[string]interface{}, []string) (interface{}, error)) (interface{}, error) {
+func (i ILike) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err
@@ -43,7 +43,7 @@ func (i ILike) Evaluate(ctx map[string]interface{}, funcs map[string]func(map[st
 		return len(lvs) == 0, nil
 	}
 
-	pattern, err := regexp.Compile(strings.Replace(rvs, "%", ".*", -1))
+	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
 	}
