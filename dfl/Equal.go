@@ -16,6 +16,10 @@ func (e Equal) Map() map[string]interface{} {
 	}
 }
 
+func (e Equal) Compile() Node {
+	return e
+}
+
 func (e Equal) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := e.EvaluateAndCompare(ctx, funcs)

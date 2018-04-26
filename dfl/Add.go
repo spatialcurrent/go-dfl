@@ -16,6 +16,23 @@ func (a Add) Map() map[string]interface{} {
 	}
 }
 
+func (a Add) Compile() Node {
+	left := a.Left.Compile()
+	right := a.Right.Compile()
+	switch left.(type) {
+	case Literal:
+		switch right.(type) {
+		case Literal:
+			v, err := AddNumbers(left.(Literal).Value, right.(Literal).Value)
+			if err != nil {
+				panic(err)
+			}
+			return Literal{Value: v}
+		}
+	}
+	return Add{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+}
+
 func (a Add) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := a.EvaluateLeftAndRight(ctx, funcs)

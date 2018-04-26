@@ -16,6 +16,23 @@ func (gt GreaterThan) Map() map[string]interface{} {
 	}
 }
 
+func (gt GreaterThan) Compile() Node {
+	left := gt.Left.Compile()
+	right := gt.Right.Compile()
+	switch left.(type) {
+	case Literal:
+		switch right.(type) {
+		case Literal:
+			v, err := CompareNumbers(left.(Literal).Value, right.(Literal).Value)
+			if err != nil {
+				panic(err)
+			}
+			return Literal{Value: (v > 0)}
+		}
+	}
+	return GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+}
+
 func (gt GreaterThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := gt.EvaluateAndCompare(ctx, funcs)

@@ -16,6 +16,23 @@ func (lt LessThan) Map() map[string]interface{} {
 	}
 }
 
+func (lt LessThan) Compile() Node {
+	left := lt.Left.Compile()
+	right := lt.Right.Compile()
+	switch left.(type) {
+	case Literal:
+		switch right.(type) {
+		case Literal:
+			v, err := CompareNumbers(left.(Literal).Value, right.(Literal).Value)
+			if err != nil {
+				panic(err)
+			}
+			return Literal{Value: (v < 0)}
+		}
+	}
+	return LessThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+}
+
 func (lt LessThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lt.EvaluateAndCompare(ctx, funcs)

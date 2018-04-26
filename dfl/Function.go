@@ -25,6 +25,10 @@ func (f Function) Dfl() string {
 	return out
 }
 
+func (f Function) Compile() Node {
+	return f
+}
+
 func (f Function) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"op":        "function",

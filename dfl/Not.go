@@ -19,6 +19,10 @@ func (n Not) Map() map[string]interface{} {
 	}
 }
 
+func (n Not) Compile() Node {
+	return n
+}
+
 func (n Not) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	v, err := n.Node.Evaluate(ctx, funcs)
 	if err != nil {

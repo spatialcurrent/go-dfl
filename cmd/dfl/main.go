@@ -12,6 +12,7 @@ import (
 
 import (
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 import (
@@ -85,6 +86,30 @@ func main() {
 		os.Exit(1)
 	}
 
+	if verbose {
+		fmt.Println("******************* Parsed *******************")
+		out, err := yaml.Marshal(root.Map())
+		if err != nil {
+			fmt.Println("Error marshalling expression to yaml.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(string(out))
+	}
+
+	root = root.Compile()
+
+	if verbose {
+		fmt.Println("******************* Compiled *******************")
+		out, err := yaml.Marshal(root.Map())
+		if err != nil {
+			fmt.Println("Error marshalling expression to yaml.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(string(out))
+	}
+
 	funcs := dfl_build_funcs()
 	result, err := root.Evaluate(ctx, funcs)
 	if err != nil {
@@ -97,6 +122,7 @@ func main() {
 	case bool:
 		result_bool := result.(bool)
 		if verbose {
+			fmt.Println("******************* Result *******************")
 			if result_bool {
 				fmt.Println("true")
 			} else {

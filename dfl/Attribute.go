@@ -14,6 +14,10 @@ func (a Attribute) Map() map[string]interface{} {
 	}
 }
 
+func (a Attribute) Compile() Node {
+	return a
+}
+
 func (a Attribute) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	if v, ok := ctx[a.Name]; ok {
 		return v, nil

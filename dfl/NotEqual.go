@@ -16,6 +16,10 @@ func (ne NotEqual) Map() map[string]interface{} {
 	}
 }
 
+func (ne NotEqual) Compile() Node {
+	return ne
+}
+
 func (ne NotEqual) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := ne.EvaluateAndCompare(ctx, funcs)

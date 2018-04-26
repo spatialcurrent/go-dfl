@@ -1,5 +1,9 @@
 package dfl
 
+import (
+	"reflect"
+)
+
 type Array struct {
 	Nodes []Node
 }
@@ -21,6 +25,22 @@ func (a Array) Map() map[string]interface{} {
 		"nodes": a.Nodes,
 	}
 }
+
+func (a Array) Compile() Node {
+	values := make([]interface{}, len(a.Nodes))
+	nodes := reflect.ValueOf(a.Nodes)
+	for i := 0; i < nodes.Len(); i++ {
+		n := nodes.Index(i).Interface()
+		switch n.(type) {
+		case *Literal:
+			values[i] = n.(*Literal).Value
+		default:
+			return a
+		}
+	}
+	return Literal{Value: values}
+}
+
 func (a Array) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {

@@ -26,6 +26,11 @@ func (l Literal) Map() map[string]interface{} {
 		"value": l.Value,
 	}
 }
+
+func (l Literal) Compile() Node {
+	return l
+}
+
 func (l Literal) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	return l.Value, nil
 }

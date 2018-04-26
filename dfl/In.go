@@ -27,6 +27,12 @@ func (i In) Map() map[string]interface{} {
 	}
 }
 
+func (i In) Compile() Node {
+	left := i.Left.Compile()
+	right := i.Right.Compile()
+	return In{&BinaryOperator{Left: left, Right: right}}
+}
+
 func (i In) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {

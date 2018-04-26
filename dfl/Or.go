@@ -20,6 +20,12 @@ func (o Or) Map() map[string]interface{} {
 	}
 }
 
+func (o Or) Compile() Node {
+	left := o.Left.Compile()
+	right := o.Right.Compile()
+	return Or{&BinaryOperator{Left: left, Right: right}}
+}
+
 func (o Or) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := o.Left.Evaluate(ctx, funcs)
 	if err != nil {
