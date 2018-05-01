@@ -1,5 +1,16 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// ILike is a BinaryOperator that evaluates the SQL standard like expression.
+// It is similar to the Like BinaryOperator but is case insensitive.
+// The parameters must be of type string.
+// The right parameter may have "%" characters that are interpreted as (.*) in a regular expression test.
 import (
 	"fmt"
 	"regexp"
@@ -32,7 +43,7 @@ func (i ILike) Compile() Node {
 	return ILike{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (i ILike) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (i ILike) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

@@ -1,13 +1,24 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
 	"encoding/json"
 	"fmt"
-	//"strings"
 )
 
+// Literal is a Node representing a literal/static value regardless of the context.
+// The value may be of any type; however, it will likely a bool, int, or string.
+// For example
+//	Literal{Value: ""}
+//	Literal{Value: 0.0}
 type Literal struct {
-	Value interface{}
+	Value interface{} // the variable containing the actual value
 }
 
 func (l Literal) Dfl() string {
@@ -31,7 +42,7 @@ func (l Literal) Compile() Node {
 	return l
 }
 
-func (l Literal) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (l Literal) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	return l.Value, nil
 }
 

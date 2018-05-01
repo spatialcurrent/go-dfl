@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 type LessThanOrEqual struct {
@@ -33,7 +40,7 @@ func (lte LessThanOrEqual) Compile() Node {
 	return LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lte LessThanOrEqual) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (lte LessThanOrEqual) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lte.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

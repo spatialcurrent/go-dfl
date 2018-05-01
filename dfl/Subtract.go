@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 type Subtract struct {
@@ -33,7 +40,7 @@ func (s Subtract) Compile() Node {
 	return Subtract{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (s Subtract) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (s Subtract) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := s.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

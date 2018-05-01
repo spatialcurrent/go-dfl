@@ -1,5 +1,14 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// GreaterThanOrEqual is a NumericBinaryOperator that evaluating to true if parameter a is greater than or equal to parameter b.
+// The parameters may be of type int, int64, or float64.
 type GreaterThanOrEqual struct {
 	*NumericBinaryOperator
 }
@@ -33,7 +42,7 @@ func (gte GreaterThanOrEqual) Compile() Node {
 	return GreaterThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (gte GreaterThanOrEqual) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (gte GreaterThanOrEqual) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	v, err := gte.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

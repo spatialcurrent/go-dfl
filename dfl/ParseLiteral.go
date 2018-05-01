@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -8,6 +15,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ParseLiteral wraps parameter v in a Literal Node and parses a remainder, if any.
+// ParseLiteral does not additional parsing of parameter v.
+// TryConvertString is used to parse an int, float64, or time from a string representation.
+// If parameter "in" is gramatically a child node, then return the parent node.
+// For example, @amenity, @shop, @population, etc.
+// Given those rules the remainder, if any, if simply parsed from the input strings
+// Examples:
+//	node, err := ParseLiteral("brewery")
 func ParseLiteral(v interface{}, remainder string) (Node, error) {
 
 	if len(remainder) == 0 {
@@ -46,6 +61,10 @@ func ParseLiteral(v interface{}, remainder string) (Node, error) {
 		root.(*Add).Left = left
 	case *Subtract:
 		root.(*Subtract).Left = left
+	case *Before:
+		root.(*Before).Left = left
+	case *After:
+		root.(*After).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + fmt.Sprint(v) + ".  Root is not a binary operator")
 	}

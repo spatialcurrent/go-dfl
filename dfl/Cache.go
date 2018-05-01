@@ -1,5 +1,14 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// Cache is a struct that stores the results of evaluations.
+// Cache can be used to speed up evaluations of a complex filter against non-random data, e.g., OSM Tags.
 type Cache struct {
 	Results map[string]bool
 }

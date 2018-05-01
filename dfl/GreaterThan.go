@@ -1,5 +1,14 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// GreaterThan is a NumericBinaryOperator that evaluating to true if parameter a is greater than parameter b.
+// The parameters may be of type int, int64, or float64.
 type GreaterThan struct {
 	*NumericBinaryOperator
 }
@@ -33,7 +42,7 @@ func (gt GreaterThan) Compile() Node {
 	return GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (gt GreaterThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (gt GreaterThan) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	v, err := gt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

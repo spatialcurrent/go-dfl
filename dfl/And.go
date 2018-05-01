@@ -1,9 +1,17 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
 	"github.com/pkg/errors"
 )
 
+// And is a BinaryOperator which represents the logical boolean AND operation of left and right values.
 type And struct {
 	*BinaryOperator
 }
@@ -20,13 +28,29 @@ func (a And) Map() map[string]interface{} {
 	}
 }
 
+// Compile returns a compiled version of this node.
+// If the left value and right value are both compiled as Literals, then returns the logical boolean AND operation of the left and right value.
+// Otherwise, returns a clone.
 func (a And) Compile() Node {
 	left := a.Left.Compile()
 	right := a.Right.Compile()
+	switch left.(type) {
+	case Literal:
+		switch right.(type) {
+		case Literal:
+			switch left.(Literal).Value.(type) {
+			case bool:
+				switch right.(Literal).Value.(type) {
+				case bool:
+					return Literal{Value: (left.(Literal).Value.(bool) && right.(Literal).Value.(bool))}
+				}
+			}
+		}
+	}
 	return And{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (a And) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (a And) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	lv, err := a.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

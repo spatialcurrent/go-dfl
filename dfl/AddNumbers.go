@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -8,6 +15,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+// AddNumbers adds 2 numbers and returns the result.
+// The parameters can be an int, int64, or float64.
+// The parameters will be cast as applicable.
+// For example you can add two integers with
+//	total := AddNumbers(1, 2)
+// or you could add an int with a float64.
+//	total := AddNumbers(1.54345345, 5)
 func AddNumbers(a interface{}, b interface{}) (interface{}, error) {
 	switch a.(type) {
 	case int:

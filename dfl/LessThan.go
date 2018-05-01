@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 type LessThan struct {
@@ -33,7 +40,7 @@ func (lt LessThan) Compile() Node {
 	return LessThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lt LessThan) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (lt LessThan) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

@@ -1,3 +1,28 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
+// Dfl is the command line utility for testing DFL expressions.
+//
+// Usage
+//
+// Pass your DFL expression using the -filter keyword argument and your context with trailing K=V arguments.
+// go-dfl will attempt to convert string values into their approriate types using TryConvertString.
+//
+//	Usage: dfl -filter INPUT [-verbose] [-version] [-help] [A=1] [B=2]
+//	Options:
+//		-filter string
+//			The DFL expression to evaulate
+//		-help
+//			Print help
+//		-verbose
+//			Provide verbose output
+//		-version
+//			Prints version to stdout
+//
 package main
 
 import (
@@ -24,7 +49,7 @@ var GO_DFL_VERSION = "0.0.1"
 func dfl_build_funcs() dfl.FunctionMap {
 	funcs := dfl.FunctionMap{}
 
-	funcs["len"] = func(ctx map[string]interface{}, args []string) (interface{}, error) {
+	funcs["len"] = func(ctx dfl.Context, args []string) (interface{}, error) {
 		if len(args) != 1 {
 			return 0, errors.New("Invalid number of arguments to len.")
 		}
@@ -75,6 +100,10 @@ func main() {
 
 	ctx := map[string]interface{}{}
 	for _, a := range flag.Args() {
+		if !strings.Contains(a, "=") {
+			fmt.Println("Context attribute \"" + a + "\" does not contain \"=\".")
+			os.Exit(1)
+		}
 		parts := strings.SplitN(a, "=", 2)
 		ctx[parts[0]] = dfl.TryConvertString(parts[1])
 	}

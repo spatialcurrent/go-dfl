@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -10,6 +17,15 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ParseArray parses an Array Node and recursively any remainder.
+// If parameter "in" is gramatically a child node, then return the parent node.
+// DFL arrays can include Attribute or Literal Nodes.
+// As all attribute references must start with an "@" character, parantheses are optional for literals except if a comma exists.
+// Below are some example inputs
+//
+//	[bank, bureau_de_change, atm]
+//	[1, 2, @target]
+//	[Taco, Tacos, Burrito, Burritos, "Mexican Food", @example]
 func ParseArray(in string, remainder string) (Node, error) {
 
 	nodes := make([]Node, 0)
@@ -88,6 +104,10 @@ func ParseArray(in string, remainder string) (Node, error) {
 		root.(*Add).Left = left
 	case *Subtract:
 		root.(*Subtract).Left = left
+	case *Before:
+		root.(*Before).Left = left
+	case *After:
+		root.(*After).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + fmt.Sprint(remainder) + ".  Root is not a binary operator")
 	}

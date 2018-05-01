@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -37,7 +44,7 @@ func (f Function) Map() map[string]interface{} {
 	}
 }
 
-func (f Function) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (f Function) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	if v, ok := funcs[f.Name]; ok {
 		return v(ctx, f.Arguments)
 	} else {

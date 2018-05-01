@@ -7,25 +7,25 @@
 
 package dfl
 
-// NumericBinaryOperator is an abstract struct extending the BinaryOperator struct.
+// TemporalBinaryOperator is an abstract struct
 // NumericBinaryOperator is a convience struct that attaches to EvaluateAndCompare function
 // that is used by structs implementing the Node interface.
-type NumericBinaryOperator struct {
+type TemporalBinaryOperator struct {
 	*BinaryOperator // Extends the BinaryOperator struct
 }
 
 // EvaluateAndCompare returns the value of the node given the Context ctx, and error if any.
-// If the left value and right value are mathematically equal, returns 0.
-// If the left value is less than the right value, returns -1.
-// if the left value is greater than the right value, returns 1.
-func (nbo NumericBinaryOperator) EvaluateAndCompare(ctx Context, funcs FunctionMap) (int, error) {
+// If the left value and right value are at the same time, returns 0.
+// If the left value is before the right value, returns -1.
+// if the left value is after the right value, returns 1.
+func (tbo TemporalBinaryOperator) EvaluateAndCompare(ctx Context, funcs FunctionMap) (int, error) {
 
-	lv, rv, err := nbo.EvaluateLeftAndRight(ctx, funcs)
+	lv, rv, err := tbo.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {
 		return 0, err
 	}
 
-	v, err := CompareNumbers(lv, rv)
+	v, err := CompareTimes(lv, rv)
 	if err != nil {
 		return 0, err
 	}

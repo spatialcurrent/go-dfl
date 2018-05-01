@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -91,6 +98,10 @@ func ParseFunction(s string, remainder string, re *regexp.Regexp) (Node, error) 
 		root.(*Add).Left = left
 	case *Subtract:
 		root.(*Subtract).Left = left
+	case *Before:
+		root.(*Before).Left = left
+	case *After:
+		root.(*After).Left = left
 	default:
 		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}

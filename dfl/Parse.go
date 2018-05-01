@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -10,57 +17,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ParseSub(s string, remainder string) (Node, error) {
-
-	if len(remainder) == 0 {
-		return Parse(s)
-	}
-
-	var root Node
-	left, err := Parse(s)
-	if err != nil {
-		return root, err
-	}
-
-	root, err = Parse(remainder)
-	if err != nil {
-		return root, err
-	}
-
-	switch root.(type) {
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	default:
-		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
-	}
-
-	return root, nil
-}
-
+// Parse is the primary entrypoint for the DFL library.
+// Parse takes a DFL expression string as input and returns an Abstract Synatax Tree (AST), and error if any.
 func Parse(in string) (Node, error) {
 	var root Node
 
@@ -79,6 +37,8 @@ func Parse(in string) (Node, error) {
 
 		parentheses := 0
 		squarebrackets := 0
+		singlequotes := 0
+		doublequotes := 0
 		for i, c := range in {
 
 			s := strings.TrimSpace(in[0 : i+1])
@@ -93,9 +53,17 @@ func Parse(in string) (Node, error) {
 				squarebrackets += 1
 			} else if squarebrackets == 1 && c == ']' {
 				squarebrackets -= 1
+			} else if singlequotes == 1 && c == '\'' {
+				singlequotes -= 1
+			} else if singlequotes == 0 && c == '\'' {
+				singlequotes += 1
+			} else if doublequotes == 1 && c == '"' {
+				doublequotes -= 1
+			} else if doublequotes == 0 && c == '"' {
+				doublequotes += 1
 			}
 
-			if parentheses == 0 && squarebrackets == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
+			if parentheses == 0 && squarebrackets == 0 && singlequotes == 0 && doublequotes == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
@@ -117,6 +85,14 @@ func Parse(in string) (Node, error) {
 						return right, err
 					}
 					return &Or{&BinaryOperator{Right: right}}, nil
+
+				} else if s_lc == "xor" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Xor{&BinaryOperator{Right: right}}, nil
 
 				} else if s_lc == "<" {
 
@@ -213,6 +189,22 @@ func Parse(in string) (Node, error) {
 						return right, err
 					}
 					return &ILike{&BinaryOperator{Right: right}}, nil
+
+				} else if s_lc == "before" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Before{&TemporalBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
+				} else if s_lc == "after" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &After{&TemporalBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
 				} else if re.MatchString(s) {
 					return ParseFunction(s, remainder, re)

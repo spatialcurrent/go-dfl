@@ -8,37 +8,32 @@
 package dfl
 
 import (
-	"strings"
-	"unicode"
-)
-
-import (
 	"github.com/pkg/errors"
 )
 
-// ParseAttribute parses an Attribute Node from an input string
+// ParseSub is used to parse a sub-expression and the remainder, if any.
+// A sub-expression is usually enclosed by parantheses.  The parantheses are removed before being passed to ParseSub.
 // If parameter "in" is gramatically a child node, then return the parent node.
-// All attribute references must start with an "@" character and have no spaces.
-// For example, @amenity, @shop, @population, etc.
-// Given those rules the remainder, if any, if simply parsed from the input strings
-// Examples:
-//	node, err := ParseAttribute("@amenity in [bar, restaurant]")
-func ParseAttribute(in string) (Node, error) {
+// For Example with an input string "(@cuisine like mexican) or (@name ilike %burrito%)",
+//	node, err : ParseSub("@cuisine like mexican", "or (@name ilike %burrito%)")
+//
+func ParseSub(s string, remainder string) (Node, error) {
 
-	end := strings.Index(strings.TrimLeftFunc(in, unicode.IsSpace), " ")
-	if end == -1 {
-		return &Attribute{Name: strings.TrimSpace(in)[1:]}, nil
+	if len(remainder) == 0 {
+		return Parse(s)
 	}
 
-	if len(strings.TrimSpace(in[end:])) == 0 {
-		return &Attribute{Name: in[1:end]}, nil
-	}
-
-	left := &Attribute{Name: in[1:end]}
-	root, err := Parse(in[end:])
+	var root Node
+	left, err := Parse(s)
 	if err != nil {
 		return root, err
 	}
+
+	root, err = Parse(remainder)
+	if err != nil {
+		return root, err
+	}
+
 	switch root.(type) {
 	case *And:
 		root.(*And).Left = left
@@ -71,8 +66,8 @@ func ParseAttribute(in string) (Node, error) {
 	case *After:
 		root.(*After).Left = left
 	default:
-		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
+		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
 	}
-	return root, nil
 
+	return root, nil
 }

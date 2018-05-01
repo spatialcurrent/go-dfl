@@ -1,13 +1,23 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// Add is a NumericBinaryOperator that represents the mathematical addition of two nodes.
 type Add struct {
 	*NumericBinaryOperator
 }
 
+// Dfl returns the DFL representation of this node as a string
 func (a Add) Dfl() string {
 	return "(" + a.Left.Dfl() + " + " + a.Right.Dfl() + ")"
 }
 
+// Map returns a map representation of this node
 func (a Add) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"op":    "+",
@@ -16,6 +26,9 @@ func (a Add) Map() map[string]interface{} {
 	}
 }
 
+// Compile returns a compiled version of this node.
+// If the left and right values are both compiled as literals, then returns the compiled Literal with that value set.
+// Otherwise returns a clone of this node.
 func (a Add) Compile() Node {
 	left := a.Left.Compile()
 	right := a.Right.Compile()
@@ -33,7 +46,8 @@ func (a Add) Compile() Node {
 	return Add{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (a Add) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+// Evaluate returns the value of this node given Context ctx, and an error if any.
+func (a Add) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := a.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

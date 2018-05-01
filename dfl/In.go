@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -11,6 +18,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// In is a BinaryOperator that evaluates to true if the left value is in the right value.
+// The left value is cast as a string using "fmt.Sprint(lv)".
+// If the right value is an array/slice, then evaluated to true if the left value is in the array/slice.
+// Otherwise, evaluates to true if the right string is contained by the left string.
 type In struct {
 	*BinaryOperator
 }
@@ -33,7 +44,7 @@ func (i In) Compile() Node {
 	return In{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (i In) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())

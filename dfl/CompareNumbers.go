@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -8,6 +15,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CompareNumbers compares parameter a and parameter b.
+// The parameters may be of type int, int64, or float64.
+// If a > b, then returns 1.  If a < b, then returns -1.  If a == b, then return 0.
 func CompareNumbers(a interface{}, b interface{}) (int, error) {
 	switch a.(type) {
 	case int:

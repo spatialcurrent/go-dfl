@@ -1,9 +1,17 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
 	"reflect"
 )
 
+// Array is a Node representing an array (aka slice in Go) of values, which can be either a Literal or Attribute.
 type Array struct {
 	Nodes []Node
 }
@@ -26,6 +34,8 @@ func (a Array) Map() map[string]interface{} {
 	}
 }
 
+// Compile returns a compiled version of this node.
+// If all the values of an array are literals, returns a single Literal with the corresponding array/slice as its value.
 func (a Array) Compile() Node {
 	values := make([]interface{}, len(a.Nodes))
 	nodes := reflect.ValueOf(a.Nodes)
@@ -41,7 +51,7 @@ func (a Array) Compile() Node {
 	return Literal{Value: values}
 }
 
-func (a Array) Evaluate(ctx map[string]interface{}, funcs FunctionMap) (interface{}, error) {
+func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
 		v, err := n.Evaluate(ctx, funcs)
