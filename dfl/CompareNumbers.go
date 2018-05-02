@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+	"reflect"
 )
 
 import (
@@ -103,5 +104,5 @@ func CompareNumbers(a interface{}, b interface{}) (int, error) {
 		}
 	}
 
-	return 0, errors.New("Error comparing values " + fmt.Sprint(a) + " and " + fmt.Sprint(b))
+	return 0, errors.New(fmt.Sprintf("Error comparing values %#v (%v) and %#v (%v)", a, reflect.TypeOf(a).String(), b, reflect.TypeOf(b).String()))
 }

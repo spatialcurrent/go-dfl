@@ -30,6 +30,7 @@ import (
 //	TryConvertString("a") => "a" (string)
 //	TryConvertString("true") => true (bool)
 //	TryConvertString("123.31") => 123.31 (float64)
+//	TryConvertString("4") => 4 (int)
 //	TryConvertString("2018-05-01") => 2018-05-01T00:00:00Z (time.Time)
 func TryConvertString(s string) interface{} {
 	s_lc := strings.ToLower(s)
@@ -46,9 +47,11 @@ func TryConvertString(s string) interface{} {
 		return false
 	}
 
-	left_f64, err := strconv.ParseFloat(s, 64)
-	if err == nil {
-		return left_f64
+	if strings.Contains(s, ".") {
+		left_f64, err := strconv.ParseFloat(s, 64)
+		if err == nil {
+			return left_f64
+		}
 	}
 
 	left_int, err := strconv.Atoi(s)

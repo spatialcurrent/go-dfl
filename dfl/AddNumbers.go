@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+	"reflect"
 )
 
 import (
@@ -53,5 +54,5 @@ func AddNumbers(a interface{}, b interface{}) (interface{}, error) {
 		}
 	}
 
-	return 0, errors.New("Error adding values " + fmt.Sprint(a) + " and " + fmt.Sprint(b))
+	return 0, errors.New(fmt.Sprintf("Error adding values %#v (%v) and %#v (%v)", a, reflect.TypeOf(a).String(), b, reflect.TypeOf(b).String()))
 }

@@ -44,6 +44,8 @@ func ParseAttribute(in string) (Node, error) {
 		root.(*And).Left = left
 	case *Or:
 		root.(*Or).Left = left
+	case *Xor:
+		root.(*Xor).Left = left
 	case *In:
 		root.(*In).Left = left
 	case *Like:

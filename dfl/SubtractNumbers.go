@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+	"reflect"
 )
 
 import (
@@ -53,5 +54,5 @@ func SubtractNumbers(a interface{}, b interface{}) (interface{}, error) {
 		}
 	}
 
-	return 0, errors.New("Error subtracting " + fmt.Sprint(a) + " - " + fmt.Sprint(b))
+	return 0, errors.New(fmt.Sprintf("Error subtracting %#v (%v) - %#v (%v)", a, reflect.TypeOf(a).String(), b, reflect.TypeOf(b).String()))
 }

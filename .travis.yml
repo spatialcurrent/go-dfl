@@ -18,4 +18,5 @@ matrix:
 script:
   - cd cmd/dfl
   - go fmt
+  - go test
   - go build
