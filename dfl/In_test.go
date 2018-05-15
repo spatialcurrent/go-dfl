@@ -10,25 +10,22 @@ package dfl
 import (
 	"reflect"
 	"testing"
-	"time"
 )
 
 import (
 	"github.com/pkg/errors"
 )
 
-func TestBefore(t *testing.T) {
+func TestIn(t *testing.T) {
 
-	ctx := Context{
-		"a": time.Date(2018, time.April, 2, 3, 28, 56, 0, time.UTC),
-		"b": time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC),
-	}
+	ctx := Context{"a": "cafe", "b": []string{"bar", "cafe"}}
 
 	testCases := []TestCase{
-		NewTestCase("2017-01-01 before 2018-01-01", ctx, true),
-		NewTestCase("@a before 2018-01-01", ctx, false),
-		NewTestCase("2017-01-01 before @b", ctx, true),
-		NewTestCase("@a before @b", ctx, true),
+		NewTestCase("bar in @b", ctx, true),
+		NewTestCase("@a in @b", ctx, true),
+		NewTestCase("bar in [bar, cafe]", ctx, true),
+		NewTestCase("fast_food in [bar, cafe]", ctx, false),
+		NewTestCase("fast_food in @b", ctx, false),
 	}
 
 	for _, testCase := range testCases {
@@ -42,7 +39,7 @@ func TestBefore(t *testing.T) {
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {
-			t.Errorf("TestBefore(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+			t.Errorf("TestILike(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

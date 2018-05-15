@@ -67,7 +67,7 @@ func Parse(in string) (Node, error) {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
-					return ParseArray(s[1:len(s)-1], remainder)
+					return ParseSet(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
 					return ParseSub(s[1:len(s)-1], remainder)
 				} else if s_lc == "and" {

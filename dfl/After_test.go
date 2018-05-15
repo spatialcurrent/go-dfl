@@ -10,7 +10,7 @@ package dfl
 import (
 	"reflect"
 	"testing"
-  "time"
+	"time"
 )
 
 import (
@@ -20,9 +20,9 @@ import (
 func TestAfter(t *testing.T) {
 
 	ctx := Context{
-    "a": time.Date(2018, time.April, 2, 3, 28, 56, 0, time.UTC),
-    "b": time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC),
-  }
+		"a": time.Date(2018, time.April, 2, 3, 28, 56, 0, time.UTC),
+		"b": time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC),
+	}
 
 	testCases := []TestCase{
 		NewTestCase("2017-01-01 after 2018-01-01", ctx, false),

@@ -63,6 +63,16 @@ func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 		return strings.Contains(fmt.Sprint(rv), lvs), nil
 	case float64:
 		return strings.Contains(strconv.FormatFloat(rv.(float64), 'f', 6, 64), lvs), nil
+	case map[string]struct{}:
+		_, ok := rv.(map[string]struct{})[lvs]
+		return ok, nil
+	case []string:
+		for _, x := range rv.([]string) {
+			if lvs == x {
+				return true, nil
+			}
+		}
+		return false, nil
 	case []interface{}:
 		for _, x := range rv.([]interface{}) {
 			if lvs == fmt.Sprint(x) {

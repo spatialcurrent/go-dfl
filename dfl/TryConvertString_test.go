@@ -45,7 +45,7 @@ func TestTryConvertStringTimes(t *testing.T) {
 		want interface{}
 	}{
 		{in: now.Format(time.RFC3339Nano), want: now},
-    {in: "2018-05-02T03:28:56Z", want: time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC)},
+		{in: "2018-05-02T03:28:56Z", want: time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC)},
 		{in: "2018-01-01", want: time.Date(2018, time.January, 1, 0, 0, 0, 0, time.UTC)},
 	}
 

@@ -9,8 +9,8 @@ package dfl
 
 // TestCase is a struct containing the variables for a unit test of expression evaluation.
 type TestCase struct {
-	Expression string // the DFL expression
-	Context    Context // the Context to use for evaluation
+	Expression string      // the DFL expression
+	Context    Context     // the Context to use for evaluation
 	Result     interface{} // The result of the evaluation
 }
 

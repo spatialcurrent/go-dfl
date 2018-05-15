@@ -11,12 +11,12 @@ import (
 	"reflect"
 )
 
-// Array is a Node representing an array (aka slice in Go) of values, which can be either a Literal or Attribute.
-type Array struct {
+// Set is a Node representing a set of values, which can be either a Literal or Attribute.
+type Set struct {
 	Nodes []Node
 }
 
-func (a Array) Dfl() string {
+func (a Set) Dfl() string {
 	str := "["
 	for i, x := range a.Nodes {
 		if i > 0 {
@@ -28,15 +28,16 @@ func (a Array) Dfl() string {
 	return str
 }
 
-func (a Array) Map() map[string]interface{} {
+func (a Set) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"nodes": a.Nodes,
 	}
 }
 
 // Compile returns a compiled version of this node.
-// If all the values of an array are literals, returns a single Literal with the corresponding array/slice as its value.
-func (a Array) Compile() Node {
+// If all the values of an Set are literals, returns a single Literal with the corresponding Set/slice as its value.
+// Otherwise returns the original node..
+func (a Set) Compile() Node {
 	values := make([]interface{}, len(a.Nodes))
 	nodes := reflect.ValueOf(a.Nodes)
 	for i := 0; i < nodes.Len(); i++ {
@@ -48,10 +49,19 @@ func (a Array) Compile() Node {
 			return a
 		}
 	}
-	return Literal{Value: values}
+	set := make(map[string]struct{}, len(values))
+	for _, v := range values {
+		switch v.(type) {
+		case string:
+			set[v.(string)] = struct{}{}
+		default:
+			return Literal{Value: values}
+		}
+	}
+	return Literal{Value: set}
 }
 
-func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a Set) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
 		v, err := n.Evaluate(ctx, funcs)
@@ -63,7 +73,7 @@ func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	return values, nil
 }
 
-func (a Array) Attributes() []string {
+func (a Set) Attributes() []string {
 	set := make(map[string]struct{})
 	for _, n := range a.Nodes {
 		for _, x := range n.Attributes() {

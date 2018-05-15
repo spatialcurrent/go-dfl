@@ -25,9 +25,9 @@ func TestLike(t *testing.T) {
 		NewTestCase("@a like cafe", ctx, false),
 		NewTestCase("bar like @b", ctx, true),
 		NewTestCase("@a like @b", ctx, false),
-    NewTestCase("@a like cafe%", ctx, true),
-    NewTestCase("@a like %bar", ctx, true),
-    NewTestCase("@a like %and%", ctx, true),
+		NewTestCase("@a like cafe%", ctx, true),
+		NewTestCase("@a like %bar", ctx, true),
+		NewTestCase("@a like %and%", ctx, true),
 	}
 
 	for _, testCase := range testCases {
