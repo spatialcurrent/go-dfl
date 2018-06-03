@@ -36,6 +36,7 @@ func Parse(in string) (Node, error) {
 	} else {
 
 		parentheses := 0
+		curlybrackets := 0
 		squarebrackets := 0
 		singlequotes := 0
 		doublequotes := 0
@@ -53,6 +54,10 @@ func Parse(in string) (Node, error) {
 				squarebrackets += 1
 			} else if squarebrackets == 1 && c == ']' {
 				squarebrackets -= 1
+			} else if curlybrackets == 0 && c == '{' {
+				curlybrackets += 1
+			} else if curlybrackets == 1 && c == '}' {
+				curlybrackets -= 1
 			} else if singlequotes == 1 && c == '\'' {
 				singlequotes -= 1
 			} else if singlequotes == 0 && c == '\'' {
@@ -63,10 +68,12 @@ func Parse(in string) (Node, error) {
 				doublequotes += 1
 			}
 
-			if parentheses == 0 && squarebrackets == 0 && singlequotes == 0 && doublequotes == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
+			if parentheses == 0 && squarebrackets == 0 && curlybrackets == 0 && singlequotes == 0 && doublequotes == 0 && (len(remainder) == 0 || in[i+1] == ' ') {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
+					return ParseArray(s[1:len(s)-1], remainder)
+				} else if len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
 					return ParseSet(s[1:len(s)-1], remainder)
 				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
 					return ParseSub(s[1:len(s)-1], remainder)

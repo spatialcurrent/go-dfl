@@ -17,16 +17,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ParseSet parses a Set Node and recursively any remainder.
+// ParseArray parses an Array Node and recursively any remainder.
 // If parameter "in" is gramatically a child node, then return the parent node.
-// DFL sets can include Attribute or Literal Nodes.
+// DFL arrays can include Attribute or Literal Nodes.
 // As all attribute references must start with an "@" character, parantheses are optional for literals except if a comma exists.
 // Below are some example inputs
 //
-//	{bank, bureau_de_change, atm}
-//	{1, 2, @target}
-//	{Taco, Tacos, Burrito, Burritos, "Mexican Food", @example}
-func ParseSet(in string, remainder string) (Node, error) {
+//	[bank, bureau_de_change, atm]
+//	[1, 2, @target]
+//	[Taco, Tacos, Burrito, Burritos, "Mexican Food", @example]
+func ParseArray(in string, remainder string) (Node, error) {
 
 	nodes := make([]Node, 0)
 	singlequotes := 0
@@ -69,10 +69,10 @@ func ParseSet(in string, remainder string) (Node, error) {
 	}
 
 	if len(remainder) == 0 {
-		return &Set{Nodes: nodes}, nil
+		return &Array{Nodes: nodes}, nil
 	}
 
-	left := &Set{Nodes: nodes}
+	left := &Array{Nodes: nodes}
 	root, err := Parse(remainder)
 	if err != nil {
 		return root, err

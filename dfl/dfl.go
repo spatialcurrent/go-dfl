@@ -39,7 +39,7 @@
 //  * Numeric: LessThan, LessThanOrEqual, Equal, NotEqual, GreaterThan, GreaterThanOrEqual, Add, Subtract
 //  * String: Like, ILike, In
 //  * Time: Before, After
-//  * Array: In
+//  * Array/Set: In
 //  * Function: Function
 //
 // Command Line Interface

@@ -24,7 +24,9 @@ func TestIn(t *testing.T) {
 		NewTestCase("bar in @b", ctx, true),
 		NewTestCase("@a in @b", ctx, true),
 		NewTestCase("bar in [bar, cafe]", ctx, true),
+		NewTestCase("bar in {bar, cafe}", ctx, true),
 		NewTestCase("fast_food in [bar, cafe]", ctx, false),
+		NewTestCase("fast_food in {bar, cafe}", ctx, false),
 		NewTestCase("fast_food in @b", ctx, false),
 	}
 

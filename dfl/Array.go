@@ -11,24 +11,24 @@ import (
 	"reflect"
 )
 
-// Set is a Node representing a set of values, which can be either a Literal or Attribute.
-type Set struct {
+// Array is a Node representing an array of values, which can be either a Literal or Attribute.
+type Array struct {
 	Nodes []Node
 }
 
-func (a Set) Dfl() string {
-	str := "{"
+func (a Array) Dfl() string {
+	str := "["
 	for i, x := range a.Nodes {
 		if i > 0 {
 			str += ", "
 		}
 		str += x.Dfl()
 	}
-	str = str + "}"
+	str = str + "]"
 	return str
 }
 
-func (a Set) Map() map[string]interface{} {
+func (a Array) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"nodes": a.Nodes,
 	}
@@ -37,7 +37,7 @@ func (a Set) Map() map[string]interface{} {
 // Compile returns a compiled version of this node.
 // If all the values of an Set are literals, returns a single Literal with the corresponding Set/slice as its value.
 // Otherwise returns the original node..
-func (a Set) Compile() Node {
+func (a Array) Compile() Node {
 	values := make([]interface{}, len(a.Nodes))
 	nodes := reflect.ValueOf(a.Nodes)
 	for i := 0; i < nodes.Len(); i++ {
@@ -49,19 +49,10 @@ func (a Set) Compile() Node {
 			return a
 		}
 	}
-	set := make(map[string]struct{}, len(values))
-	for _, v := range values {
-		switch v.(type) {
-		case string:
-			set[v.(string)] = struct{}{}
-		default:
-			return Literal{Value: values}
-		}
-	}
-	return Literal{Value: set}
+	return Literal{Value: values}
 }
 
-func (a Set) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
 		v, err := n.Evaluate(ctx, funcs)
@@ -73,7 +64,7 @@ func (a Set) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	return values, nil
 }
 
-func (a Set) Attributes() []string {
+func (a Array) Attributes() []string {
 	set := make(map[string]struct{})
 	for _, n := range a.Nodes {
 		for _, x := range n.Attributes() {

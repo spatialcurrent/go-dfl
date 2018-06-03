@@ -16,12 +16,14 @@ import (
 )
 ```
 
-You can also test DFL filtering using a command line tool:
+You can also use the command line tool.
 
 ```
-Usage: dfl -filter INPUT [-verbose] [-version] [-help] [A=1] [B=2]
+Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]
 Options:
-  -filter string
+  -env
+    	Load environment variables
+  -f string
     	The DFL expression to evaulate
   -help
     	Print help
@@ -29,10 +31,21 @@ Options:
     	Provide verbose output
   -version
     	Prints version to stdout
-
 ```
 
 # Examples:
+
+**Environment**
+
+With the `-env` flag you can use DFL filters against the current environment.
+
+```
+./dfl -env -f '@SHELL in [/bin/sh, /bin/bash]' && echo "Shell is set to sh or bash"
+```
+
+**OpenStreetMap**
+
+You can also use DFL to filter OpenStreetMap features.
 
 ```
 ./dfl -verbose -filter '@pop > (10 - 2)' craft=brewery name=Stone pop=10

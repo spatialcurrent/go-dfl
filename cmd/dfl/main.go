@@ -65,12 +65,14 @@ func main() {
 
 	var filter_text string
 
+	var load_env bool
 	var verbose bool
 	var version bool
 	var help bool
 
-	flag.StringVar(&filter_text, "filter", "", "The DFL expression to evaulate")
+	flag.StringVar(&filter_text, "f", "", "The DFL expression to evaulate")
 
+	flag.BoolVar(&load_env, "env", false, "Load environment variables")
 	flag.BoolVar(&verbose, "verbose", false, "Provide verbose output")
 	flag.BoolVar(&version, "version", false, "Prints version to stdout")
 	flag.BoolVar(&help, "help", false, "Print help")
@@ -78,7 +80,7 @@ func main() {
 	flag.Parse()
 
 	if help {
-		fmt.Println("Usage: dfl -filter INPUT [-verbose] [-version] [-help] [A=1] [B=2]")
+		fmt.Println("Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(0)
@@ -87,7 +89,7 @@ func main() {
 		fmt.Println("Run \"dfl -help\" for more information.")
 		os.Exit(0)
 	} else if len(os.Args) == 2 && os.Args[1] == "help" {
-		fmt.Println("Usage: dfl -filter INPUT [-verbose] [-version] [-help] [A=1] [B=2]")
+		fmt.Println("Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(0)
@@ -99,13 +101,19 @@ func main() {
 	}
 
 	ctx := map[string]interface{}{}
+	if load_env {
+		for _, e := range os.Environ() {
+			pair := strings.Split(e, "=")
+			ctx[pair[0]] = dfl.TryConvertString(pair[1])
+		}
+	}
 	for _, a := range flag.Args() {
 		if !strings.Contains(a, "=") {
 			fmt.Println("Context attribute \"" + a + "\" does not contain \"=\".")
 			os.Exit(1)
 		}
-		parts := strings.SplitN(a, "=", 2)
-		ctx[parts[0]] = dfl.TryConvertString(parts[1])
+		pair := strings.SplitN(a, "=", 2)
+		ctx[pair[0]] = dfl.TryConvertString(pair[1])
 	}
 
 	root, err := dfl.Parse(filter_text)
