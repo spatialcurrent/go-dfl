@@ -22,8 +22,11 @@ import (
 	"honnef.co/go/js/console"
 )
 
+var GO_DFL_VERSION = "0.0.2"
+
 func main() {
 	js.Global.Set("dfl", map[string]interface{}{
+		"Version":        GO_DFL_VERSION,
 		"EvaluateBool":   EvaluateBool,
 		"EvaluateInt":    EvaluateInt,
 		"EvaluateString": EvaluateString,
