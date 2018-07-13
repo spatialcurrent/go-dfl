@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -72,6 +73,16 @@ func TryConvertString(s string) interface{} {
 	left_time, err = time.Parse("2006-01-02", s)
 	if err == nil {
 		return left_time
+	}
+
+	left_ipv4 := net.ParseIP(s)
+	if left_ipv4 != nil {
+		return left_ipv4
+	}
+
+	_, left_net, err := net.ParseCIDR(s)
+	if err == nil {
+		return left_net
 	}
 
 	return s

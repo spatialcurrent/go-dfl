@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/spatialcurrent/go-dfl.svg)](https://travis-ci.org/spatialcurrent/go-dfl) [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl)
+[![Build Status](https://travis-ci.org/spatialcurrent/go-dfl.svg)](https://travis-ci.org/spatialcurrent/go-dfl) [![Go Report Card](https://goreportcard.com/badge/spatialcurrent/go-dfl)](https://goreportcard.com/report/spatialcurrent/go-dfl)  [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/go-spatial/tegola/blob/master/LICENSE.md)
 
 # go-dfl
 
@@ -43,32 +43,37 @@ With the `-env` flag you can use DFL filters against the current environment.
 ./dfl -env -f '@SHELL in [/bin/sh, /bin/bash]' && echo "Shell is set to sh or bash"
 ```
 
+**IP Address Information**
+
+You can use DFL to filter IP addresses.
+
+```
+./dfl -verbose -f '@ip in 10.10.0.0/16' ip=10.10.20.22
+# returns true as exit code 0
+```
+
 **OpenStreetMap**
 
 You can also use DFL to filter OpenStreetMap features.
 
 ```
-./dfl -verbose -filter '@pop > (10 - 2)' craft=brewery name=Stone pop=10
-true
-Done in 7.354125ms
+./dfl -f '@pop > (10 - 2)' craft=brewery name=Stone pop=10
+# returns true as exit code 0
 ```
 
 ```
-./dfl -verbose -filter '@craft like "brewery"' craft=brewery name=Stone pop=10
-true
-Done in 3.44965ms
+./dfl -f '@craft like "brewery"' craft=brewery name=Stone pop=10
+# returns true as exit code 0
 ```
 
 ```
-./dfl -verbose -filter '@craft like "brew%"' craft=brewery name=Stone pop=10
-true
-Done in 4.159278ms
+./dfl -f '@craft like "brew%"' craft=brewery name=Stone pop=10
+# returns true as exit code 0
 ```
 
 ```
-./dfl -verbose -filter '@craft ilike "Stone%"' craft=brewery name=Atlas pop=10
-false
-Done in 4.439012ms
+./dfl -f '@craft ilike "Stone%"' craft=brewery name=Atlas pop=10
+# returns true as exit code 0
 ```
 
 # Contributing

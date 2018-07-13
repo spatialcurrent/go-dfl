@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+	"net"
 	//"reflect"
 	"strconv"
 	"strings"
@@ -49,12 +50,26 @@ func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
 	}
-	lvs := fmt.Sprint(lv)
 
 	rv, err := i.Right.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
 	}
+
+	switch lv.(type) {
+	case net.IP:
+		lv_ip := lv.(net.IP)
+		switch rv.(type) {
+		case net.IPNet:
+			rv_net := rv.(net.IPNet)
+			return rv_net.Contains(lv_ip), nil
+		case *net.IPNet:
+			rv_net := rv.(*net.IPNet)
+			return rv_net.Contains(lv_ip), nil
+		}
+	}
+
+	lvs := fmt.Sprint(lv)
 
 	switch rv.(type) {
 	case string:

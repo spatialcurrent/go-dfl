@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -55,6 +56,32 @@ func TestTryConvertStringTimes(t *testing.T) {
 		switch got.(type) {
 		case time.Time:
 			if !got.(time.Time).Equal(want) {
+				t.Errorf("TryConvertString(%q) == %v (%q), want %v (%q)", testCase.in, got, reflect.TypeOf(got), testCase.want, reflect.TypeOf(testCase.want))
+			}
+		default:
+			t.Errorf("TryConvertString(%q) == %v (%q), want %v (%q)", testCase.in, got, reflect.TypeOf(got), testCase.want, reflect.TypeOf(testCase.want))
+		}
+	}
+
+}
+
+
+func TestTryConvertStringIPv4(t *testing.T) {
+
+	testCases := []struct {
+		in   string
+		want interface{}
+	}{
+		{in: "192.168.2.1", want: net.ParseIP("192.168.2.1")},
+		{in: "10.10.1.1", want: net.ParseIP("10.10.1.1")},
+	}
+
+	for _, testCase := range testCases {
+		got := TryConvertString(testCase.in)
+		want := testCase.want.(net.IP)
+		switch got.(type) {
+		case net.IP:
+			if !got.(net.IP).Equal(want) {
 				t.Errorf("TryConvertString(%q) == %v (%q), want %v (%q)", testCase.in, got, reflect.TypeOf(got), testCase.want, reflect.TypeOf(testCase.want))
 			}
 		default:
