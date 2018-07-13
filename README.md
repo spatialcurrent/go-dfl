@@ -76,6 +76,16 @@ You can also use DFL to filter OpenStreetMap features.
 # returns true as exit code 0
 ```
 
+# Building
+
+**CLI**
+
+The command line DFL program can be built with the `scripts/build_cli.sh` script.
+
+**JavaScript**
+
+You can compile DFL to pure JavaScript with the `scripts/build_javascript.sh` script.
+
 # Contributing
 
 [Spatial Current, Inc.](https://spatialcurrent.io) is currently accepting pull requests for this repository.  We'd love to have your contributions!  Please see [Contributing.md](https://github.com/spatialcurrent/go-dfl/blob/master/CONTRIBUTING.md) for how to get started.
