@@ -16,6 +16,7 @@ matrix:
   fast_finish: true
 
 install:
+  - go get -t ./...
   - go get -u github.com/alecthomas/gometalinter
   - gometalinter --install
 
