@@ -15,7 +15,7 @@ import (
 )
 
 // TryConvertString attempts to parse the string parameter s into an appropriate literal value of type string, bool, int, float64, or time.Time.
-// The functions evaluates the following rules in order.  It returns the first sucess.  The rules are:
+// The functions evaluates the following rules in order.  It returns the first success.  The rules are:
 //
 //	1. "null", "none", "" => ""
 //	2. "true" => true (bool)

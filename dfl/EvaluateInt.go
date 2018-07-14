@@ -19,6 +19,8 @@ func EvaluateInt(n Node, ctx Context, funcs FunctionMap) (int, error) {
 	switch result.(type) {
 	case int:
 		return result.(int), nil
+	case float64:
+		return int(result.(float64)), nil
 	}
 
 	return 0, errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of int")

@@ -68,5 +68,5 @@ func (x Xor) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 			return lv.(bool) != rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaulating expression " + x.Dfl())
+	return false, errors.New("Error evaluating expression " + x.Dfl())
 }

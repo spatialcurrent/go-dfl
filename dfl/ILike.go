@@ -62,7 +62,7 @@ func (i ILike) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 
 	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
 	}
 	return pattern.MatchString(lvs), nil
 }

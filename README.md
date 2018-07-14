@@ -8,13 +8,7 @@
 
 # Usage
 
-You can import **go-dfl** as a library with:
-
-```
-import (
-  "github.com/spatialcurrent/go-dfl/dfl"
-)
-```
+**CLI**
 
 You can also use the command line tool.
 
@@ -32,6 +26,35 @@ Options:
   -version
     	Prints version to stdout
 ```
+
+**Go**
+
+You can import **go-dfl** as a library with:
+
+```
+import (
+  "github.com/spatialcurrent/go-dfl/dfl"
+)
+```
+
+**JavaScript**
+
+```html
+<html>
+  <head>
+    <script src="https://...dfljs.js"></script>
+  </head>
+  <body>
+    <script>
+      var exp = "@pop + 10";
+      var root = dfl.Parse(exp).Compile();
+      var result = root.Evaluate({"pop": 10})
+      ...
+    </script>
+  </body>
+</html>
+```
+
 
 # Examples:
 

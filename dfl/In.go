@@ -48,12 +48,12 @@ func (i In) Compile() Node {
 func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
 	}
 
 	rv, err := i.Right.Evaluate(ctx, funcs)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaulating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
 	}
 
 	switch lv.(type) {
