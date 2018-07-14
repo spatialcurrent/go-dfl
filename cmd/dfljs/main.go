@@ -26,7 +26,7 @@ import (
 	"honnef.co/go/js/console"
 )
 
-var GO_DFL_VERSION = "0.0.2"
+var GO_DFL_VERSION = "0.0.3"
 
 type Node struct {
 	Node dfl.Node

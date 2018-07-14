@@ -44,7 +44,7 @@ import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
-var GO_DFL_VERSION = "0.0.2"
+var GO_DFL_VERSION = "0.0.3"
 
 func dfl_build_funcs() dfl.FunctionMap {
 	funcs := dfl.FunctionMap{}
