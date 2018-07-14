@@ -54,5 +54,5 @@ func (n Not) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	case bool:
 		return !(v.(bool)), nil
 	}
-	return false, errors.New("Error evaulating expression " + n.Dfl())
+	return false, errors.New("Error evaluating expression " + n.Dfl())
 }

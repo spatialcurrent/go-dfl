@@ -127,7 +127,7 @@ func main() {
 		fmt.Println("******************* Parsed *******************")
 		out, err := yaml.Marshal(root.Map())
 		if err != nil {
-			fmt.Println("Error marshalling expression to yaml.")
+			fmt.Println("Error marshaling expression to yaml.")
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -140,7 +140,7 @@ func main() {
 		fmt.Println("******************* Compiled *******************")
 		out, err := yaml.Marshal(root.Map())
 		if err != nil {
-			fmt.Println("Error marshalling expression to yaml.")
+			fmt.Println("Error marshaling expression to yaml.")
 			fmt.Println(err)
 			os.Exit(1)
 		}

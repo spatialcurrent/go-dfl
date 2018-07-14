@@ -15,7 +15,14 @@ matrix:
     - go: tip
   fast_finish: true
 
+install:
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
+
 script:
+  - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./dfl/
+  - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./cmd/dfl/
+  - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./cmd/dfljs/
   - cd cmd/dfl
   - go fmt
   - go test

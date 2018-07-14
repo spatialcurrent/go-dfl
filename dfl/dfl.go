@@ -30,7 +30,7 @@
 //	1.  Easy to Read - The "@" in front of every attribute.
 //	2.  Clean - Quotes are optional (unless required because of spaces in an element)
 //	3.  Strict Execution Path - Use of parentheses is strongly encouraged o maximize performance over large datasets.
-//	4.  Dyanmically typed - Operators support multiple types and try to cast if possible.  Fails hard if not valid.
+//	4.  Dynamically typed - Operators support multiple types and try to cast if possible.  Fails hard if not valid.
 //	5.  Embeddable - Easily written in other languages, such as Python, Javascript, or Shell, without endless worry about escaping.
 //
 // DFL aims to cover a wide variety of filters while keeping the language expressive and easy to read.  DFL currently supports:

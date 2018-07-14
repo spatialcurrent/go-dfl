@@ -69,5 +69,5 @@ func (a And) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 			return rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaulating expression " + a.Dfl())
+	return false, errors.New("Error evaluating expression " + a.Dfl())
 }
