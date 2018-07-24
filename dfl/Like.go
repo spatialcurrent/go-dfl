@@ -9,8 +9,6 @@ package dfl
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
 )
 
 import (
@@ -48,21 +46,16 @@ func (l Like) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	if err != nil {
 		return false, err
 	}
-	lvs := fmt.Sprint(lv)
 
 	rv, err := l.Right.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err
 	}
-	rvs := fmt.Sprint(rv)
 
-	if len(rvs) == 0 {
-		return len(lvs) == 0, nil
-	}
-
-	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
+	match, err := CompareStrings(fmt.Sprint(lv), fmt.Sprint(rv))
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaluating expression "+l.Dfl())
 	}
-	return pattern.MatchString(lvs), nil
+
+	return match, nil
 }

@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"encoding/hex"
 	"net"
 	"strconv"
 	"strings"
@@ -46,6 +47,26 @@ func TryConvertString(s string) interface{} {
 
 	if s_lc == "false" {
 		return false
+	}
+
+	if s_lc == "[]" {
+		return make([]interface{}, 0)
+	}
+
+	if s_lc == "{}" {
+		return make(map[string]struct{}, 0)
+	}
+
+	if strings.HasPrefix(s_lc, "0x") && (len(s_lc) >= 4) && (0 == len(s_lc)%2) {
+		b := []byte(s[2:])
+		value := make([]byte, hex.DecodedLen(len(b)))
+		_, err := hex.Decode(value, b)
+		if err == nil {
+			if len(value) == 1 {
+				return value[0]
+			}
+			return value
+		}
 	}
 
 	if strings.Contains(s, ".") {

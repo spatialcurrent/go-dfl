@@ -139,7 +139,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &Equal{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+					return &Equal{&BinaryOperator{Right: right}}, nil
 
 				} else if s_lc == "!=" {
 
@@ -147,7 +147,7 @@ func Parse(in string) (Node, error) {
 					if err != nil {
 						return right, err
 					}
-					return &NotEqual{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+					return &NotEqual{&BinaryOperator{Right: right}}, nil
 
 				} else if s_lc == "+" {
 
