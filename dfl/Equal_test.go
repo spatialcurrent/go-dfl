@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestNotEqual(t *testing.T) {
+func TestEqual(t *testing.T) {
 
 	ctx := Context{
 		"a": 2,
@@ -28,22 +28,21 @@ func TestNotEqual(t *testing.T) {
 	}
 
 	testCases := []TestCase{
-		NewTestCase("2 != 7", ctx, true),
-		NewTestCase("@a != 1", ctx, true),
-		NewTestCase("3.0 != @b", ctx, false),
-		NewTestCase("@a != @b", ctx, true),
-		NewTestCase("a != b", ctx, true),
-		NewTestCase("'a' != 'b'", ctx, true),
-		NewTestCase("192.168.2.1 != 192.168.2.1", ctx, false),
-		NewTestCase("192.168.2.1 != 192.168.1.1", ctx, true),
-		NewTestCase("[1, 2] != [1, 2]", ctx, false),
-		NewTestCase("[1, 2] != [1, 3]", ctx, true),
-		NewTestCase("[a, b] != [a, b]", ctx, false),
-		NewTestCase("[@c, b] != [v, b]", ctx, false),
-		NewTestCase("@d != [1, 2, 3, 4]", ctx, false),
-		NewTestCase("@d != [1, 2, 3, 4]", ctx, false),
-		NewTestCase("@e != [a, b, c, e]", ctx, true),
-		NewTestCase("@f != [0x89, 0x50, 0x4E, 0X47]", ctx, false),
+		NewTestCase("2 == 7", ctx, false),
+		NewTestCase("@a == 1", ctx, false),
+		NewTestCase("3.0 == @b", ctx, true),
+		NewTestCase("@a == @b", ctx, false),
+		NewTestCase("a == b", ctx, false),
+		NewTestCase("'a' == 'b'", ctx, false),
+		NewTestCase("192.168.2.1 == 192.168.2.1", ctx, true),
+		NewTestCase("192.168.2.1 == 192.168.1.1", ctx, false),
+		NewTestCase("[1, 2] == [1, 2]", ctx, true),
+		NewTestCase("[1, 2] == [1, 3]", ctx, false),
+		NewTestCase("[@c, b] == [v, b]", ctx, true),
+		NewTestCase("@d == [1, 2, 3, 4]", ctx, true),
+		NewTestCase("@d == [1, 2, 3, 4]", ctx, true),
+		NewTestCase("@e == [a, b, c, d]", ctx, true),
+		NewTestCase("@f == [0x89, 0x50, 0x4E, 0X47]", ctx, true),
 	}
 
 	for _, testCase := range testCases {
@@ -57,7 +56,7 @@ func TestNotEqual(t *testing.T) {
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {
-			t.Errorf("TestNotEqual(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+			t.Errorf("TestEqual(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

@@ -35,7 +35,7 @@ func (a Array) Map() map[string]interface{} {
 }
 
 // Compile returns a compiled version of this node.
-// If all the values of an Set are literals, returns a single Literal with the corresponding Set/slice as its value.
+// If all the values of an Set are literals, returns a single Literal with the corresponding array as its value.
 // Otherwise returns the original node..
 func (a Array) Compile() Node {
 	values := make([]interface{}, len(a.Nodes))
@@ -49,7 +49,7 @@ func (a Array) Compile() Node {
 			return a
 		}
 	}
-	return Literal{Value: values}
+	return Literal{Value: TryConvertArray(values)}
 }
 
 func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
@@ -61,7 +61,7 @@ func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 		}
 		values[i] = v
 	}
-	return values, nil
+	return TryConvertArray(values), nil
 }
 
 func (a Array) Attributes() []string {

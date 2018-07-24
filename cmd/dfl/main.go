@@ -101,19 +101,32 @@ func main() {
 	}
 
 	ctx := map[string]interface{}{}
+
 	if load_env {
 		for _, e := range os.Environ() {
-			pair := strings.Split(e, "=")
-			ctx[pair[0]] = dfl.TryConvertString(pair[1])
+			pair := strings.SplitN(e, "=", 2)
+			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(strings.TrimSpace(pair[1]))
 		}
 	}
+
 	for _, a := range flag.Args() {
 		if !strings.Contains(a, "=") {
 			fmt.Println("Context attribute \"" + a + "\" does not contain \"=\".")
 			os.Exit(1)
 		}
 		pair := strings.SplitN(a, "=", 2)
-		ctx[pair[0]] = dfl.TryConvertString(pair[1])
+		value, err := dfl.Parse(strings.TrimSpace(pair[1]))
+		if err != nil {
+			fmt.Println(errors.Wrap(err, "Could not parse context variable"))
+			os.Exit(1)
+		}
+		value = value.Compile()
+		switch value.(type) {
+		case dfl.Literal:
+			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
+		default:
+			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(pair[1])
+		}
 	}
 
 	root, err := dfl.Parse(filter_text)
@@ -121,6 +134,17 @@ func main() {
 		fmt.Println("Error parsing filter expression.")
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	if verbose {
+		fmt.Println("******************* Context *******************")
+		out, err := yaml.Marshal(ctx)
+		if err != nil {
+			fmt.Println("Error marshaling context to yaml.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(string(out))
 	}
 
 	if verbose {

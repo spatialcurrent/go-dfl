@@ -55,7 +55,6 @@ import (
 </html>
 ```
 
-
 # Examples:
 
 **Environment**
@@ -64,6 +63,22 @@ With the `-env` flag you can use DFL filters against the current environment.
 
 ```
 ./dfl -env -f '@SHELL in [/bin/sh, /bin/bash]' && echo "Shell is set to sh or bash"
+```
+
+**Arrays**
+
+You can use DFL to filter integer arrays.
+
+```
+./dfl -verbose -f '@a == [1, 2, 3, 4]' 'a=[1, 2, 3, 4]'
+# returns true as exit code 0
+```
+
+You can also use DFl to compare byte arrays.
+
+```
+./dfl -f '@a == [137, 80, 78, 71]' 'a=[0x89, 0x50, 0x4E, 0X47]'
+# returns true as exit code 0
 ```
 
 **IP Address Information**

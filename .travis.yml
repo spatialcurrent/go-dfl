@@ -26,5 +26,5 @@ script:
   - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./cmd/dfljs/
   - cd cmd/dfl
   - go fmt
-  - go test
   - go build
+  - go test
