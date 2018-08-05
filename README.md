@@ -70,7 +70,7 @@ With the `-env` flag you can use DFL filters against the current environment.
 You can use DFL to filter integer arrays.
 
 ```
-./dfl -verbose -f '@a == [1, 2, 3, 4]' 'a=[1, 2, 3, 4]'
+./dfl -f '@a == [1, 2, 3, 4]' 'a=[1, 2, 3, 4]'
 # returns true as exit code 0
 ```
 
@@ -86,7 +86,7 @@ You can also use DFl to compare byte arrays.
 You can use DFL to filter IP addresses.
 
 ```
-./dfl -verbose -f '@ip in 10.10.0.0/16' ip=10.10.20.22
+./dfl -f '@ip in 10.10.0.0/16' ip=10.10.20.22
 # returns true as exit code 0
 ```
 

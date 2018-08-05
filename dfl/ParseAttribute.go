@@ -8,11 +8,6 @@
 package dfl
 
 import (
-	"strings"
-	"unicode"
-)
-
-import (
 	"github.com/pkg/errors"
 )
 
@@ -23,58 +18,23 @@ import (
 // Given those rules the remainder, if any, if simply parsed from the input strings
 // Examples:
 //	node, err := ParseAttribute("@amenity in [bar, restaurant]")
-func ParseAttribute(in string) (Node, error) {
+func ParseAttribute(in string, remainder string) (Node, error) {
 
-	end := strings.Index(strings.TrimLeftFunc(in, unicode.IsSpace), " ")
-	if end == -1 {
-		return &Attribute{Name: strings.TrimSpace(in)[1:]}, nil
+	if len(remainder) == 0 {
+		return &Attribute{Name: in[1:]}, nil
 	}
 
-	if len(strings.TrimSpace(in[end:])) == 0 {
-		return &Attribute{Name: in[1:end]}, nil
-	}
-
-	left := &Attribute{Name: in[1:end]}
-	root, err := Parse(in[end:])
+	left := &Attribute{Name: in[1:]}
+	root, err := Parse(remainder)
 	if err != nil {
-		return root, err
+		return root, errors.Wrap(err, "error parsing remainder < "+remainder+" >")
 	}
-	switch root.(type) {
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *Xor:
-		root.(*Xor).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	case *Before:
-		root.(*Before).Left = left
-	case *After:
-		root.(*After).Left = left
-	default:
-		return root, errors.New("Invalid expression syntax for " + in + ".  Root is not a binary operator")
+
+	err = AttachLeft(root, left)
+	if err != nil {
+		return root, errors.Wrap(err, "error attaching left for attribute "+in)
 	}
+
 	return root, nil
 
 }

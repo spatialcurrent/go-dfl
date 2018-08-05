@@ -7,13 +7,10 @@
 
 package dfl
 
-import (
-	"strings"
-)
-
+// Function is a refrenced function in a DFL filter.  The actual function in a given FunctionMap is derefernced by name.
 type Function struct {
-	Name      string   `json:"name" bson:"name" yaml:"name" hcl:"name"`
-	Arguments []string `json:"arguments" bson:"arguments" yaml:"arguments" hcl:"arguments"`
+	Name      string `json:"name" bson:"name" yaml:"name" hcl:"name"`                     // name of the function
+	Arguments []Node `json:"arguments" bson:"arguments" yaml:"arguments" hcl:"arguments"` // list of function arguments
 }
 
 func (f Function) Dfl() string {
@@ -22,11 +19,7 @@ func (f Function) Dfl() string {
 		if i > 0 {
 			out += ", "
 		}
-		if strings.Contains(arg, " ") {
-			out += "\"" + arg + "\""
-		} else {
-			out += arg
-		}
+		out += arg.Dfl()
 	}
 	out += ")"
 	return out
@@ -45,13 +38,31 @@ func (f Function) Map() map[string]interface{} {
 }
 
 func (f Function) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
-	if v, ok := funcs[f.Name]; ok {
-		return v(ctx, f.Arguments)
+	if fn, ok := funcs[f.Name]; ok {
+		values := make([]interface{}, 0, len(f.Arguments))
+		for _, arg := range f.Arguments {
+			value, err := arg.Evaluate(ctx, funcs)
+			if err != nil {
+				return &Null{}, err
+			}
+			values = append(values, value)
+		}
+		return fn(ctx, values)
 	} else {
 		return "", nil
 	}
 }
 
 func (f Function) Attributes() []string {
-	return []string{}
+	set := make(map[string]struct{})
+	for _, n := range f.Arguments {
+		for _, x := range n.Attributes() {
+			set[x] = struct{}{}
+		}
+	}
+	attrs := make([]string, 0, len(set))
+	for x := range set {
+		attrs = append(attrs, x)
+	}
+	return attrs
 }

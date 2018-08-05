@@ -46,19 +46,6 @@ import (
 
 var GO_DFL_VERSION = "0.0.3"
 
-func dfl_build_funcs() dfl.FunctionMap {
-	funcs := dfl.FunctionMap{}
-
-	funcs["len"] = func(ctx dfl.Context, args []string) (interface{}, error) {
-		if len(args) != 1 {
-			return 0, errors.New("Invalid number of arguments to len.")
-		}
-		return len(args[0]), nil
-	}
-
-	return funcs
-}
-
 func main() {
 
 	start := time.Now()
@@ -171,8 +158,7 @@ func main() {
 		fmt.Println(string(out))
 	}
 
-	funcs := dfl_build_funcs()
-	result, err := root.Evaluate(ctx, funcs)
+	result, err := root.Evaluate(ctx, dfl.NewFuntionMapWithDefaults())
 	if err != nil {
 		fmt.Println("Error evaluating expression.")
 		fmt.Println(err)

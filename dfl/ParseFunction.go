@@ -8,104 +8,110 @@
 package dfl
 
 import (
-	"regexp"
+	"fmt"
 	"strings"
+	"unicode"
 )
 
 import (
 	"github.com/pkg/errors"
 )
 
-func ParseFunctionArguments(in string) ([]string, error) {
+func ParseFunction(in string, remainder string) (Node, error) {
 
-	args := []string{}
+	functionName := ""
+	arguments := make([]Node, 0)
+	leftparentheses := 0
+	rightparentheses := 0
+	singlequotes := 0
+	doublequotes := 0
 
-	re2, err := regexp.Compile("(\\s*)(?P<value>((\"([^\"]+?)\")|([^,\\s]+)))(\\s*)")
-	if err != nil {
-		return args, err
-	}
+	in = strings.TrimSpace(in)
+	s := ""
 
-	for _, m2 := range re2.FindAllStringSubmatch(in, -1) {
-		g2 := map[string]string{}
-		for i, name := range re2.SubexpNames() {
-			if i != 0 {
-				g2[name] = m2[i]
+	for i := 0; i < len(in); i++ {
+
+		c := in[i]
+
+		s += string(c)
+
+		if c == '(' {
+			leftparentheses += 1
+
+			if leftparentheses == 1 {
+				functionName = strings.TrimSpace(s[:len(s)-1])
+				s = ""
 			}
-		}
-		if value, ok := g2["value"]; ok {
-			value = strings.TrimSpace(value)
-			if strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\"") {
-				args = append(args, value[1:len(value)-1])
-			} else {
-				args = append(args, value)
+
+		} else if c == ')' {
+
+			rightparentheses += 1
+
+			if leftparentheses-rightparentheses > 0 {
+
+				subFunction, err := ParseFunction(strings.TrimSpace(s), "")
+				if err != nil {
+					return &Function{}, errors.Wrap(err, "error parsing sub function")
+				}
+				arguments = append(arguments, subFunction)
+
+			} else if leftparentheses == rightparentheses {
+				s = strings.TrimSpace(s[0 : len(s)-1])
+				if len(s) > 0 {
+					if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+						arguments = append(arguments, &Literal{Value: s[1 : len(s)-1]})
+					} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
+						arguments = append(arguments, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})
+					} else if strings.Contains(s, "(") {
+						subFunction, err := ParseFunction(strings.TrimSpace(s), "")
+						if err != nil {
+							return &Function{}, errors.Wrap(err, "error parsing subfunction as argument")
+						}
+						arguments = append(arguments, subFunction)
+					} else {
+						arguments = append(arguments, &Literal{Value: TryConvertString(s)})
+					}
+				}
+				s = ""
+
 			}
+
+			s = ""
+
+		} else if singlequotes == 0 && doublequotes == 0 && (leftparentheses-rightparentheses) == 1 && c == ',' {
+			s = strings.TrimSpace(s[0 : len(s)-1])
+			if len(s) > 0 {
+				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+					arguments = append(arguments, &Literal{Value: s[1 : len(s)-1]})
+				} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
+					arguments = append(arguments, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})
+				} else {
+					arguments = append(arguments, &Literal{Value: TryConvertString(s)})
+				}
+			}
+			s = ""
 		}
+
 	}
 
-	return args, nil
-}
-
-func ParseFunction(s string, remainder string, re *regexp.Regexp) (Node, error) {
-	var root Node
-
-	m := re.FindStringSubmatch(s)
-	g := map[string]string{}
-	for j, name := range re.SubexpNames() {
-		if j != 0 {
-			g[name] = m[j]
-		}
-	}
-	name := g["name"]
-
-	args, err := ParseFunctionArguments(g["args"])
-	if err != nil {
-		return root, err
+	if leftparentheses > rightparentheses {
+		return &Function{}, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+	} else if leftparentheses < rightparentheses {
+		return &Function{}, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
 	}
 
 	if len(remainder) == 0 {
-		return &Function{Name: name, Arguments: args}, nil
+		return &Function{Name: functionName, Arguments: arguments}, nil
 	}
 
-	left := &Function{Name: name, Arguments: args}
-	root, err = Parse(remainder)
+	root, err := Parse(remainder)
 	if err != nil {
 		return root, err
 	}
-	switch root.(type) {
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *Xor:
-		root.(*Xor).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	case *Before:
-		root.(*Before).Left = left
-	case *After:
-		root.(*After).Left = left
-	default:
-		return root, errors.New("Invalid expression syntax for " + s + ".  Root is not a binary operator")
+
+	err = AttachLeft(root, &Function{Name: functionName, Arguments: arguments})
+	if err != nil {
+		return root, errors.Wrap(err, "error attaching left for "+in)
 	}
 
 	return root, nil
