@@ -1,5 +1,13 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
+// Counter is used for creating a frequency histogram of values
 type Counter map[string]int
 
 func (c Counter) Len() int {

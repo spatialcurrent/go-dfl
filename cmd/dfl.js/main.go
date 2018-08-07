@@ -30,10 +30,14 @@ var GO_DFL_VERSION = "0.0.3"
 
 type Node struct {
 	Node dfl.Node
+	FunctionMap dfl.FunctionMap
 }
 
 func (n Node) Compile() *js.Object {
-	return js.MakeWrapper(Node{Node:n.Node.Compile()})
+	return js.MakeWrapper(Node{
+		Node: n.Node.Compile(),
+		FunctionMap: dfl.NewFuntionMapWithDefaults(),
+	})
 }
 
 func (n Node) Evaluate(options *js.Object) interface{} {
@@ -43,7 +47,7 @@ func (n Node) Evaluate(options *js.Object) interface{} {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := n.Node.Evaluate(ctx, dfl.FunctionMap{})
+	result, err := n.Node.Evaluate(ctx, n.FunctionMap)
 	if err != nil {
 		console.Log(err.Error())
 		return false
@@ -87,7 +91,7 @@ func EvaluateBool(s string, options *js.Object) bool {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateBool(root, ctx, dfl.FunctionMap{})
+	result, err := dfl.EvaluateBool(root, ctx, dfl.NewFuntionMapWithDefaults())
 	if err != nil {
 		console.Log(err.Error())
 		return false
@@ -110,7 +114,7 @@ func EvaluateInt(s string, options *js.Object) int {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateInt(root, ctx, dfl.FunctionMap{})
+	result, err := dfl.EvaluateInt(root, ctx, dfl.NewFuntionMapWithDefaults())
 	if err != nil {
 		console.Log(err.Error())
 		return 0
@@ -133,7 +137,7 @@ func EvaluateFloat64(s string, options *js.Object) float64 {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateFloat64(root, ctx, dfl.FunctionMap{})
+	result, err := dfl.EvaluateFloat64(root, ctx, dfl.NewFuntionMapWithDefaults())
 	if err != nil {
 		console.Log(err.Error())
 		return 0.0
@@ -156,7 +160,7 @@ func EvaluateString(s string, options *js.Object) string {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateString(root, ctx, dfl.FunctionMap{})
+	result, err := dfl.EvaluateString(root, ctx, dfl.NewFuntionMapWithDefaults())
 	if err != nil {
 		console.Log(err.Error())
 		return ""

@@ -16,15 +16,26 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestAnd(t *testing.T) {
+func TestFunction(t *testing.T) {
 
-	ctx := Context{"a": true, "b": false}
+	ctx := Context{
+		"a": 2,
+		"b": 3.0,
+		"c": "PNG",
+		"d": []map[string]interface{}{
+			map[string]interface{}{"e": "f"},
+			map[string]interface{}{"e": "h"},
+		},
+	}
 
 	testCases := []TestCase{
-		NewTestCase("true and false", ctx, false),
-		NewTestCase("@a and true", ctx, true),
-		NewTestCase("false and @b", ctx, false),
-		NewTestCase("@a and @b", ctx, false),
+		NewTestCase("min(1, @a) == 1", ctx, true),
+		NewTestCase("min(2, @b) == 2", ctx, true),
+		NewTestCase("max(3, @a) == 3", ctx, true),
+		NewTestCase("min(3, @b) == 3.0", ctx, true),
+		NewTestCase("min(1, max(@a, @b)) == 1", ctx, true),
+		NewTestCase("len(bytes(@c)) == 3", ctx, true),
+		NewTestCase("f in map(@d, e)", ctx, true),
 	}
 
 	for _, testCase := range testCases {
@@ -34,11 +45,11 @@ func TestAnd(t *testing.T) {
 			continue
 		}
 		node = node.Compile()
-		got, err := node.Evaluate(testCase.Context, FunctionMap{})
+		got, err := node.Evaluate(testCase.Context, NewFuntionMapWithDefaults())
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {
-			t.Errorf("TestAnd(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+			t.Errorf("TestFunction(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

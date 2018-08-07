@@ -44,6 +44,14 @@ func (e Equal) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	}
 
 	switch lv.(type) {
+	case byte:
+		lvs := lv.(byte)
+		switch rv.(type) {
+		case string:
+			return string([]byte{lvs}) == rv.(string), nil
+		case uint8:
+			return lvs == (rv.(byte)), nil
+		}
 	case string:
 		lvs := lv.(string)
 		switch rv.(type) {

@@ -9,6 +9,9 @@ echo "******************"
 echo "Formatting $DIR/../cmd/dfl"
 cd $DIR/../cmd/dfl
 go fmt
+echo "Formatting $DIR/../dfl"
+cd $DIR/../dfl
+go fmt
 echo "Done formatting."
 echo "******************"
 echo "Building program for go-dfl"

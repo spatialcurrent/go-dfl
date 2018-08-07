@@ -7,7 +7,9 @@
 
 package dfl
 
-// Array is a Node representing the value of an attribute in the context map.
+// Attribute is a Node representing the value of an attribute in the context map.
+// Attributes start with a "@" and follow with the name or full path into the object if multiple levels deep.
+// For example, @a and @a.b.c.d.  You can also use a null-safe operator, e.g., @a?.b?.c?.d
 type Attribute struct {
 	Name string
 }
@@ -23,15 +25,11 @@ func (a Attribute) Map() map[string]interface{} {
 }
 
 func (a Attribute) Compile() Node {
-	return a
+	return Attribute{Name: a.Name}
 }
 
 func (a Attribute) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
-	if v, ok := ctx[a.Name]; ok {
-		return v, nil
-	} else {
-		return "", nil
-	}
+	return Extract(a.Name, ctx)
 }
 
 func (a Attribute) Attributes() []string {
