@@ -41,7 +41,7 @@ func (l Like) Compile() Node {
 	return Like{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (l Like) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (l Like) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := l.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

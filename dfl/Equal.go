@@ -36,7 +36,7 @@ func (e Equal) Compile() Node {
 	return Equal{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (e Equal) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (e Equal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := e.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {
@@ -44,6 +44,12 @@ func (e Equal) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 	}
 
 	switch lv.(type) {
+	case Null:
+		switch rv.(type) {
+		case Null:
+			return true, nil
+		}
+		return false, nil
 	case byte:
 		lvs := lv.(byte)
 		switch rv.(type) {

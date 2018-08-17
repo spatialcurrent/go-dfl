@@ -42,7 +42,7 @@ func (l Literal) Compile() Node {
 	return l
 }
 
-func (l Literal) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (l Literal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	return l.Value, nil
 }
 

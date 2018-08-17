@@ -18,7 +18,7 @@ import (
 
 func TestFunction(t *testing.T) {
 
-	ctx := Context{
+	ctx := map[string]interface{}{
 		"a": 2,
 		"b": 3.0,
 		"c": "PNG",

@@ -42,7 +42,7 @@ func (a After) Compile() Node {
 	return After{&TemporalBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (a After) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a After) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := a.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

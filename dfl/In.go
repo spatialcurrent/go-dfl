@@ -19,6 +19,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+import (
+	"github.com/spatialcurrent/go-reader/reader"
+)
+
 // In is a BinaryOperator that evaluates to true if the left value is in the right value.
 // The left value is cast as a string using "fmt.Sprint(lv)".
 // If the right value is an array/slice, then evaluated to true if the left value is in the array/slice.
@@ -45,7 +49,7 @@ func (i In) Compile() Node {
 	return In{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (i In) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
@@ -69,6 +73,82 @@ func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 		}
 	}
 
+	switch lv.(type) {
+	case []string:
+		lvs := lv.([]string)
+		switch rv.(type) {
+		case []string:
+			rvs := rv.([]string)
+			if len(lvs) == len(rvs) && len(lvs) == 0 {
+				return true, nil
+			}
+			for i, _ := range rvs {
+				if rvs[i] == lvs[0] && i+len(lvs) < len(rvs) {
+					match := true
+					for j, _ := range lvs {
+						if rvs[i+j] != lvs[j] {
+							match = false
+							break
+						}
+					}
+					if match {
+						return true, nil
+					}
+				}
+			}
+			return false, nil
+		}
+	case []byte:
+		lvb := lv.([]byte)
+		switch rv.(type) {
+		case []byte:
+			rvb := rv.([]byte)
+			if len(lvb) == len(rvb) && len(lvb) == 0 {
+				return true, nil
+			}
+			for i, _ := range rvb {
+				if rvb[i] == lvb[0] && i+len(lvb) < len(rvb) {
+					match := true
+					for j, _ := range lvb {
+						if rvb[i+j] != lvb[j] {
+							match = false
+							break
+						}
+					}
+					if match {
+						return true, nil
+					}
+				}
+			}
+			return false, nil
+		case *reader.Cache:
+			rvr := rv.(*reader.Cache)
+			rvb, err := rvr.ReadAll()
+			if err != nil {
+				return false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl())
+			}
+			if len(lvb) == len(rvb) && len(lvb) == 0 {
+				return true, nil
+			}
+			for i, _ := range rvb {
+				if rvb[i] == lvb[0] && i+len(lvb) < len(rvb) {
+					match := true
+					for j, _ := range lvb {
+						if rvb[i+j] != lvb[j] {
+							match = false
+							break
+						}
+					}
+					if match {
+						return true, nil
+					}
+				}
+			}
+			return false, nil
+
+		}
+	}
+
 	lvs := fmt.Sprint(lv)
 
 	switch rv.(type) {
@@ -78,8 +158,20 @@ func (i In) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
 		return strings.Contains(fmt.Sprint(rv), lvs), nil
 	case float64:
 		return strings.Contains(strconv.FormatFloat(rv.(float64), 'f', 6, 64), lvs), nil
+	case map[interface{}]struct{}:
+		_, ok := rv.(map[interface{}]struct{})[lv]
+		return ok, nil
 	case map[string]struct{}:
 		_, ok := rv.(map[string]struct{})[lvs]
+		return ok, nil
+	case map[interface{}]interface{}:
+		_, ok := rv.(map[interface{}]interface{})[lvs]
+		return ok, nil
+	case map[string]interface{}:
+		_, ok := rv.(map[string]interface{})[lvs]
+		return ok, nil
+	case map[string]string:
+		_, ok := rv.(map[string]string)[lvs]
 		return ok, nil
 	case []string:
 		for _, x := range rv.([]string) {

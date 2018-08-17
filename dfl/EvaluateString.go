@@ -10,7 +10,7 @@ import (
 )
 
 // EvaluateString returns the string value of a node given a context.  If the result is not a string, then returns an error.
-func EvaluateString(n Node, ctx Context, funcs FunctionMap) (string, error) {
+func EvaluateString(n Node, ctx interface{}, funcs FunctionMap) (string, error) {
 	result, err := n.Evaluate(ctx, funcs)
 	if err != nil {
 		return "", errors.Wrap(err, "Error evaluating expression")

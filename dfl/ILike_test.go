@@ -18,7 +18,7 @@ import (
 
 func TestILike(t *testing.T) {
 
-	ctx := Context{"a": "Cafe and Bar", "b": "bar"}
+	ctx := map[string]interface{}{"a": "Cafe and Bar", "b": "bar"}
 
 	testCases := []TestCase{
 		NewTestCase("bar ilike cafe", ctx, false),

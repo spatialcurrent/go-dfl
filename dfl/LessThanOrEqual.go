@@ -40,7 +40,7 @@ func (lte LessThanOrEqual) Compile() Node {
 	return LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lte LessThanOrEqual) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (lte LessThanOrEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lte.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

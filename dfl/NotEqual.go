@@ -39,7 +39,7 @@ func (ne NotEqual) Compile() Node {
 	return NotEqual{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (ne NotEqual) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (ne NotEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := ne.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

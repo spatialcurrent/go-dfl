@@ -18,7 +18,7 @@ type TemporalBinaryOperator struct {
 // If the left value and right value are at the same time, returns 0.
 // If the left value is before the right value, returns -1.
 // if the left value is after the right value, returns 1.
-func (tbo TemporalBinaryOperator) EvaluateAndCompare(ctx Context, funcs FunctionMap) (int, error) {
+func (tbo TemporalBinaryOperator) EvaluateAndCompare(ctx interface{}, funcs FunctionMap) (int, error) {
 
 	lv, rv, err := tbo.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

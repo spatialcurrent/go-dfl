@@ -42,7 +42,7 @@ func (gt GreaterThan) Compile() Node {
 	return GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (gt GreaterThan) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (gt GreaterThan) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := gt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

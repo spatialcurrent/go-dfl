@@ -10,7 +10,7 @@ import (
 )
 
 // EvaluateBool returns the boolean value of a node given a context.  If the result is not a bool, then returns an error.
-func EvaluateBool(n Node, ctx Context, funcs FunctionMap) (bool, error) {
+func EvaluateBool(n Node, ctx interface{}, funcs FunctionMap) (bool, error) {
 	result, err := n.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, errors.Wrap(err, "Error evaluating expression")

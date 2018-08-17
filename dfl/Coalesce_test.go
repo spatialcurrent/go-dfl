@@ -18,7 +18,7 @@ import (
 
 func TestCoalesce(t *testing.T) {
 
-	ctx := Context{"a": nil, "b": 10, "c": 10}
+	ctx := map[string]interface{}{"a": nil, "b": 10, "c": 10}
 
 	testCases := []TestCase{
 		NewTestCase("(@a ?: 10) == 10", ctx, true),

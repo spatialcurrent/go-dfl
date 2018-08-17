@@ -1,10 +1,12 @@
-[![Build Status](https://travis-ci.org/spatialcurrent/go-dfl.svg)](https://travis-ci.org/spatialcurrent/go-dfl) [![Go Report Card](https://goreportcard.com/badge/spatialcurrent/go-dfl)](https://goreportcard.com/report/spatialcurrent/go-dfl)  [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/go-spatial/tegola/blob/master/LICENSE.md)
+[![Build Status](https://travis-ci.org/spatialcurrent/go-dfl.svg)](https://travis-ci.org/spatialcurrent/go-dfl) [![Go Report Card](https://goreportcard.com/badge/spatialcurrent/go-dfl)](https://goreportcard.com/report/spatialcurrent/go-dfl)  [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/spatialcurrent/go-dfl/blob/master/LICENSE.md)
 
 # go-dfl
 
 # Description
 
 **go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).
+
+Using cross compilers, this library can also be called by other languages.  This library is cross compiled into a Shared Object file (`*.so`).  The Shared Object file can be called by `C`, `C++`, and `Python` on Linux machines.  See the examples folder for patterns that you can use.  This library is also compiled to pure `JavaScript` using [GopherJS](https://github.com/gopherjs/gopherjs).
 
 # Usage
 
@@ -54,6 +56,16 @@ import (
   </body>
 </html>
 ```
+
+**C**
+
+A variant of the `EvaluateBool` function is exported in a Shared Object file (`*.so`), which can be called by `C`, `C++`, and `Python` programs on Linux machines.  For example:
+
+```
+err = EvaluateBool(expression, size, ctx, &result);
+```
+
+The Go function definition defined in `plugins/dfl/main.go` takes in the expression and context.  For complete patterns for `C`, `C++`, and `Python`, see the `examples`.
 
 # Examples:
 
@@ -123,6 +135,10 @@ The command line DFL program can be built with the `scripts/build_cli.sh` script
 **JavaScript**
 
 You can compile DFL to pure JavaScript with the `scripts/build_javascript.sh` script.
+
+**Shared Object**
+
+The `build_so.sh` script is used to build a Shared Object (`*.go`), which can be called by `C`, `C++`, and `Python` on Linux machines.
 
 # Contributing
 

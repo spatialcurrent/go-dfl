@@ -18,7 +18,7 @@ import (
 
 func TestAttribute(t *testing.T) {
 
-	ctx := Context{
+	ctx := map[string]interface{}{
 		"a": nil,
 		"b": nil,
 		"c": map[string]interface{}{"d": 10, "e": map[string]interface{}{"f": 100}},

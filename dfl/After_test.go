@@ -19,7 +19,7 @@ import (
 
 func TestAfter(t *testing.T) {
 
-	ctx := Context{
+	ctx := map[string]interface{}{
 		"a": time.Date(2018, time.April, 2, 3, 28, 56, 0, time.UTC),
 		"b": time.Date(2018, time.May, 2, 3, 28, 56, 0, time.UTC),
 	}

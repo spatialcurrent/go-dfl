@@ -37,7 +37,7 @@ func (f Function) Map() map[string]interface{} {
 	}
 }
 
-func (f Function) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (f Function) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	if fn, ok := funcs[f.Name]; ok {
 		values := make([]interface{}, 0, len(f.Arguments))
 		for _, arg := range f.Arguments {

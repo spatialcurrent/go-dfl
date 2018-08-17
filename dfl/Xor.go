@@ -52,7 +52,7 @@ func (x Xor) Compile() Node {
 	return Xor{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (x Xor) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (x Xor) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := x.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

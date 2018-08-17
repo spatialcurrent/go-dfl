@@ -18,7 +18,7 @@ import (
 
 func TestGreaterThanOrEqual(t *testing.T) {
 
-	ctx := Context{"a": 2, "b": 3.0}
+	ctx := map[string]interface{}{"a": 2, "b": 3.0}
 
 	testCases := []TestCase{
 		NewTestCase("2 >= 7", ctx, false),

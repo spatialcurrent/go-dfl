@@ -52,7 +52,7 @@ func (a Array) Compile() Node {
 	return Literal{Value: TryConvertArray(values)}
 }
 
-func (a Array) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a Array) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
 		v, err := n.Evaluate(ctx, funcs)

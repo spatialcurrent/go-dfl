@@ -28,7 +28,7 @@ func (a Attribute) Compile() Node {
 	return Attribute{Name: a.Name}
 }
 
-func (a Attribute) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a Attribute) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	return Extract(a.Name, ctx)
 }
 

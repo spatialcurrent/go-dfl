@@ -40,7 +40,7 @@ func (lt LessThan) Compile() Node {
 	return LessThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lt LessThan) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (lt LessThan) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	v, err := lt.EvaluateAndCompare(ctx, funcs)
 	if err != nil {

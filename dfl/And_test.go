@@ -18,7 +18,7 @@ import (
 
 func TestAnd(t *testing.T) {
 
-	ctx := Context{"a": true, "b": false}
+	ctx := map[string]interface{}{"a": true, "b": false}
 
 	testCases := []TestCase{
 		NewTestCase("true and false", ctx, false),

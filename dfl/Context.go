@@ -17,4 +17,19 @@ package dfl
 //
 //  ctx := Context{"amenity": "bar", "popularity": 10, "open": 1}
 //
-type Context map[string]interface{}
+type Context struct {
+	Data map[string]interface{}
+}
+
+func (c *Context) Has(key string) bool {
+	_, ok := c.Data[key]
+	return ok
+}
+
+func (c *Context) Get(key string) interface{} {
+	return c.Data[key]
+}
+
+func (c *Context) Set(key string, value interface{}) {
+	c.Data[key] = value
+}

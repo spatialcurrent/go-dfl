@@ -61,7 +61,7 @@ func (a Set) Compile() Node {
 	return Literal{Value: set}
 }
 
-func (a Set) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (a Set) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
 		v, err := n.Evaluate(ctx, funcs)

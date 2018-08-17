@@ -18,6 +18,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+import (
+	"github.com/spatialcurrent/go-reader/reader"
+)
+
 // Extract is a function to extract a value from an object.
 // Extract supports a standard dot (.) and null-safe (?.) indexing.
 // Extract also support array indexing, including [A], [A:B], [A:], and [:B].
@@ -57,9 +61,18 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 			key := path[0:index_questionmark]
 			remainder := path[index_period+1 : len(path)]
 
-			switch obj.(type) {
-			case Context:
-				if value, ok := obj.(Context)[key]; ok {
+			switch o := obj.(type) {
+			case *Context:
+				if o.Has(key) {
+					value := o.Get(key)
+					if value == nil {
+						return Null{}, nil
+					}
+					return Extract(remainder, value)
+				}
+				return Null{}, nil
+			case map[interface{}]interface{}:
+				if value, ok := o[key]; ok {
 					if value == nil {
 						return Null{}, nil
 					}
@@ -67,7 +80,7 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 				}
 				return Null{}, nil
 			case map[string]interface{}:
-				if value, ok := obj.(map[string]interface{})[key]; ok {
+				if value, ok := o[key]; ok {
 					if value == nil {
 						return Null{}, nil
 					}
@@ -81,9 +94,10 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 			key := path[0:index_period]
 			remainder := path[index_period+1 : len(path)]
 
-			switch obj.(type) {
-			case Context:
-				if value, ok := obj.(Context)[key]; ok {
+			switch o := obj.(type) {
+			case *Context:
+				if o.Has(key) {
+					value := o.Get(key)
 					if value == nil {
 						return Null{}, errors.New("value " + key + " is null.")
 					}
@@ -91,7 +105,15 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 				}
 				return Null{}, errors.New("value " + key + " is null.")
 			case map[string]interface{}:
-				if value, ok := obj.(map[string]interface{})[key]; ok {
+				if value, ok := o[key]; ok {
+					if value == nil {
+						return Null{}, errors.New("value " + key + " is null.")
+					}
+					return Extract(remainder, value)
+				}
+				return Null{}, errors.New("value " + key + " is null.")
+			case map[interface{}]interface{}:
+				if value, ok := o[key]; ok {
 					if value == nil {
 						return Null{}, errors.New("value " + key + " is null.")
 					}
@@ -131,6 +153,13 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 						return o[start:end], nil
 					case []string:
 						return o[start:end], nil
+					case *reader.Cache:
+						return o.ReadRange(start, end-1)
+					case []map[interface{}]interface{}:
+						if len(remainder) > 0 {
+							return Extract(remainder, o[start:end])
+						}
+						return o[start:end], nil
 					case []map[string]interface{}:
 						if len(remainder) > 0 {
 							return Extract(remainder, o[start:end])
@@ -153,6 +182,13 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 					case []int:
 						return o[start:], nil
 					case []string:
+						return o[start:], nil
+					case *reader.Cache:
+						return make([]byte, 0), errors.New("Reader cannot evaluate [start:]")
+					case []map[interface{}]interface{}:
+						if len(remainder) > 0 {
+							return Extract(remainder, o[start:])
+						}
 						return o[start:], nil
 					case []map[string]interface{}:
 						if len(remainder) > 0 {
@@ -184,6 +220,17 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 					return o[slice_index], nil
 				case []string:
 					return o[slice_index], nil
+				case *reader.Cache:
+					values, err := o.ReadRange(slice_index, slice_index)
+					if err != nil {
+						return make([]byte, 0), err
+					}
+					return values[0], nil
+				case []map[interface{}]interface{}:
+					if len(remainder) > 0 {
+						return Extract(remainder, o[slice_index])
+					}
+					return o[slice_index], nil
 				case []map[string]interface{}:
 					if len(remainder) > 0 {
 						return Extract(remainder, o[slice_index])
@@ -202,7 +249,16 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 			key := path[0:slice_start_index]
 			remainder := path[slice_start_index:len(path)]
 			switch o := obj.(type) {
-			case Context:
+			case *Context:
+				if o.Has(key) {
+					value := o.Get(key)
+					if value == nil {
+						return Null{}, errors.New("value " + key + " is null.")
+					}
+					return Extract(remainder, value)
+				}
+				return Null{}, errors.New("value " + key + " is null.")
+			case map[interface{}]interface{}:
 				if value, ok := o[key]; ok {
 					if value == nil {
 						return Null{}, errors.New("value " + key + " is null.")
@@ -223,9 +279,18 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 		}
 	}
 
-	switch obj.(type) {
-	case Context:
-		if value, ok := obj.(Context)[path]; ok {
+	switch o := obj.(type) {
+	case *Context:
+		if o.Has(path) {
+			value := o.Get(path)
+			if value == nil {
+				return Null{}, nil
+			}
+			return value, nil
+		}
+		return Null{}, nil
+	case map[interface{}]interface{}:
+		if value, ok := o[path]; ok {
 			if value == nil {
 				return Null{}, nil
 			}
@@ -233,7 +298,7 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 		}
 		return Null{}, nil
 	case map[string]interface{}:
-		if value, ok := obj.(map[string]interface{})[path]; ok {
+		if value, ok := o[path]; ok {
 			if value == nil {
 				return Null{}, nil
 			}
@@ -241,7 +306,7 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 		}
 		return Null{}, nil
 	case map[string]string:
-		if value, ok := obj.(map[string]string)[path]; ok {
+		if value, ok := o[path]; ok {
 			return value, nil
 		}
 		return Null{}, nil

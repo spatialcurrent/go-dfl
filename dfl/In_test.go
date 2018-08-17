@@ -18,7 +18,7 @@ import (
 
 func TestIn(t *testing.T) {
 
-	ctx := Context{"a": "cafe", "b": []string{"bar", "cafe"}}
+	ctx := map[string]interface{}{"a": "cafe", "b": []string{"bar", "cafe"}}
 
 	testCases := []TestCase{
 		NewTestCase("bar in @b", ctx, true),

@@ -40,7 +40,7 @@ func (s Subtract) Compile() Node {
 	return Subtract{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (s Subtract) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (s Subtract) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 
 	lv, rv, err := s.EvaluateLeftAndRight(ctx, funcs)
 	if err != nil {

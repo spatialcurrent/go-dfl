@@ -50,7 +50,7 @@ func (o Or) Compile() Node {
 	return Or{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (o Or) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (o Or) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := o.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

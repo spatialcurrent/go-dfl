@@ -45,7 +45,7 @@ func (n Not) Compile() Node {
 }
 
 // Evaluate evaluates this node within a context and returns the bool result, and error if any.
-func (n Not) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (n Not) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	v, err := n.Node.Evaluate(ctx, funcs)
 	if err != nil {
 		return false, err

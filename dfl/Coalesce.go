@@ -41,7 +41,7 @@ func (c Coalesce) Compile() Node {
 	return Coalesce{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (c Coalesce) Evaluate(ctx Context, funcs FunctionMap) (interface{}, error) {
+func (c Coalesce) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := c.Left.Evaluate(ctx, funcs)
 	if err != nil {
 		return lv, errors.Wrap(err, "Error evaluating Coalesce left value")
