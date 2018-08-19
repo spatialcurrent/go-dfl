@@ -50,7 +50,8 @@
 //
 // Projects
 //
-// go-dfl is used by the go-osm project.
+// go-dfl is used by the railgun and go-osm project.
+//  - https://godoc.org/github.com/spatialcurrent/railgun/railgun
 //  - https://godoc.org/github.com/spatialcurrent/go-osm/osm
 //  - https://godoc.org/github.com/spatialcurrent/go-dfl/dfl
 //

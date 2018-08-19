@@ -155,6 +155,11 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 						return o[start:end], nil
 					case *reader.Cache:
 						return o.ReadRange(start, end-1)
+					case []interface{}:
+						if len(remainder) > 0 {
+							return Extract(remainder, o[start:end])
+						}
+						return o[start:end], nil
 					case []map[interface{}]interface{}:
 						if len(remainder) > 0 {
 							return Extract(remainder, o[start:end])
@@ -185,6 +190,11 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 						return o[start:], nil
 					case *reader.Cache:
 						return make([]byte, 0), errors.New("Reader cannot evaluate [start:]")
+					case []interface{}:
+						if len(remainder) > 0 {
+							return Extract(remainder, o[start:])
+						}
+						return o[start:], nil
 					case []map[interface{}]interface{}:
 						if len(remainder) > 0 {
 							return Extract(remainder, o[start:])
@@ -226,6 +236,11 @@ func Extract(path string, obj interface{}) (interface{}, error) {
 						return make([]byte, 0), err
 					}
 					return values[0], nil
+				case []interface{}:
+					if len(remainder) > 0 {
+						return Extract(remainder, o[slice_index])
+					}
+					return o[slice_index], nil
 				case []map[interface{}]interface{}:
 					if len(remainder) > 0 {
 						return Extract(remainder, o[slice_index])
