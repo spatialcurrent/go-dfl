@@ -10,7 +10,7 @@ package dfl
 import (
 	"fmt"
 	"net"
-	//"reflect"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -52,12 +52,12 @@ func (i In) Compile() Node {
 func (i In) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating in with left value for "+i.Dfl())
 	}
 
 	rv, err := i.Right.Evaluate(ctx, funcs)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl())
 	}
 
 	switch lv.(type) {
@@ -189,5 +189,5 @@ func (i In) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 		return false, nil
 	}
 
-	return false, errors.New("Error evaluating expression " + i.Dfl())
+	return false, errors.Wrap(err, "Error evaluating in with left value ("+fmt.Sprint(reflect.TypeOf(lv))+") and right value ("+fmt.Sprint(reflect.TypeOf(rv))+")")
 }

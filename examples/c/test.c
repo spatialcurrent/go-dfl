@@ -34,6 +34,9 @@ main(int argc, char **argv) {
 
     printf("%s\n", expression);
 
+    char *version = Version();
+    printf("version: %s\n", version);
+
     // EvaluateBool evaulates the expression for true/false, using the variables provided.
     // The size must be passed with the context array.
     // Returns an error as a string if any.

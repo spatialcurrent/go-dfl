@@ -29,6 +29,9 @@ func (a Attribute) Compile() Node {
 }
 
 func (a Attribute) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+	if len(a.Name) == 0 {
+		return ctx, nil
+	}
 	return Extract(a.Name, ctx)
 }
 

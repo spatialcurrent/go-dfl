@@ -44,8 +44,6 @@ import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
-var GO_DFL_VERSION = "0.0.4"
-
 func main() {
 
 	start := time.Now()
@@ -83,7 +81,7 @@ func main() {
 	}
 
 	if version {
-		fmt.Println(GO_DFL_VERSION)
+		fmt.Println(dfl.VERSION)
 		os.Exit(0)
 	}
 

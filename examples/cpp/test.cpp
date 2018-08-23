@@ -47,6 +47,9 @@ int main(int argc, char **argv) {
   // Since they are char*, we can calculate with the following math.
   int size = sizeof(ctx) / sizeof(ctx[0]);
 
+  char *v = Version();
+  std::cout << "version: " << std::string(v) << std::endl;
+
   int result = 0;
 
   // Write expresion to stdout

@@ -37,8 +37,12 @@ import (
 func TryConvertString(s string) interface{} {
 	s_lc := strings.ToLower(s)
 
-	if s_lc == "null" || s_lc == "none" || s_lc == "" {
+	if s_lc == "" {
 		return ""
+	}
+
+	if s_lc == "null" || s_lc == "none" || s_lc == "nil" {
+		return Null{}
 	}
 
 	if s_lc == "true" {

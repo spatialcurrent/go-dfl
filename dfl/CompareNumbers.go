@@ -17,7 +17,7 @@ import (
 )
 
 // CompareNumbers compares parameter a and parameter b.
-// The parameters may be of type int, int64, or float64.
+// The parameters may be of type uint8, int, int64, or float64.
 // If a > b, then returns 1.  If a < b, then returns -1.  If a == b, then return 0.
 func CompareNumbers(a interface{}, b interface{}) (int, error) {
 	switch a.(type) {
@@ -163,5 +163,5 @@ func CompareNumbers(a interface{}, b interface{}) (int, error) {
 		}
 	}
 
-	return 0, errors.New(fmt.Sprintf("Error comparing values %#v (%v) and %#v (%v)", a, reflect.TypeOf(a).String(), b, reflect.TypeOf(b).String()))
+	return 0, errors.New(fmt.Sprintf("Error comparing numbers %#v (%v) and %#v (%v)", a, reflect.TypeOf(a).String(), b, reflect.TypeOf(b).String()))
 }

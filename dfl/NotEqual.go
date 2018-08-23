@@ -47,9 +47,17 @@ func (ne NotEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, er
 	}
 
 	switch lv.(type) {
+	case Null:
+		switch rv.(type) {
+		case Null:
+			return false, nil
+		}
+		return true, nil
 	case string:
 		lvs := lv.(string)
 		switch rv.(type) {
+		case Null:
+			return true, nil
 		case string:
 			return lvs != rv.(string), nil
 		case int:
@@ -61,9 +69,16 @@ func (ne NotEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, er
 		case float64:
 			return lvs != fmt.Sprint(rv.(float64)), nil
 		}
+	case float64:
+		switch rv.(type) {
+		case Null:
+			return true, nil
+		}
 	case net.IP:
 		lvip := lv.(net.IP)
 		switch rv.(type) {
+		case Null:
+			return true, nil
 		case net.IP:
 			rvip := rv.(net.IP)
 			if len(lvip) != len(rvip) {
@@ -79,6 +94,8 @@ func (ne NotEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, er
 	case []string:
 		lva := lv.([]string)
 		switch rv.(type) {
+		case Null:
+			return true, nil
 		case []string:
 			rva := rv.([]string)
 			if len(lva) != len(rva) {
@@ -94,6 +111,8 @@ func (ne NotEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, er
 	case []int:
 		lva := lv.([]int)
 		switch rv.(type) {
+		case Null:
+			return true, nil
 		case []int:
 			rva := rv.([]int)
 			if len(lva) != len(rva) {

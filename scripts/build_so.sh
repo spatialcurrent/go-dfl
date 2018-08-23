@@ -1,23 +1,24 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DEST=$(realpath ${1:-$DIR/../bin})
 
-mkdir -p $DIR/../bin
+mkdir -p $DEST
 
 echo "******************"
-echo "Formatting $DIR/dfl"
+echo "Formatting $(realpath $DIR/../dfl)"
 cd $DIR/../dfl
 go fmt
-echo "Formatting $DIR/../cmd/dfl"
-cd $DIR/../cmd/dfl
+echo "Formatting $(realpath $DIR/../plugins/dfl)"
+cd $DIR/../plugins/dfl
 go fmt
 echo "Done formatting."
 echo "******************"
 echo "Building Shared Object (*.so) for dfl"
-cd $DIR/../bin
+cd $DEST
 go build -o dfl.so -buildmode=c-shared github.com/spatialcurrent/go-dfl/plugins/dfl
 if [[ "$?" != 0 ]] ; then
     echo "Error Building Shared Object (*.so) for dfl"
     exit 1
 fi
-echo "Executable built at $(realpath $DIR/../bin)"
+echo "Shared Object (*.so) built at $DEST"

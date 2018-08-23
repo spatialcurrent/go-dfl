@@ -20,8 +20,8 @@ func TestTryConvertString(t *testing.T) {
 		in   string
 		want interface{}
 	}{
-		{in: "null", want: ""},
-		{in: "none", want: ""},
+		{in: "null", want: Null{}},
+		{in: "none", want: Null{}},
 		{in: "", want: ""},
 		{in: "true", want: true},
 		{in: "false", want: false},

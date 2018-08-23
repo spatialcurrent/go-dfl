@@ -26,16 +26,14 @@ import (
 	"honnef.co/go/js/console"
 )
 
-var GO_DFL_VERSION = "0.0.4"
-
 type Node struct {
-	Node dfl.Node
+	Node        dfl.Node
 	FunctionMap dfl.FunctionMap
 }
 
 func (n Node) Compile() *js.Object {
 	return js.MakeWrapper(Node{
-		Node: n.Node.Compile(),
+		Node:        n.Node.Compile(),
 		FunctionMap: dfl.NewFuntionMapWithDefaults(),
 	})
 }
@@ -57,11 +55,11 @@ func (n Node) Evaluate(options *js.Object) interface{} {
 
 func main() {
 	js.Global.Set("dfl", map[string]interface{}{
-		"version":        GO_DFL_VERSION,
-		"Parse": Parse,
+		"version":        dfl.VERSION,
+		"Parse":          Parse,
 		"EvaluateBool":   EvaluateBool,
 		"EvaluateInt":    EvaluateInt,
-		"EvaluateFloat": EvaluateFloat64,
+		"EvaluateFloat":  EvaluateFloat64,
 		"EvaluateString": EvaluateString,
 	})
 }
@@ -72,10 +70,8 @@ func Parse(s string) *js.Object {
 		console.Log(err.Error())
 		return js.MakeWrapper(Node{Node: nil})
 	}
-	return js.MakeWrapper(Node{Node:root})
+	return js.MakeWrapper(Node{Node: root})
 }
-
-
 
 func EvaluateBool(s string, options *js.Object) bool {
 	root, err := dfl.Parse(s)

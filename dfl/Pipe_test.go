@@ -16,26 +16,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestFunction(t *testing.T) {
+func TestPipe(t *testing.T) {
 
 	ctx := map[string]interface{}{
-		"a": 2,
-		"b": 3.0,
-		"c": "PNG",
-		"d": []map[string]interface{}{
-			map[string]interface{}{"e": "f"},
-			map[string]interface{}{"e": "h"},
+		"a": 1,
+		"b": map[string]interface{}{
+			"c": 2,
 		},
+		"d": []string{"bar", "restaurant", "shop"},
 	}
 
 	testCases := []TestCase{
-		NewTestCase("min(1, @a) == 1", ctx, true),
-		NewTestCase("min(2, @b) == 2", ctx, true),
-		NewTestCase("max(3, @a) == 3", ctx, true),
-		NewTestCase("min(3, @b) == 3.0", ctx, true),
-		NewTestCase("min(1, max(@a, @b)) == 1", ctx, true),
-		NewTestCase("len(bytes(@c)) == 3", ctx, true),
-		NewTestCase("f in map(@d, '@e')", ctx, true),
+		NewTestCase("true | false", ctx, false),
+		NewTestCase("@b | @c == 2", ctx, true),
+		NewTestCase("@d | bar in @", ctx, true),
+		NewTestCase("@d | sort(@,'',true) | limit(@, 1) | @[0] == shop", ctx, true),
 	}
 
 	for _, testCase := range testCases {
@@ -49,7 +44,7 @@ func TestFunction(t *testing.T) {
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {
-			t.Errorf("TestFunction(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+			t.Errorf("TestPipe(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

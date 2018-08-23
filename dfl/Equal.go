@@ -72,6 +72,11 @@ func (e Equal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error)
 		case float64:
 			return lvs == fmt.Sprint(rv.(float64)), nil
 		}
+	case float64:
+		switch rv.(type) {
+		case Null:
+			return false, nil
+		}
 	case net.IP:
 		lvip := lv.(net.IP)
 		switch rv.(type) {

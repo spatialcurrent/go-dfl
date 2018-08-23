@@ -39,12 +39,14 @@ import (
 )
 ```
 
+See [dfl](https://godoc.org/github.com/spatialcurrent/go-dfl/dfl) in GoDoc for information on how to use Go API.
+
 **JavaScript**
 
 ```html
 <html>
   <head>
-    <script src="https://...dfljs.js"></script>
+    <script src="https://...dfl.js"></script>
   </head>
   <body>
     <script>
@@ -65,7 +67,7 @@ A variant of the `EvaluateBool` function is exported in a Shared Object file (`*
 err = EvaluateBool(expression, size, ctx, &result);
 ```
 
-The Go function definition defined in `plugins/dfl/main.go` takes in the expression and context.  For complete patterns for `C`, `C++`, and `Python`, see the `examples`.
+The Go function definition defined in `plugins/dfl/main.go` takes in the expression and context.  For complete patterns for `C`, `C++`, and `Python`, see the `examples` folder.
 
 # Examples:
 
@@ -138,7 +140,11 @@ You can compile DFL to pure JavaScript with the `scripts/build_javascript.sh` sc
 
 **Shared Object**
 
-The `build_so.sh` script is used to build a Shared Object (`*.go`), which can be called by `C`, `C++`, and `Python` on Linux machines.
+The `scripts/build_so.sh` script is used to build a Shared Object (`*.go`), which can be called by `C`, `C++`, and `Python` on Linux machines.
+
+**Changing Destination**
+
+The default destination for build artifacts is `go-dfl/bin`, but you can change the destination with a CLI argument.  For building on a Chromebook consider saving the artifacts in `/usr/local/go/bin`, e.g., `bash scripts/build_cli.sh /usr/local/go/bin`
 
 # Contributing
 

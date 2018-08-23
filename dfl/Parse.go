@@ -8,10 +8,7 @@
 package dfl
 
 import (
-	//"fmt"
-	"regexp"
 	"strings"
-	//"unicode"
 )
 
 import (
@@ -28,16 +25,14 @@ func Parse(in string) (Node, error) {
 		return root, errors.New("Error: Input string is empty.")
 	}
 
-	re, err := regexp.Compile("(\\s*)(?P<name>([a-zA-Z_\\d]+))(\\s*)\\((\\s*)(?P<args>(.)*?)(\\s*)\\)(\\s*)")
-	if err != nil {
-		return root, err
-	}
+	leftparentheses := 0
+	rightparentheses := 0
 
-	parentheses := 0
 	curlybrackets := 0
 	squarebrackets := 0
 	singlequotes := 0
 	doublequotes := 0
+
 	for i, c := range in {
 
 		s := strings.TrimSpace(in[0 : i+1])
@@ -45,9 +40,9 @@ func Parse(in string) (Node, error) {
 		remainder := strings.TrimSpace(in[i+1:])
 
 		if c == '(' {
-			parentheses += 1
+			leftparentheses += 1
 		} else if c == ')' {
-			parentheses -= 1
+			rightparentheses += 1
 		} else if singlequotes == 0 && doublequotes == 0 {
 			if squarebrackets == 0 && c == '[' {
 				squarebrackets += 1
@@ -68,7 +63,7 @@ func Parse(in string) (Node, error) {
 			doublequotes -= 1
 		}
 
-		if parentheses == 0 &&
+		if leftparentheses == rightparentheses &&
 			squarebrackets == 0 &&
 			curlybrackets == 0 &&
 			singlequotes == 0 &&
@@ -148,6 +143,14 @@ func Parse(in string) (Node, error) {
 					return right, err
 				}
 				return &Subtract{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
+			} else if s_lc == "|" {
+
+				right, err := Parse(remainder)
+				if err != nil {
+					return right, err
+				}
+				return &Pipe{&BinaryOperator{Right: right}}, nil
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
 				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
@@ -232,7 +235,7 @@ func Parse(in string) (Node, error) {
 					}
 					return &After{&TemporalBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
-				} else if re.MatchString(s) {
+				} else if strings.Contains(s, "(") {
 					return ParseFunction(s, remainder)
 				} else {
 					return ParseLiteral(TryConvertString(s), remainder)

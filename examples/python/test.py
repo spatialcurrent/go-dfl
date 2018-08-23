@@ -19,6 +19,12 @@ evaluate = lib.EvaluateBool
 evaluate.argtypes = [c_char_p, c_int, POINTER(POINTER(c_char)), POINTER(c_int)]
 evaluate.restype = c_char_p
 
+version = lib.Version
+version.argtypes = []
+version.restype = c_char_p
+
+print "version:", version()
+
 # Define input and output variables
 # Output must be a ctypec_char_p
 expression = "(@population > 40) and (@featuretype in [road, highway])"

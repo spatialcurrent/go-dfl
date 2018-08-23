@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -13,7 +20,7 @@ import (
 func EvaluateBool(n Node, ctx interface{}, funcs FunctionMap) (bool, error) {
 	result, err := n.Evaluate(ctx, funcs)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression")
+		return false, errors.Wrap(err, "Error evaluating expression "+n.Dfl())
 	}
 
 	switch result.(type) {

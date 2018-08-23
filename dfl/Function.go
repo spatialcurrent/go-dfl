@@ -7,6 +7,10 @@
 
 package dfl
 
+import (
+	"github.com/pkg/errors"
+)
+
 // Function is a refrenced function in a DFL filter.  The actual function in a given FunctionMap is derefernced by name.
 type Function struct {
 	Name      string `json:"name" bson:"name" yaml:"name" hcl:"name"`                     // name of the function
@@ -47,9 +51,9 @@ func (f Function) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, err
 			}
 			values = append(values, value)
 		}
-		return fn(ctx, values)
+		return fn(funcs, ctx, values)
 	} else {
-		return "", nil
+		return "", errors.New("attempted to evaluate unknown function " + f.Name)
 	}
 }
 
