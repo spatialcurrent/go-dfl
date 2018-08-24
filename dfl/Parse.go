@@ -32,6 +32,7 @@ func Parse(in string) (Node, error) {
 	squarebrackets := 0
 	singlequotes := 0
 	doublequotes := 0
+	backticks := 0
 
 	for i, c := range in {
 
@@ -43,7 +44,7 @@ func Parse(in string) (Node, error) {
 			leftparentheses += 1
 		} else if c == ')' {
 			rightparentheses += 1
-		} else if singlequotes == 0 && doublequotes == 0 {
+		} else if singlequotes == 0 && doublequotes == 0 && backticks == 0 {
 			if squarebrackets == 0 && c == '[' {
 				squarebrackets += 1
 			} else if squarebrackets == 1 && c == ']' {
@@ -56,18 +57,23 @@ func Parse(in string) (Node, error) {
 				singlequotes += 1
 			} else if c == '"' {
 				doublequotes += 1
+			} else if c == '`' {
+				backticks += 1
 			}
 		} else if singlequotes == 1 && c == '\'' {
 			singlequotes -= 1
 		} else if doublequotes == 1 && c == '"' {
 			doublequotes -= 1
+		} else if backticks == 1 && c == '`' {
+			backticks -= 1
 		}
 
 		if leftparentheses == rightparentheses &&
 			squarebrackets == 0 &&
 			curlybrackets == 0 &&
 			singlequotes == 0 &&
-			doublequotes == 0 {
+			doublequotes == 0 &&
+			backticks == 0 {
 			if s_lc == "?:" {
 				right, err := Parse(remainder)
 				if err != nil {
@@ -153,7 +159,7 @@ func Parse(in string) (Node, error) {
 				return &Pipe{&BinaryOperator{Right: right}}, nil
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
-				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"")) || (strings.HasPrefix(s, "`") && strings.HasSuffix(s, "`"))) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if strings.HasPrefix(s, "@") {
 					return ParseAttribute(s, remainder)

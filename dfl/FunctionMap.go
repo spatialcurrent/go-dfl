@@ -23,6 +23,7 @@ type FunctionMap map[string]func(FunctionMap, interface{}, []interface{}) (inter
 func NewFuntionMapWithDefaults() FunctionMap {
 	funcs := FunctionMap{}
 
+	funcs["flatten"] = flattenArray
 	funcs["filter"] = filterArray
 	funcs["map"] = mapArray
 	funcs["sort"] = sortArray
@@ -30,6 +31,8 @@ func NewFuntionMapWithDefaults() FunctionMap {
 	funcs["array"] = setToArray
 	funcs["set"] = arrayToSet
 	funcs["len"] = getLength
+	funcs["hist"] = histArray
+	funcs["top"] = topCounter
 	funcs["bytes"] = convertToBytes
 	funcs["int16"] = convertToInt16
 	funcs["int32"] = convertToInt32

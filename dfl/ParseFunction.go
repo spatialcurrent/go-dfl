@@ -26,6 +26,7 @@ func ParseFunction(in string, remainder string) (Node, error) {
 	rightparentheses := 0
 	singlequotes := 0
 	doublequotes := 0
+	backticks := 0
 
 	in = strings.TrimSpace(in)
 	s := ""
@@ -36,10 +37,12 @@ func ParseFunction(in string, remainder string) (Node, error) {
 
 		s += string(c)
 
-		if c == '"' && singlequotes == 0 {
+		if c == '"' && singlequotes == 0 && backticks == 0 {
 			doublequotes ^= 1
-		} else if c == '\'' && doublequotes == 0 {
+		} else if c == '\'' && doublequotes == 0 && backticks == 0 {
 			singlequotes ^= 1
+		} else if c == '`' && singlequotes == 0 && doublequotes == 0 {
+			backticks ^= 1
 		} else if c == '(' {
 			leftparentheses += 1
 
@@ -52,7 +55,7 @@ func ParseFunction(in string, remainder string) (Node, error) {
 
 			rightparentheses += 1
 
-			if singlequotes == 0 && doublequotes == 0 {
+			if singlequotes == 0 && doublequotes == 0 && backticks == 0 {
 				if leftparentheses-rightparentheses == 1 {
 					// if leftparentheses-rightparentheses > 0 {
 					subFunction, err := ParseFunction(strings.TrimSpace(s), "")
@@ -64,7 +67,7 @@ func ParseFunction(in string, remainder string) (Node, error) {
 				} else if leftparentheses == rightparentheses {
 					s = strings.TrimSpace(s[0 : len(s)-1])
 					if len(s) > 0 {
-						if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+						if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"")) || (strings.HasPrefix(s, "`") && strings.HasSuffix(s, "`"))) {
 							arguments = append(arguments, &Literal{Value: s[1 : len(s)-1]})
 						} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
 							arguments = append(arguments, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})
@@ -84,10 +87,10 @@ func ParseFunction(in string, remainder string) (Node, error) {
 
 			//s = ""
 
-		} else if singlequotes == 0 && doublequotes == 0 && (leftparentheses-rightparentheses) == 1 && c == ',' {
+		} else if singlequotes == 0 && doublequotes == 0 && backticks == 0 && (leftparentheses-rightparentheses) == 1 && c == ',' {
 			s = strings.TrimSpace(s[0 : len(s)-1])
 			if len(s) > 0 {
-				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
+				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"")) || (strings.HasPrefix(s, "`") && strings.HasSuffix(s, "`"))) {
 					arguments = append(arguments, &Literal{Value: s[1 : len(s)-1]})
 				} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
 					arguments = append(arguments, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})

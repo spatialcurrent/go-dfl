@@ -26,6 +26,42 @@ import (
 	"github.com/spatialcurrent/go-reader/reader"
 )
 
+func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+
+	if len(args) != 1 {
+		return Null{}, errors.New("Invalid number of arguments to flattenArray.")
+	}
+
+	switch arr := args[0].(type) {
+	case []string:
+		return arr, nil
+	case []int:
+		return arr, nil
+	case []interface{}:
+		output := make([]interface{}, 0)
+		for _, x := range arr {
+			switch y := x.(type) {
+			case []string:
+				for _, z := range y {
+					output = append(output, z)
+				}
+			case []interface{}:
+				for _, z := range y {
+					output = append(output, z)
+				}
+			case []int:
+				for _, z := range y {
+					output = append(output, z)
+				}
+			}
+		}
+		return output, nil
+	}
+
+	return Null{}, errors.New("Invalid arguments for flattenArray function " + reflect.TypeOf(args[0]).String())
+
+}
+
 func arrayToSet(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
 
 	if len(args) != 1 {
@@ -351,6 +387,11 @@ func limitArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 				return arr, nil
 			}
 			return arr[:limit], nil
+		case []map[string]interface{}:
+			if limit > len(arr) {
+				return arr, nil
+			}
+			return arr[:limit], nil
 		case []string:
 			if limit > len(arr) {
 				return arr, nil
@@ -464,6 +505,213 @@ func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 	return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
 }
 
+func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+	if len(args) != 1 && len(args) != 2 && len(args) != 3 {
+		return 0, errors.New("Invalid number of arguments to histArray.")
+	}
+
+	if len(args) == 3 {
+
+		switch dfl_value := args[2].(type) {
+		case string:
+			node_values, err := Parse(dfl_value)
+			if err != nil {
+				return 0, errors.Wrap(err, "error parsing expression for histArray")
+			}
+			node_values = node_values.Compile()
+			switch dfl_key := args[1].(type) {
+			case string:
+				node_key, err := Parse(dfl_key)
+				if err != nil {
+					return 0, errors.Wrap(err, "error parsing expression for histArray")
+				}
+				node_key = node_key.Compile()
+				switch arr := args[0].(type) {
+				case []map[string]interface{}:
+					if len(arr) == 0 {
+						return NewCounter(), nil
+					}
+					counters := map[string]map[string]int{}
+					for _, x := range arr {
+						x_key, err := node_key.Evaluate(x, funcs)
+						if err != nil {
+							return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+						}
+						switch x_key_str := x_key.(type) {
+						case string:
+							if _, ok := counters[x_key_str]; !ok {
+								counters[x_key_str] = map[string]int{}
+							}
+							x_values, err := node_values.Evaluate(x, funcs)
+							if err != nil {
+								return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+							}
+							switch x_values.(type) {
+							case []interface{}:
+								for _, x_value := range x_values.([]interface{}) {
+									Counter(counters[x_key_str]).Increment(fmt.Sprint(x_value))
+								}
+							case []string:
+								for _, x_value := range x_values.([]string) {
+									Counter(counters[x_key_str]).Increment(x_value)
+								}
+							default:
+								return 0, errors.Wrap(err, "invalid histogram values "+fmt.Sprint(reflect.TypeOf(x_values)))
+							}
+						default:
+							return 0, errors.Wrap(err, "invalid histogram key "+fmt.Sprint(reflect.TypeOf(x_key)))
+						}
+					}
+					return counters, nil
+				case []interface{}:
+					if len(arr) == 0 {
+						return NewCounter(), nil
+					}
+					h := map[string]Counter{}
+					for _, x := range arr {
+						x_key, err := node_key.Evaluate(x, funcs)
+						if err != nil {
+							return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+						}
+						switch x_key_str := x_key.(type) {
+						case string:
+							if _, ok := h[x_key_str]; !ok {
+								h[x_key_str] = NewCounter()
+							}
+							x_values, err := node_values.Evaluate(x, funcs)
+							if err != nil {
+								return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+							}
+							switch x_values.(type) {
+							case []interface{}:
+								for _, x_value := range x_values.([]interface{}) {
+									h[x_key_str].Increment(fmt.Sprint(x_value))
+								}
+							case []string:
+								for _, x_value := range x_values.([]string) {
+									h[x_key_str].Increment(x_value)
+								}
+							default:
+								return 0, errors.Wrap(err, "invalid histogram values "+fmt.Sprint(reflect.TypeOf(x_values)))
+							}
+						default:
+							return 0, errors.Wrap(err, "invalid histogram key "+fmt.Sprint(reflect.TypeOf(x_key)))
+						}
+					}
+					return h, nil
+				}
+			}
+		}
+
+	} else if len(args) == 2 {
+
+		switch exp := args[1].(type) {
+		case string:
+			n, err := Parse(exp)
+			if err != nil {
+				return 0, errors.Wrap(err, "error parsing expression for histArray")
+			}
+			n = n.Compile()
+			switch arr := args[0].(type) {
+			case []map[string]interface{}:
+				if len(arr) == 0 {
+					return NewCounter(), nil
+				}
+				counter := NewCounter()
+				for _, x := range arr {
+					y, err := n.Evaluate(x, funcs)
+					if err != nil {
+						return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+					}
+					counter.Increment(fmt.Sprint(y))
+				}
+				return counter, nil
+			case []interface{}:
+				if len(arr) == 0 {
+					return NewCounter(), nil
+				}
+				counter := NewCounter()
+				for _, x := range arr {
+					y, err := n.Evaluate(x, funcs)
+					if err != nil {
+						return 0, errors.Wrap(err, "error extracting value from array element in histArray")
+					}
+					counter.Increment(fmt.Sprint(y))
+				}
+				return counter, nil
+			default:
+				return 0, errors.Wrap(err, "invalid histogram values "+fmt.Sprint(reflect.TypeOf(arr)))
+			}
+		}
+
+	} else if len(args) == 1 {
+		var values interface{}
+
+		switch arr := args[0].(type) {
+		case []interface{}:
+			if len(arr) == 0 {
+				return NewCounter(), nil
+			}
+			switch arr2 := TryConvertArray(arr).(type) {
+			case []interface{}:
+				values := make([]string, 0, len(arr2))
+				for _, x := range arr2 {
+					values = append(values, fmt.Sprint(x))
+				}
+			default:
+				values = arr2
+			}
+		default:
+			values = arr
+		}
+
+		switch arr := values.(type) {
+		case []string:
+			counter := NewCounter()
+			for _, value := range arr {
+				counter.Increment(value)
+			}
+			return counter, nil
+		}
+
+	}
+
+	return 0, errors.New("Invalid arguments for histArray " + reflect.TypeOf(args[0]).String())
+}
+
+func topCounter(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+	if len(args) != 2 && len(args) != 3 {
+		return 0, errors.New("Invalid number of arguments to topCounter.")
+	}
+
+	if len(args) == 2 {
+		switch n := args[1].(type) {
+		case int:
+			switch c := args[0].(type) {
+			case Counter:
+				return c.Top(n, 0), nil
+			case map[string]int:
+				return Counter(c).Top(n, 0), nil
+			}
+		}
+	} else if len(args) == 3 {
+		switch min := args[2].(type) {
+		case int:
+			switch n := args[1].(type) {
+			case int:
+				switch c := args[0].(type) {
+				case Counter:
+					return c.Top(n, min), nil
+				case map[string]int:
+					return Counter(c).Top(n, min), nil
+				}
+			}
+		}
+	}
+
+	return 0, errors.New("Invalid arguments for topCounter " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
+}
+
 func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to map.")
@@ -520,7 +768,14 @@ func splitString(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to split.")
 	}
-	return strings.Split(fmt.Sprint(args[0]), fmt.Sprint(args[1])), nil
+	switch s := args[0].(type) {
+	case string:
+		switch delim := args[1].(type) {
+		case string:
+			return strings.Split(s, delim), nil
+		}
+	}
+	return 0, errors.New("Invalid arguments for splitString " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
 }
 
 func trimString(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {

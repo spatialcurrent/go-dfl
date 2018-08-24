@@ -20,7 +20,7 @@ func (a Attribute) Dfl() string {
 
 func (a Attribute) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"attribute": a.Name,
+		"attribute": "@" + a.Name,
 	}
 }
 

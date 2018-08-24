@@ -34,10 +34,14 @@ func (f Function) Compile() Node {
 }
 
 func (f Function) Map() map[string]interface{} {
+	arguments := make([]map[string]interface{}, 0, len(f.Arguments))
+	for _, a := range f.Arguments {
+		arguments = append(arguments, a.Map())
+	}
 	return map[string]interface{}{
 		"op":        "function",
 		"name":      f.Name,
-		"arguments": f.Arguments,
+		"arguments": arguments,
 	}
 }
 
