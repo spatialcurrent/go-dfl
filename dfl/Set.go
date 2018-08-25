@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -49,13 +50,13 @@ func (a Set) Compile() Node {
 			return a
 		}
 	}
-	set := make(map[string]struct{}, len(values))
-	for _, v := range values {
-		switch v.(type) {
-		case string:
-			set[v.(string)] = struct{}{}
-		default:
-			return Literal{Value: values}
+	set := NewStringSet()
+	switch arr := TryConvertArray(values).(type) {
+	case []string:
+		set.Add(arr...)
+	case []interface{}:
+		for _, x := range arr {
+			set.Add(fmt.Sprint(x))
 		}
 	}
 	return Literal{Value: set}
@@ -70,7 +71,18 @@ func (a Set) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 		}
 		values[i] = v
 	}
-	return values, nil
+
+	set := NewStringSet()
+	switch arr := TryConvertArray(values).(type) {
+	case []string:
+		set.Add(arr...)
+	case []interface{}:
+		for _, x := range arr {
+			set.Add(fmt.Sprint(x))
+		}
+	}
+
+	return set, nil
 }
 
 func (a Set) Attributes() []string {

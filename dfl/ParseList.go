@@ -8,52 +8,141 @@
 package dfl
 
 import (
+	"fmt"
 	"strings"
-	"unicode"
+)
+
+import (
+	"github.com/pkg/errors"
 )
 
 // ParseList parses a list of values.
-func ParseList(in string) []Node {
+func ParseList(in string) ([]Node, error) {
 
 	nodes := make([]Node, 0)
+
 	singlequotes := 0
 	doublequotes := 0
+	backticks := 0
+
+	leftparentheses := 0
+	rightparentheses := 0
+	leftcurlybrackets := 0
+	rightcurlybrackets := 0
+	leftsquarebrackets := 0
+	rightsquarebrackets := 0
 
 	in = strings.TrimSpace(in)
 	s := ""
 
 	for i, c := range in {
 
-		if !(singlequotes == 0 && doublequotes == 0 && c == ',') {
-			s += string(c)
-			if c == '\'' && doublequotes == 0 {
-				if singlequotes == 0 {
-					singlequotes += 1
-				} else {
-					singlequotes -= 1
-				}
-			} else if c == '"' && singlequotes == 0 {
-				if doublequotes == 0 {
-					doublequotes += 1
-				} else {
-					doublequotes -= 1
-				}
+		// If you're note in a quoted string, then you can start one
+		// If you're in a quoted string, only exit with matching quote.
+		if singlequotes == 0 && doublequotes == 0 && backticks == 0 {
+			switch c {
+			case '\'':
+				singlequotes += 1
+			case '"':
+				doublequotes += 1
+			case '`':
+				backticks += 1
+			case '(':
+				leftparentheses += 1
+			case '[':
+				leftsquarebrackets += 1
+			case '{':
+				leftcurlybrackets += 1
+			case ')':
+				rightparentheses += 1
+			case ']':
+				rightsquarebrackets += 1
+			case '}':
+				rightcurlybrackets += 1
 			}
+		} else if singlequotes == 1 && c == '\'' {
+			singlequotes -= 1
+		} else if doublequotes == 1 && c == '"' {
+			doublequotes -= 1
+		} else if backticks == 1 && c == '`' {
+			backticks -= 1
 		}
 
-		if singlequotes == 0 && doublequotes == 0 && (i+1 == len(in) || in[i+1] == ',') {
-			s = strings.TrimSpace(s)
-			if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
-				nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
-			} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
-				nodes = append(nodes, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})
-			} else {
-				nodes = append(nodes, &Literal{Value: TryConvertString(s)})
+		// If not (within string/array/set/sub and c == ,)
+		if !(singlequotes == 0 &&
+			doublequotes == 0 &&
+			backticks == 0 &&
+			leftparentheses == rightparentheses &&
+			leftcurlybrackets == rightcurlybrackets &&
+			leftsquarebrackets == rightsquarebrackets &&
+			c == ',') {
+			s += string(c)
+		}
+
+		// If sub/array/set and string are closed.
+		if singlequotes == 0 &&
+			doublequotes == 0 &&
+			backticks == 0 &&
+			leftparentheses == rightparentheses &&
+			leftsquarebrackets == rightsquarebrackets &&
+			leftcurlybrackets == rightcurlybrackets {
+			// If end of input or argumnet
+			if i+1 == len(in) || in[i+1] == ',' {
+				s = strings.TrimSpace(s)
+				if IsQuoted(s) {
+					nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
+				} else if IsAttribute(s) {
+					attr, err := ParseAttribute(s, "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing attribute in list "+s)
+					}
+					nodes = append(nodes, attr)
+				} else if IsArray(s) {
+					arr, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing array in list "+s)
+					}
+					nodes = append(nodes, arr)
+				} else if IsSet(s) {
+					set, err := ParseSet(strings.TrimSpace(s[1:len(s)-1]), "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing set in list "+s)
+					}
+					nodes = append(nodes, set)
+				} else if strings.Contains(s, "(") {
+					f, err := ParseFunction(s, "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing function in list "+s)
+					}
+					nodes = append(nodes, f)
+				} else if IsSub(s) {
+					sub, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing sub in list "+s)
+					}
+					nodes = append(nodes, sub)
+				} else {
+					nodes = append(nodes, &Literal{Value: TryConvertString(s)})
+				}
+				s = ""
 			}
-			s = ""
 		}
 
 	}
 
-	return nodes
+	if leftparentheses > rightparentheses {
+		return nodes, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+	} else if leftparentheses < rightparentheses {
+		return nodes, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+	} else if leftcurlybrackets > rightcurlybrackets {
+		return nodes, errors.New("too few closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightcurlybrackets))
+	} else if leftcurlybrackets < rightcurlybrackets {
+		return nodes, errors.New("too many closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightparentheses))
+	} else if leftsquarebrackets > rightsquarebrackets {
+		return nodes, errors.New("too few closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+	} else if leftsquarebrackets < rightsquarebrackets {
+		return nodes, errors.New("too many closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+	}
+
+	return nodes, nil
 }

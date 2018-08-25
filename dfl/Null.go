@@ -9,3 +9,7 @@ package dfl
 
 // Null is used as return value for Extract and DFL functions instead of returning nil pointers.
 type Null struct{}
+
+func (n Null) Dfl() string {
+	return "null"
+}

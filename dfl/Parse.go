@@ -27,7 +27,6 @@ func Parse(in string) (Node, error) {
 
 	leftparentheses := 0
 	rightparentheses := 0
-
 	curlybrackets := 0
 	squarebrackets := 0
 	singlequotes := 0
@@ -159,15 +158,15 @@ func Parse(in string) (Node, error) {
 				return &Pipe{&BinaryOperator{Right: right}}, nil
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
-				if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"")) || (strings.HasPrefix(s, "`") && strings.HasSuffix(s, "`"))) {
+				if IsQuoted(s) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
-				} else if strings.HasPrefix(s, "@") {
+				} else if IsAttribute(s) {
 					return ParseAttribute(s, remainder)
-				} else if len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") {
+				} else if IsArray(s) {
 					return ParseArray(strings.TrimSpace(s[1:len(s)-1]), remainder)
-				} else if len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
+				} else if IsSet(s) {
 					return ParseSet(strings.TrimSpace(s[1:len(s)-1]), remainder)
-				} else if len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
+				} else if IsSub(s) {
 					return ParseSub(strings.TrimSpace(s[1:len(s)-1]), remainder)
 				} else if s_lc == "and" {
 

@@ -22,12 +22,18 @@ type Literal struct {
 }
 
 func (l Literal) Dfl() string {
-	switch l.Value.(type) {
+	switch value := l.Value.(type) {
 	case string:
-		return fmt.Sprintf("%q", l.Value)
+		return fmt.Sprintf("%q", value)
 	case []string:
-		out, _ := json.Marshal(l.Value)
+		out, _ := json.Marshal(value)
 		return string(out)
+	case map[string]struct{}:
+		return StringSet(value).Dfl()
+	case StringSet:
+		return value.Dfl()
+	case Null:
+		return value.Dfl()
 	}
 	return fmt.Sprint(l.Value)
 }

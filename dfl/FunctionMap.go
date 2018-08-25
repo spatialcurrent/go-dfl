@@ -23,6 +23,7 @@ type FunctionMap map[string]func(FunctionMap, interface{}, []interface{}) (inter
 func NewFuntionMapWithDefaults() FunctionMap {
 	funcs := FunctionMap{}
 
+	funcs["intersects"] = intersects
 	funcs["flatten"] = flattenArray
 	funcs["filter"] = filterArray
 	funcs["map"] = mapArray

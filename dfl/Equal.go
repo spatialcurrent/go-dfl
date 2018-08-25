@@ -61,6 +61,8 @@ func (e Equal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error)
 	case string:
 		lvs := lv.(string)
 		switch rv.(type) {
+		case Null:
+			return false, nil
 		case string:
 			return lvs == rv.(string), nil
 		case int:

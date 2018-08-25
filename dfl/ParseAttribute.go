@@ -9,6 +9,8 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
+	"strings"
+	"unicode"
 )
 
 // ParseAttribute parses an Attribute Node from an input string
@@ -21,10 +23,10 @@ import (
 func ParseAttribute(in string, remainder string) (Node, error) {
 
 	if len(remainder) == 0 {
-		return &Attribute{Name: in[1:]}, nil
+		return &Attribute{Name: strings.TrimLeftFunc(in, unicode.IsSpace)[1:]}, nil
 	}
 
-	left := &Attribute{Name: in[1:]}
+	left := &Attribute{Name: strings.TrimLeftFunc(in, unicode.IsSpace)[1:]}
 	root, err := Parse(remainder)
 	if err != nil {
 		return root, errors.Wrap(err, "error parsing remainder < "+remainder+" >")

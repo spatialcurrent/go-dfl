@@ -26,6 +26,46 @@ import (
 	"github.com/spatialcurrent/go-reader/reader"
 )
 
+func intersects(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+
+	if len(args) != 2 {
+		return Null{}, errors.New("Invalid number of arguments to intersects " + fmt.Sprint(len(args)))
+	}
+
+	switch a := args[0].(type) {
+	case Null:
+		switch b := args[1].(type) {
+		case Null:
+			return true, nil
+		case StringSet:
+			return b.Len() == 0, nil
+		case map[string]struct{}:
+			return len(b) == 0, nil
+		}
+	case StringSet:
+		switch b := args[1].(type) {
+		case Null:
+			return a.Len() == 0, nil
+		case StringSet:
+			return a.Intersects(b), nil
+		case map[string]struct{}:
+			return a.Intersects(b), nil
+		}
+	case map[string]struct{}:
+		switch b := args[1].(type) {
+		case Null:
+			return len(a) == 0, nil
+		case map[string]struct{}:
+			return StringSet(a).Intersects(b), nil
+		case StringSet:
+			return StringSet(a).Intersects(b), nil
+		}
+	}
+
+	return Null{}, errors.New("Invalid arguments for intersects function " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
+
+}
+
 func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
 
 	if len(args) != 1 {
@@ -65,10 +105,12 @@ func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}) (inter
 func arrayToSet(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
 
 	if len(args) != 1 {
-		return Null{}, errors.New("Invalid number of arguments to arrayToSet.")
+		return Null{}, errors.New("Invalid number of arguments to arrayToSet (" + fmt.Sprint(len(args)) + ").")
 	}
 
 	switch arr := args[0].(type) {
+	case Null:
+		return Null{}, nil
 	case []string:
 		set := map[string]struct{}{}
 		for _, v := range arr {
@@ -774,6 +816,8 @@ func splitString(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 		case string:
 			return strings.Split(s, delim), nil
 		}
+	case Null:
+		return s, nil
 	}
 	return 0, errors.New("Invalid arguments for splitString " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
 }

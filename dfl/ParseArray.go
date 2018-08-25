@@ -22,7 +22,10 @@ import (
 //	[Taco, Tacos, Burrito, Burritos, "Mexican Food", @example]
 func ParseArray(in string, remainder string) (Node, error) {
 
-	nodes := ParseList(in)
+	nodes, err := ParseList(in)
+	if err != nil {
+		return &Array{}, errors.Wrap(err, "error parsing array "+in)
+	}
 
 	if len(remainder) == 0 {
 		return &Array{Nodes: nodes}, nil

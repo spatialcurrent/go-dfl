@@ -8,11 +8,6 @@
 package dfl
 
 import (
-	"strings"
-	"unicode"
-)
-
-import (
 	"github.com/pkg/errors"
 )
 
@@ -27,44 +22,9 @@ import (
 //	{Taco, Tacos, Burrito, Burritos, "Mexican Food", @example}
 func ParseSet(in string, remainder string) (Node, error) {
 
-	nodes := make([]Node, 0)
-	singlequotes := 0
-	doublequotes := 0
-
-	in = strings.TrimSpace(in)
-	s := ""
-
-	for i, c := range in {
-
-		if !(singlequotes == 0 && doublequotes == 0 && c == ',') {
-			s += string(c)
-			if c == '\'' && doublequotes == 0 {
-				if singlequotes == 0 {
-					singlequotes += 1
-				} else {
-					singlequotes -= 1
-				}
-			} else if c == '"' && singlequotes == 0 {
-				if doublequotes == 0 {
-					doublequotes += 1
-				} else {
-					doublequotes -= 1
-				}
-			}
-		}
-
-		if singlequotes == 0 && doublequotes == 0 && (i+1 == len(in) || in[i+1] == ',') {
-			s = strings.TrimSpace(s)
-			if len(s) >= 2 && ((strings.HasPrefix(s, "'") && strings.HasSuffix(s, "'")) || (strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\""))) {
-				nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
-			} else if strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@") {
-				nodes = append(nodes, &Attribute{Name: strings.TrimLeftFunc(s, unicode.IsSpace)[1:]})
-			} else {
-				nodes = append(nodes, &Literal{Value: TryConvertString(s)})
-			}
-			s = ""
-		}
-
+	nodes, err := ParseList(in)
+	if err != nil {
+		return &Array{}, errors.Wrap(err, "error parsing set "+in)
 	}
 
 	if len(remainder) == 0 {
@@ -79,7 +39,7 @@ func ParseSet(in string, remainder string) (Node, error) {
 
 	err = AttachLeft(root, left)
 	if err != nil {
-		return root, errors.Wrap(err, "error attaching left for set "+in)
+		return root, errors.Wrap(err, "error attaching left for "+in)
 	}
 
 	return root, nil

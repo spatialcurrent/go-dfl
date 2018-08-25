@@ -152,6 +152,10 @@ func (i In) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	lvs := fmt.Sprint(lv)
 
 	switch rv.(type) {
+	case Null:
+		return false, nil
+	case StringSet:
+		return rv.(StringSet).Contains(lvs), nil
 	case string:
 		return strings.Contains(rv.(string), lvs), nil
 	case int:
