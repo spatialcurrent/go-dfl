@@ -34,7 +34,7 @@ func TestSubtract(t *testing.T) {
 			continue
 		}
 		node = node.Compile()
-		got, err := node.Evaluate(testCase.Context, FunctionMap{})
+		got, err := node.Evaluate(testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {

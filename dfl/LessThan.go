@@ -11,8 +11,8 @@ type LessThan struct {
 	*NumericBinaryOperator
 }
 
-func (lt LessThan) Dfl() string {
-	return "(" + lt.Left.Dfl() + " < " + lt.Right.Dfl() + ")"
+func (lt LessThan) Dfl(quotes []string, pretty bool) string {
+	return "(" + lt.Left.Dfl(quotes, pretty) + " < " + lt.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (lt LessThan) Map() map[string]interface{} {
@@ -40,9 +40,9 @@ func (lt LessThan) Compile() Node {
 	return LessThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lt LessThan) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (lt LessThan) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 
-	v, err := lt.EvaluateAndCompare(ctx, funcs)
+	v, err := lt.EvaluateAndCompare(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}

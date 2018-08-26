@@ -70,3 +70,5 @@
 //  valid := root.Evaluate(Context{"amenity": "bar", "name": "John's Whiskey Bar"})
 //
 package dfl
+
+var DefaultQuotes = []string{"'", "\"", "`"}

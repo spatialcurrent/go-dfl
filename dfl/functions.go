@@ -26,7 +26,7 @@ import (
 	"github.com/spatialcurrent/go-reader/reader"
 )
 
-func intersects(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func intersects(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 2 {
 		return Null{}, errors.New("Invalid number of arguments to intersects " + fmt.Sprint(len(args)))
@@ -66,7 +66,7 @@ func intersects(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 
 }
 
-func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 1 {
 		return Null{}, errors.New("Invalid number of arguments to flattenArray.")
@@ -102,7 +102,7 @@ func flattenArray(funcs FunctionMap, ctx interface{}, args []interface{}) (inter
 
 }
 
-func arrayToSet(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func arrayToSet(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 1 {
 		return Null{}, errors.New("Invalid number of arguments to arrayToSet (" + fmt.Sprint(len(args)) + ").")
@@ -135,7 +135,7 @@ func arrayToSet(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 
 }
 
-func setToArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func setToArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 1 {
 		return Null{}, errors.New("Invalid number of arguments to setToArray.")
@@ -166,7 +166,7 @@ func setToArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 
 }
 
-func prefix(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func prefix(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to prefix.")
@@ -240,7 +240,7 @@ func prefix(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}
 
 }
 
-func suffix(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func suffix(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to suffix.")
@@ -307,7 +307,7 @@ func suffix(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}
 
 }
 
-func sortArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func sortArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 1 && len(args) != 2 && len(args) != 3 {
 		return 0, errors.New("Invalid number of arguments to sortArray.")
@@ -361,11 +361,11 @@ func sortArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 			return 0, errors.New("Cannot sort []interface{} without a key, because no natural sort order.")
 		}
 		sort.SliceStable(arr, func(i int, j int) bool {
-			iv, err := key.Evaluate(arr[i], funcs)
+			iv, err := key.Evaluate(arr[i], funcs, quotes)
 			if err != nil {
 				return false
 			}
-			jv, err := key.Evaluate(arr[j], funcs)
+			jv, err := key.Evaluate(arr[j], funcs, quotes)
 			if err != nil {
 				return false
 			}
@@ -415,7 +415,7 @@ func sortArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 	return 0, errors.New("Invalid arguments for sortArray " + reflect.TypeOf(args[0]).String())
 }
 
-func limitArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func limitArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to limitArray.")
@@ -455,7 +455,7 @@ func limitArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 	return 0, errors.New("Invalid arguments for limitArray " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
 }
 
-func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 && len(args) != 3 {
 		return 0, errors.New("Invalid number of arguments to filter.")
 	}
@@ -477,7 +477,7 @@ func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 				n = n.Compile()
 				output_slice := make([]map[string]interface{}, 0)
 				for _, m := range arr {
-					valid, err := EvaluateBool(n, m, funcs)
+					valid, err := EvaluateBool(n, m, funcs, quotes)
 					if err != nil {
 						return 0, errors.Wrap(err, "Error evaluating object "+fmt.Sprint(m))
 					}
@@ -502,7 +502,7 @@ func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 				n = n.Compile()
 				output_slice := make([]interface{}, 0)
 				for _, m := range arr {
-					valid, err := EvaluateBool(n, m, funcs)
+					valid, err := EvaluateBool(n, m, funcs, quotes)
 					if err != nil {
 						return 0, errors.Wrap(err, "Error evaluating object "+fmt.Sprint(m))
 					}
@@ -527,7 +527,7 @@ func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 					n = n.Compile()
 					output_slice := make([]map[string]interface{}, 0)
 					for _, m := range arr {
-						valid, err := EvaluateBool(n, m, funcs)
+						valid, err := EvaluateBool(n, m, funcs, quotes)
 						if err != nil {
 							return 0, errors.Wrap(err, "Error evaluating object "+fmt.Sprint(m))
 						}
@@ -547,7 +547,7 @@ func filterArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 	return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
 }
 
-func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func histArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 && len(args) != 2 && len(args) != 3 {
 		return 0, errors.New("Invalid number of arguments to histArray.")
 	}
@@ -575,7 +575,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 					}
 					counters := map[string]map[string]int{}
 					for _, x := range arr {
-						x_key, err := node_key.Evaluate(x, funcs)
+						x_key, err := node_key.Evaluate(x, funcs, quotes)
 						if err != nil {
 							return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 						}
@@ -584,7 +584,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 							if _, ok := counters[x_key_str]; !ok {
 								counters[x_key_str] = map[string]int{}
 							}
-							x_values, err := node_values.Evaluate(x, funcs)
+							x_values, err := node_values.Evaluate(x, funcs, quotes)
 							if err != nil {
 								return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 							}
@@ -611,7 +611,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 					}
 					h := map[string]Counter{}
 					for _, x := range arr {
-						x_key, err := node_key.Evaluate(x, funcs)
+						x_key, err := node_key.Evaluate(x, funcs, quotes)
 						if err != nil {
 							return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 						}
@@ -620,7 +620,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 							if _, ok := h[x_key_str]; !ok {
 								h[x_key_str] = NewCounter()
 							}
-							x_values, err := node_values.Evaluate(x, funcs)
+							x_values, err := node_values.Evaluate(x, funcs, quotes)
 							if err != nil {
 								return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 							}
@@ -661,7 +661,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 				}
 				counter := NewCounter()
 				for _, x := range arr {
-					y, err := n.Evaluate(x, funcs)
+					y, err := n.Evaluate(x, funcs, quotes)
 					if err != nil {
 						return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 					}
@@ -674,7 +674,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 				}
 				counter := NewCounter()
 				for _, x := range arr {
-					y, err := n.Evaluate(x, funcs)
+					y, err := n.Evaluate(x, funcs, quotes)
 					if err != nil {
 						return 0, errors.Wrap(err, "error extracting value from array element in histArray")
 					}
@@ -721,7 +721,7 @@ func histArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 	return 0, errors.New("Invalid arguments for histArray " + reflect.TypeOf(args[0]).String())
 }
 
-func topCounter(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func topCounter(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 && len(args) != 3 {
 		return 0, errors.New("Invalid number of arguments to topCounter.")
 	}
@@ -754,7 +754,7 @@ func topCounter(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 	return 0, errors.New("Invalid arguments for topCounter " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
 }
 
-func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to map.")
 	}
@@ -770,7 +770,7 @@ func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface
 		case []map[string]interface{}:
 			values := make([]interface{}, 0, len(arr))
 			for _, x := range arr {
-				y, err := n.Evaluate(x, funcs) //Extract(key, x)
+				y, err := n.Evaluate(x, funcs, quotes) //Extract(key, x)
 				if err != nil {
 					return 0, errors.Wrap(err, "error extracting value from array element in mapArray")
 				}
@@ -780,7 +780,7 @@ func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface
 		case []map[string]string:
 			values := make([]string, 0, len(arr))
 			for _, x := range arr {
-				y, err := n.Evaluate(x, funcs)
+				y, err := n.Evaluate(x, funcs, quotes)
 				if err != nil {
 					return 0, errors.Wrap(err, "error extracting value from array element in mapArray")
 				}
@@ -790,7 +790,7 @@ func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface
 		case []interface{}:
 			values := make([]interface{}, 0, len(arr))
 			for _, x := range arr {
-				y, err := n.Evaluate(x, funcs)
+				y, err := n.Evaluate(x, funcs, quotes)
 				if err != nil {
 					return 0, errors.Wrap(err, "error extracting value from array element in mapArray")
 				}
@@ -806,7 +806,7 @@ func mapArray(funcs FunctionMap, ctx interface{}, args []interface{}) (interface
 
 }
 
-func splitString(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func splitString(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to split.")
 	}
@@ -822,7 +822,7 @@ func splitString(funcs FunctionMap, ctx interface{}, args []interface{}) (interf
 	return 0, errors.New("Invalid arguments for splitString " + reflect.TypeOf(args[0]).String() + " , " + reflect.TypeOf(args[1]).String())
 }
 
-func trimString(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func trimString(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to split.")
 	}
@@ -843,7 +843,7 @@ func trimString(funcs FunctionMap, ctx interface{}, args []interface{}) (interfa
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func trimStringLeft(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func trimStringLeft(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to ltrim.")
 	}
@@ -874,7 +874,7 @@ func trimStringLeft(funcs FunctionMap, ctx interface{}, args []interface{}) (int
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func trimStringRight(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func trimStringRight(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to rtrim.")
 	}
@@ -894,7 +894,7 @@ func trimStringRight(funcs FunctionMap, ctx interface{}, args []interface{}) (in
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func getLength(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func getLength(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to len.")
 	}
@@ -917,7 +917,7 @@ func getLength(funcs FunctionMap, ctx interface{}, args []interface{}) (interfac
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToBytes(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToBytes(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to len.")
 	}
@@ -934,7 +934,7 @@ func convertToBytes(funcs FunctionMap, ctx interface{}, args []interface{}) (int
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToInt16(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToInt16(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to int16.")
 	}
@@ -954,7 +954,7 @@ func convertToInt16(funcs FunctionMap, ctx interface{}, args []interface{}) (int
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToInt32(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToInt32(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to int32.")
 	}
@@ -972,7 +972,7 @@ func convertToInt32(funcs FunctionMap, ctx interface{}, args []interface{}) (int
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToBigEndian(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToBigEndian(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to big-endian.")
 	}
@@ -998,7 +998,7 @@ func convertToBigEndian(funcs FunctionMap, ctx interface{}, args []interface{}) 
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToLittleEndian(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToLittleEndian(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to little-endian.")
 	}
@@ -1024,7 +1024,7 @@ func convertToLittleEndian(funcs FunctionMap, ctx interface{}, args []interface{
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func repeat(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func repeat(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 {
 		return 0, errors.New("Invalid number of arguments to repeat.")
 	}
@@ -1049,7 +1049,7 @@ func repeat(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}
 	return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
-func convertToString(funcs FunctionMap, ctx interface{}, args []interface{}) (interface{}, error) {
+func convertToString(funcs FunctionMap, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to len.")
 	}

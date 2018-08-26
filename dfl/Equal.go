@@ -18,8 +18,8 @@ type Equal struct {
 	*BinaryOperator
 }
 
-func (e Equal) Dfl() string {
-	return "(" + e.Left.Dfl() + " == " + e.Right.Dfl() + ")"
+func (e Equal) Dfl(quotes []string, pretty bool) string {
+	return "(" + e.Left.Dfl(quotes, pretty) + " == " + e.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (e Equal) Map() map[string]interface{} {
@@ -36,9 +36,9 @@ func (e Equal) Compile() Node {
 	return Equal{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (e Equal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (e Equal) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 
-	lv, rv, err := e.EvaluateLeftAndRight(ctx, funcs)
+	lv, rv, err := e.EvaluateLeftAndRight(ctx, funcs, quotes)
 	if err != nil {
 		return 0, err
 	}

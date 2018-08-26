@@ -17,13 +17,13 @@ type Set struct {
 	Nodes []Node
 }
 
-func (a Set) Dfl() string {
+func (a Set) Dfl(quotes []string, pretty bool) string {
 	str := "{"
 	for i, x := range a.Nodes {
 		if i > 0 {
 			str += ", "
 		}
-		str += x.Dfl()
+		str += x.Dfl(quotes, pretty)
 	}
 	str = str + "}"
 	return str
@@ -62,10 +62,10 @@ func (a Set) Compile() Node {
 	return Literal{Value: set}
 }
 
-func (a Set) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (a Set) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
-		v, err := n.Evaluate(ctx, funcs)
+		v, err := n.Evaluate(ctx, funcs, quotes)
 		if err != nil {
 			return values, err
 		}

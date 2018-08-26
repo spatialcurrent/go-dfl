@@ -13,8 +13,8 @@ type Add struct {
 }
 
 // Dfl returns the DFL representation of this node as a string
-func (a Add) Dfl() string {
-	return "(" + a.Left.Dfl() + " + " + a.Right.Dfl() + ")"
+func (a Add) Dfl(quotes []string, pretty bool) string {
+	return "(" + a.Left.Dfl(quotes, pretty) + " + " + a.Right.Dfl(quotes, pretty) + ")"
 }
 
 // Map returns a map representation of this node
@@ -47,9 +47,9 @@ func (a Add) Compile() Node {
 }
 
 // Evaluate returns the value of this node given Context ctx, and an error if any.
-func (a Add) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (a Add) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 
-	lv, rv, err := a.EvaluateLeftAndRight(ctx, funcs)
+	lv, rv, err := a.EvaluateLeftAndRight(ctx, funcs, quotes)
 	if err != nil {
 		return 0, err
 	}

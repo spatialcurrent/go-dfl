@@ -17,13 +17,13 @@ type Function struct {
 	Arguments []Node `json:"arguments" bson:"arguments" yaml:"arguments" hcl:"arguments"` // list of function arguments
 }
 
-func (f Function) Dfl() string {
+func (f Function) Dfl(quotes []string, pretty bool) string {
 	out := f.Name + "("
 	for i, arg := range f.Arguments {
 		if i > 0 {
 			out += ", "
 		}
-		out += arg.Dfl()
+		out += arg.Dfl(quotes[1:], pretty)
 	}
 	out += ")"
 	return out
@@ -45,17 +45,17 @@ func (f Function) Map() map[string]interface{} {
 	}
 }
 
-func (f Function) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (f Function) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	if fn, ok := funcs[f.Name]; ok {
 		values := make([]interface{}, 0, len(f.Arguments))
 		for _, arg := range f.Arguments {
-			value, err := arg.Evaluate(ctx, funcs)
+			value, err := arg.Evaluate(ctx, funcs, quotes)
 			if err != nil {
 				return &Null{}, err
 			}
 			values = append(values, value)
 		}
-		return fn(funcs, ctx, values)
+		return fn(funcs, ctx, values, quotes)
 	} else {
 		return "", errors.New("attempted to evaluate unknown function " + f.Name)
 	}

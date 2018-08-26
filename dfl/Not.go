@@ -17,8 +17,8 @@ type Not struct {
 }
 
 // Dfl returns the DFL representation of this node (and its children nodes)
-func (n Not) Dfl() string {
-	return "not " + n.Node.Dfl()
+func (n Not) Dfl(quotes []string, pretty bool) string {
+	return "not " + n.Node.Dfl(quotes, pretty)
 }
 
 // Map returns a map representation of this node (and its children nodes)
@@ -45,8 +45,8 @@ func (n Not) Compile() Node {
 }
 
 // Evaluate evaluates this node within a context and returns the bool result, and error if any.
-func (n Not) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
-	v, err := n.Node.Evaluate(ctx, funcs)
+func (n Not) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+	v, err := n.Node.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
@@ -54,5 +54,5 @@ func (n Not) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 	case bool:
 		return !(v.(bool)), nil
 	}
-	return false, errors.New("Error evaluating expression " + n.Dfl())
+	return false, errors.New("Error evaluating expression " + n.Dfl(quotes, false))
 }

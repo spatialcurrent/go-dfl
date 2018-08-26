@@ -16,12 +16,12 @@ type BinaryOperator struct {
 
 // EvaluateLeftAndRight evaluates the value of the left node and right node given a context map (ctx) and function map (funcs).
 // Returns a 3 value tuple of left value, right value, and error.
-func (bo BinaryOperator) EvaluateLeftAndRight(ctx interface{}, funcs FunctionMap) (interface{}, interface{}, error) {
-	lv, err := bo.Left.Evaluate(ctx, funcs)
+func (bo BinaryOperator) EvaluateLeftAndRight(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, interface{}, error) {
+	lv, err := bo.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, false, err
 	}
-	rv, err := bo.Right.Evaluate(ctx, funcs)
+	rv, err := bo.Right.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, false, err
 	}

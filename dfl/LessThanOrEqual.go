@@ -11,8 +11,8 @@ type LessThanOrEqual struct {
 	*NumericBinaryOperator
 }
 
-func (lte LessThanOrEqual) Dfl() string {
-	return "(" + lte.Left.Dfl() + " <= " + lte.Right.Dfl() + ")"
+func (lte LessThanOrEqual) Dfl(quotes []string, pretty bool) string {
+	return "(" + lte.Left.Dfl(quotes, pretty) + " <= " + lte.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (lte LessThanOrEqual) Map() map[string]interface{} {
@@ -40,9 +40,9 @@ func (lte LessThanOrEqual) Compile() Node {
 	return LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lte LessThanOrEqual) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (lte LessThanOrEqual) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 
-	v, err := lte.EvaluateAndCompare(ctx, funcs)
+	v, err := lte.EvaluateAndCompare(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}

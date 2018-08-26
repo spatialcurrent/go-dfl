@@ -16,13 +16,13 @@ type Array struct {
 	Nodes []Node
 }
 
-func (a Array) Dfl() string {
+func (a Array) Dfl(quotes []string, pretty bool) string {
 	str := "["
 	for i, x := range a.Nodes {
 		if i > 0 {
 			str += ", "
 		}
-		str += x.Dfl()
+		str += x.Dfl(quotes, pretty)
 	}
 	str = str + "]"
 	return str
@@ -52,10 +52,10 @@ func (a Array) Compile() Node {
 	return Literal{Value: TryConvertArray(values)}
 }
 
-func (a Array) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (a Array) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
-		v, err := n.Evaluate(ctx, funcs)
+		v, err := n.Evaluate(ctx, funcs, quotes)
 		if err != nil {
 			return values, err
 		}

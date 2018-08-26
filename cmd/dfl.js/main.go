@@ -26,6 +26,8 @@ import (
 	"honnef.co/go/js/console"
 )
 
+var GO_DFL_DEFAULT_QUOTES = []string{"\"", "'", "`"}
+
 type Node struct {
 	Node        dfl.Node
 	FunctionMap dfl.FunctionMap
@@ -45,7 +47,7 @@ func (n Node) Evaluate(options *js.Object) interface{} {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := n.Node.Evaluate(ctx, n.FunctionMap)
+	result, err := n.Node.Evaluate(ctx, n.FunctionMap, GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		console.Log(err.Error())
 		return false
@@ -87,7 +89,7 @@ func EvaluateBool(s string, options *js.Object) bool {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateBool(root, ctx, dfl.NewFuntionMapWithDefaults())
+	result, err := dfl.EvaluateBool(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		console.Log(err.Error())
 		return false
@@ -110,7 +112,7 @@ func EvaluateInt(s string, options *js.Object) int {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateInt(root, ctx, dfl.NewFuntionMapWithDefaults())
+	result, err := dfl.EvaluateInt(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		console.Log(err.Error())
 		return 0
@@ -133,7 +135,7 @@ func EvaluateFloat64(s string, options *js.Object) float64 {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateFloat64(root, ctx, dfl.NewFuntionMapWithDefaults())
+	result, err := dfl.EvaluateFloat64(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		console.Log(err.Error())
 		return 0.0
@@ -156,7 +158,7 @@ func EvaluateString(s string, options *js.Object) string {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateString(root, ctx, dfl.NewFuntionMapWithDefaults())
+	result, err := dfl.EvaluateString(root, ctx, dfl.NewFuntionMapWithDefaults() GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		console.Log(err.Error())
 		return ""

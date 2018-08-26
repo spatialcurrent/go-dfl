@@ -44,6 +44,8 @@ import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
+var GO_DFL_DEFAULT_QUOTES = []string{"'", "\"", "`"}
+
 func main() {
 
 	start := time.Now()
@@ -154,9 +156,11 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println(string(out))
+
+		fmt.Println(GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:]) + GO_DFL_DEFAULT_QUOTES[0])
 	}
 
-	result, err := root.Evaluate(ctx, dfl.NewFuntionMapWithDefaults())
+	result, err := root.Evaluate(ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
 		fmt.Println("Error evaluating expression.")
 		fmt.Println(err)

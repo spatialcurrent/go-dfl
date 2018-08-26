@@ -16,8 +16,9 @@ echo "Done formatting."
 echo "******************"
 echo "Building program for go-dfl"
 cd $DEST
-for GOOS in darwin linux windows; do
+for GOOS in linux darwin windows; do
   GOOS=${GOOS} GOARCH=amd64 go build -o "dfl_${GOOS}_amd64" github.com/spatialcurrent/go-dfl/cmd/dfl
+  exit 0
 done
 if [[ "$?" != 0 ]] ; then
     echo "Error building program for go-dfl"

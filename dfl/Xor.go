@@ -18,8 +18,8 @@ type Xor struct {
 	*BinaryOperator // Extends the BinaryOperator struct
 }
 
-func (x Xor) Dfl() string {
-	return "(" + x.Left.Dfl() + " xor " + x.Right.Dfl() + ")"
+func (x Xor) Dfl(quotes []string, pretty bool) string {
+	return "(" + x.Left.Dfl(quotes, pretty) + " xor " + x.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (x Xor) Map() map[string]interface{} {
@@ -52,14 +52,14 @@ func (x Xor) Compile() Node {
 	return Xor{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (x Xor) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
-	lv, err := x.Left.Evaluate(ctx, funcs)
+func (x Xor) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+	lv, err := x.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
 	switch lv.(type) {
 	case bool:
-		rv, err := x.Right.Evaluate(ctx, funcs)
+		rv, err := x.Right.Evaluate(ctx, funcs, quotes)
 		if err != nil {
 			return false, err
 		}
@@ -68,5 +68,5 @@ func (x Xor) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 			return lv.(bool) != rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + x.Dfl())
+	return false, errors.New("Error evaluating expression " + x.Dfl(quotes, false))
 }

@@ -18,9 +18,9 @@ type NumericBinaryOperator struct {
 // If the left value and right value are mathematically equal, returns 0.
 // If the left value is less than the right value, returns -1.
 // if the left value is greater than the right value, returns 1.
-func (nbo NumericBinaryOperator) EvaluateAndCompare(ctx interface{}, funcs FunctionMap) (int, error) {
+func (nbo NumericBinaryOperator) EvaluateAndCompare(ctx interface{}, funcs FunctionMap, quotes []string) (int, error) {
 
-	lv, rv, err := nbo.EvaluateLeftAndRight(ctx, funcs)
+	lv, rv, err := nbo.EvaluateLeftAndRight(ctx, funcs, quotes)
 	if err != nil {
 		return 0, err
 	}

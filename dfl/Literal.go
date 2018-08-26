@@ -21,17 +21,18 @@ type Literal struct {
 	Value interface{} // the variable containing the actual value
 }
 
-func (l Literal) Dfl() string {
+func (l Literal) Dfl(quotes []string, pretty bool) string {
 	switch value := l.Value.(type) {
 	case string:
-		return fmt.Sprintf("%q", value)
+		return quotes[0] + value + quotes[0]
+		//return fmt.Sprintf("%q", value)
 	case []string:
 		out, _ := json.Marshal(value)
 		return string(out)
 	case map[string]struct{}:
-		return StringSet(value).Dfl()
+		return StringSet(value).Dfl(quotes)
 	case StringSet:
-		return value.Dfl()
+		return value.Dfl(quotes)
 	case Null:
 		return value.Dfl()
 	}
@@ -48,7 +49,7 @@ func (l Literal) Compile() Node {
 	return l
 }
 
-func (l Literal) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (l Literal) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	return l.Value, nil
 }
 

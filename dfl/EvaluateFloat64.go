@@ -17,10 +17,10 @@ import (
 )
 
 // EvaluateFloat64 returns the float64 value of a node given a context.  If the result is not a float64, then returns an error.
-func EvaluateFloat64(n Node, ctx interface{}, funcs FunctionMap) (float64, error) {
-	result, err := n.Evaluate(ctx, funcs)
+func EvaluateFloat64(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (float64, error) {
+	result, err := n.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl())
+		return 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false))
 	}
 
 	switch result.(type) {

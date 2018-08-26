@@ -1,7 +1,6 @@
 package dfl
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
@@ -10,10 +9,10 @@ import (
 // The use of a string -> empty struct backend provides a higher write performance versus a slice backend.
 type StringSet map[string]struct{}
 
-func (set StringSet) Dfl() string {
+func (set StringSet) Dfl(quotes []string, pretty bool) string {
 	values := make([]string, 0, len(set))
 	for v := range set {
-		values = append(values, fmt.Sprintf("%q", v))
+		values = append(values, quotes[0]+v+quotes[0])
 	}
 	return "{" + strings.Join(values, ", ") + "}"
 }

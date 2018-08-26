@@ -16,8 +16,8 @@ type Or struct {
 	*BinaryOperator
 }
 
-func (o Or) Dfl() string {
-	return "(" + o.Left.Dfl() + " or " + o.Right.Dfl() + ")"
+func (o Or) Dfl(quotes []string, pretty bool) string {
+	return "(" + o.Left.Dfl(quotes, pretty) + " or " + o.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (o Or) Map() map[string]interface{} {
@@ -50,8 +50,8 @@ func (o Or) Compile() Node {
 	return Or{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (o Or) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
-	lv, err := o.Left.Evaluate(ctx, funcs)
+func (o Or) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+	lv, err := o.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
@@ -60,7 +60,7 @@ func (o Or) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 		if lv.(bool) {
 			return true, nil
 		}
-		rv, err := o.Right.Evaluate(ctx, funcs)
+		rv, err := o.Right.Evaluate(ctx, funcs, quotes)
 		if err != nil {
 			return false, err
 		}
@@ -69,5 +69,5 @@ func (o Or) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
 			return rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + o.Dfl())
+	return false, errors.New("Error evaluating expression " + o.Dfl(quotes, false))
 }

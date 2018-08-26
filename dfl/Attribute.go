@@ -14,7 +14,7 @@ type Attribute struct {
 	Name string
 }
 
-func (a Attribute) Dfl() string {
+func (a Attribute) Dfl(quotes []string, pretty bool) string {
 	return "@" + a.Name
 }
 
@@ -28,7 +28,7 @@ func (a Attribute) Compile() Node {
 	return Attribute{Name: a.Name}
 }
 
-func (a Attribute) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
+func (a Attribute) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	if len(a.Name) == 0 {
 		return ctx, nil
 	}

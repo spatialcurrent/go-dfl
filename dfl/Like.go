@@ -23,8 +23,8 @@ type Like struct {
 	*BinaryOperator
 }
 
-func (l Like) Dfl() string {
-	return "(" + l.Left.Dfl() + " like " + l.Right.Dfl() + ")"
+func (l Like) Dfl(quotes []string, pretty bool) string {
+	return "(" + l.Left.Dfl(quotes, pretty) + " like " + l.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (l Like) Map() map[string]interface{} {
@@ -41,20 +41,20 @@ func (l Like) Compile() Node {
 	return Like{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (l Like) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
-	lv, err := l.Left.Evaluate(ctx, funcs)
+func (l Like) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+	lv, err := l.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
 
-	rv, err := l.Right.Evaluate(ctx, funcs)
+	rv, err := l.Right.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
 
 	match, err := CompareStrings(fmt.Sprint(lv), fmt.Sprint(rv))
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+l.Dfl())
+		return false, errors.Wrap(err, "Error evaluating expression "+l.Dfl(quotes, false))
 	}
 
 	return match, nil

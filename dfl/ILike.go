@@ -25,8 +25,8 @@ type ILike struct {
 	*BinaryOperator
 }
 
-func (i ILike) Dfl() string {
-	return "(" + i.Left.Dfl() + " ilike " + i.Right.Dfl() + ")"
+func (i ILike) Dfl(quotes []string, pretty bool) string {
+	return "(" + i.Left.Dfl(quotes, pretty) + " ilike " + i.Right.Dfl(quotes, pretty) + ")"
 }
 
 func (i ILike) Map() map[string]interface{} {
@@ -43,14 +43,14 @@ func (i ILike) Compile() Node {
 	return ILike{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (i ILike) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error) {
-	lv, err := i.Left.Evaluate(ctx, funcs)
+func (i ILike) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+	lv, err := i.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
 	lvs := strings.ToLower(fmt.Sprint(lv))
 
-	rv, err := i.Right.Evaluate(ctx, funcs)
+	rv, err := i.Right.Evaluate(ctx, funcs, quotes)
 	if err != nil {
 		return false, err
 	}
@@ -62,7 +62,7 @@ func (i ILike) Evaluate(ctx interface{}, funcs FunctionMap) (interface{}, error)
 
 	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl())
+		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false))
 	}
 	return pattern.MatchString(lvs), nil
 }
