@@ -16,13 +16,13 @@ type Array struct {
 	Nodes []Node
 }
 
-func (a Array) Dfl(quotes []string, pretty bool) string {
+func (a Array) Dfl(quotes []string, pretty bool, tabs int) string {
 	str := "["
 	for i, x := range a.Nodes {
 		if i > 0 {
 			str += ", "
 		}
-		str += x.Dfl(quotes, pretty)
+		str += x.Dfl(quotes, pretty, tabs)
 	}
 	str = str + "]"
 	return str

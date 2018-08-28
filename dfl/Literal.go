@@ -10,6 +10,7 @@ package dfl
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // Literal is a Node representing a literal/static value regardless of the context.
@@ -21,22 +22,31 @@ type Literal struct {
 	Value interface{} // the variable containing the actual value
 }
 
-func (l Literal) Dfl(quotes []string, pretty bool) string {
+func (l Literal) Dfl(quotes []string, pretty bool, tabs int) string {
+
+	str := ""
 	switch value := l.Value.(type) {
 	case string:
-		return quotes[0] + value + quotes[0]
+		str = quotes[0] + value + quotes[0]
 		//return fmt.Sprintf("%q", value)
 	case []string:
 		out, _ := json.Marshal(value)
-		return string(out)
+		str = string(out)
 	case map[string]struct{}:
-		return StringSet(value).Dfl(quotes)
+		str = StringSet(value).Dfl(quotes, pretty, tabs)
 	case StringSet:
-		return value.Dfl(quotes)
+		str = value.Dfl(quotes, pretty, tabs)
 	case Null:
-		return value.Dfl()
+		str = value.Dfl()
+	default:
+		str = fmt.Sprint(l.Value)
 	}
-	return fmt.Sprint(l.Value)
+
+	if pretty {
+		str = strings.Repeat("  ", tabs) + str
+	}
+
+	return str
 }
 
 func (l Literal) Map() map[string]interface{} {

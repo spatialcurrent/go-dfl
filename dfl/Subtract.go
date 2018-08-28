@@ -11,8 +11,8 @@ type Subtract struct {
 	*NumericBinaryOperator
 }
 
-func (s Subtract) Dfl(quotes []string, pretty bool) string {
-	return "(" + s.Left.Dfl(quotes, pretty) + " - " + s.Right.Dfl(quotes, pretty) + ")"
+func (s Subtract) Dfl(quotes []string, pretty bool, tabs int) string {
+	return s.BinaryOperator.Dfl("-", quotes, pretty, tabs)
 }
 
 func (s Subtract) Map() map[string]interface{} {

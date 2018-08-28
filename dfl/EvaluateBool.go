@@ -20,7 +20,7 @@ import (
 func EvaluateBool(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (bool, error) {
 	result, err := n.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false))
+		return false, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	switch result.(type) {

@@ -13,8 +13,8 @@ type GreaterThan struct {
 	*NumericBinaryOperator
 }
 
-func (gt GreaterThan) Dfl(quotes []string, pretty bool) string {
-	return "(" + gt.Left.Dfl(quotes, pretty) + " > " + gt.Right.Dfl(quotes, pretty) + ")"
+func (gt GreaterThan) Dfl(quotes []string, pretty bool, tabs int) string {
+	return gt.BinaryOperator.Dfl(">", quotes, pretty, tabs+1)
 }
 
 func (gt GreaterThan) Map() map[string]interface{} {

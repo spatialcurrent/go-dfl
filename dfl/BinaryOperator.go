@@ -7,11 +7,36 @@
 
 package dfl
 
+import (
+	"strings"
+)
+
 // BinaryOperator is a DFL Node that represents the binary operator of a left value and right value.
 // This struct functions as an embedded struct for many comparator operations.
 type BinaryOperator struct {
 	Left  Node
 	Right Node
+}
+
+func (bo BinaryOperator) Dfl(operator string, quotes []string, pretty bool, tabs int) string {
+	if pretty {
+		switch bo.Left.(type) {
+		case *Literal:
+			switch bo.Left.(*Literal).Value.(type) {
+			case string, int, []byte, Null:
+				return strings.Repeat("  ", tabs) + "(" + bo.Left.Dfl(quotes, false, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, false, tabs) + ")"
+			}
+		}
+		switch bo.Right.(type) {
+		case *Literal:
+			switch bo.Right.(*Literal).Value.(type) {
+			case string, int, []byte, Null:
+				return strings.Repeat("  ", tabs) + "(" + bo.Left.Dfl(quotes, false, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, false, tabs) + ")"
+			}
+		}
+		return strings.Repeat("  ", tabs) + "(\n" + bo.Left.Dfl(quotes, pretty, tabs+1) + " " + operator + " " + "\n" + bo.Right.Dfl(quotes, pretty, tabs+1) + "\n" + strings.Repeat("  ", tabs) + ")"
+	}
+	return "(" + bo.Left.Dfl(quotes, pretty, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, pretty, tabs) + ")"
 }
 
 // EvaluateLeftAndRight evaluates the value of the left node and right node given a context map (ctx) and function map (funcs).

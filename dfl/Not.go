@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // Not is a UnaryOperator that inverts the boolean value of the children Node.
@@ -17,8 +18,11 @@ type Not struct {
 }
 
 // Dfl returns the DFL representation of this node (and its children nodes)
-func (n Not) Dfl(quotes []string, pretty bool) string {
-	return "not " + n.Node.Dfl(quotes, pretty)
+func (n Not) Dfl(quotes []string, pretty bool, tabs int) string {
+	if pretty {
+		return strings.Repeat("  ", tabs) + "not " + n.Node.Dfl(quotes, pretty, tabs)
+	}
+	return "not " + n.Node.Dfl(quotes, pretty, tabs)
 }
 
 // Map returns a map representation of this node (and its children nodes)
@@ -54,5 +58,5 @@ func (n Not) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (inte
 	case bool:
 		return !(v.(bool)), nil
 	}
-	return false, errors.New("Error evaluating expression " + n.Dfl(quotes, false))
+	return false, errors.New("Error evaluating expression " + n.Dfl(quotes, false, 0))
 }

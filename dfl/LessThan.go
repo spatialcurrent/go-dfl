@@ -7,12 +7,14 @@
 
 package dfl
 
+// LessThan is a NumericBinaryOperator that evaluating to true if parameter a is less than parameter b.
+// The parameters may be of type int, int64, or float64.
 type LessThan struct {
 	*NumericBinaryOperator
 }
 
-func (lt LessThan) Dfl(quotes []string, pretty bool) string {
-	return "(" + lt.Left.Dfl(quotes, pretty) + " < " + lt.Right.Dfl(quotes, pretty) + ")"
+func (lt LessThan) Dfl(quotes []string, pretty bool, tabs int) string {
+	return lt.BinaryOperator.Dfl("<", quotes, pretty, tabs)
 }
 
 func (lt LessThan) Map() map[string]interface{} {

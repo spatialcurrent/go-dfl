@@ -16,8 +16,8 @@ type And struct {
 	*BinaryOperator
 }
 
-func (a And) Dfl(quotes []string, pretty bool) string {
-	return "(" + a.Left.Dfl(quotes, pretty) + " and " + a.Right.Dfl(quotes, pretty) + ")"
+func (a And) Dfl(quotes []string, pretty bool, tabs int) string {
+	return a.BinaryOperator.Dfl("and", quotes, pretty, tabs)
 }
 
 func (a And) Map() map[string]interface{} {
@@ -69,5 +69,5 @@ func (a And) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (inte
 			return rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + a.Dfl(quotes, false))
+	return false, errors.New("Error evaluating expression " + a.Dfl(quotes, false, 0))
 }

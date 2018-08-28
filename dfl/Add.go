@@ -13,8 +13,8 @@ type Add struct {
 }
 
 // Dfl returns the DFL representation of this node as a string
-func (a Add) Dfl(quotes []string, pretty bool) string {
-	return "(" + a.Left.Dfl(quotes, pretty) + " + " + a.Right.Dfl(quotes, pretty) + ")"
+func (a Add) Dfl(quotes []string, pretty bool, tabs int) string {
+	return a.BinaryOperator.Dfl("+", quotes, pretty, tabs)
 }
 
 // Map returns a map representation of this node

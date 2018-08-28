@@ -26,8 +26,6 @@
 package main
 
 import (
-	//"bufio"
-	//"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -55,9 +53,11 @@ func main() {
 	var load_env bool
 	var verbose bool
 	var version bool
+	var pretty bool
 	var help bool
 
 	flag.StringVar(&filter_text, "f", "", "The DFL expression to evaulate")
+	flag.BoolVar(&pretty, "pretty", false, "Prints pretty version of expression to stdout")
 
 	flag.BoolVar(&load_env, "env", false, "Load environment variables")
 	flag.BoolVar(&verbose, "verbose", false, "Provide verbose output")
@@ -123,7 +123,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	if pretty {
+		fmt.Println("# Pretty Version \n" + root.Dfl(dfl.DefaultQuotes[1:], true, 0) + "\n")
+	}
+
 	if verbose {
+
 		fmt.Println("******************* Context *******************")
 		out, err := yaml.Marshal(ctx)
 		if err != nil {
@@ -132,17 +137,16 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println(string(out))
-	}
 
-	if verbose {
 		fmt.Println("******************* Parsed *******************")
-		out, err := yaml.Marshal(root.Map())
+		out, err = yaml.Marshal(root.Map())
 		if err != nil {
 			fmt.Println("Error marshaling expression to yaml.")
 			fmt.Println(err)
 			os.Exit(1)
 		}
 		fmt.Println(string(out))
+
 	}
 
 	root = root.Compile()
@@ -157,7 +161,7 @@ func main() {
 		}
 		fmt.Println(string(out))
 
-		fmt.Println(GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:]) + GO_DFL_DEFAULT_QUOTES[0])
+		fmt.Println(GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:], false, 0) + GO_DFL_DEFAULT_QUOTES[0])
 	}
 
 	result, err := root.Evaluate(ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])

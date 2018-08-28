@@ -31,8 +31,8 @@ type In struct {
 	*BinaryOperator
 }
 
-func (i In) Dfl(quotes []string, pretty bool) string {
-	return "(" + i.Left.Dfl(quotes, pretty) + " in " + i.Right.Dfl(quotes, pretty) + ")"
+func (i In) Dfl(quotes []string, pretty bool, tabs int) string {
+	return i.BinaryOperator.Dfl("in", quotes, pretty, tabs)
 }
 
 func (i In) Map() map[string]interface{} {
@@ -52,12 +52,12 @@ func (i In) Compile() Node {
 func (i In) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	lv, err := i.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating in with left value for "+i.Dfl(quotes, false))
+		return false, errors.Wrap(err, "Error evaluating in with left value for "+i.Dfl(quotes, false, 0))
 	}
 
 	rv, err := i.Right.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl(quotes, false))
+		return false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl(quotes, false, 0))
 	}
 
 	switch lv.(type) {
@@ -125,7 +125,7 @@ func (i In) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (inter
 			rvr := rv.(*reader.Cache)
 			rvb, err := rvr.ReadAll()
 			if err != nil {
-				return false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false))
+				return false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
 			}
 			if len(lvb) == len(rvb) && len(lvb) == 0 {
 				return true, nil

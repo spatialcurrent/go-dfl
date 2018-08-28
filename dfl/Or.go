@@ -16,8 +16,8 @@ type Or struct {
 	*BinaryOperator
 }
 
-func (o Or) Dfl(quotes []string, pretty bool) string {
-	return "(" + o.Left.Dfl(quotes, pretty) + " or " + o.Right.Dfl(quotes, pretty) + ")"
+func (o Or) Dfl(quotes []string, pretty bool, tabs int) string {
+	return o.BinaryOperator.Dfl("or", quotes, pretty, tabs)
 }
 
 func (o Or) Map() map[string]interface{} {
@@ -69,5 +69,5 @@ func (o Or) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (inter
 			return rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + o.Dfl(quotes, false))
+	return false, errors.New("Error evaluating expression " + o.Dfl(quotes, false, 0))
 }

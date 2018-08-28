@@ -13,8 +13,8 @@ type Before struct {
 	*TemporalBinaryOperator // Extends the TemporalBinaryOperator struct
 }
 
-func (b Before) Dfl(quotes []string, pretty bool) string {
-	return "(" + b.Left.Dfl(quotes, pretty) + " before " + b.Right.Dfl(quotes, pretty) + ")"
+func (b Before) Dfl(quotes []string, pretty bool, tabs int) string {
+	return b.BinaryOperator.Dfl("before", quotes, pretty, tabs)
 }
 
 func (b Before) Map() map[string]interface{} {

@@ -16,8 +16,8 @@ type Coalesce struct {
 	*BinaryOperator
 }
 
-func (c Coalesce) Dfl(quotes []string, pretty bool) string {
-	return "(" + c.Left.Dfl(quotes, pretty) + " ?: " + c.Right.Dfl(quotes, pretty) + ")"
+func (c Coalesce) Dfl(quotes []string, pretty bool, tabs int) string {
+	return "(" + c.Left.Dfl(quotes, pretty, tabs) + " ?: " + c.Right.Dfl(quotes, pretty, tabs) + ")"
 }
 
 func (c Coalesce) Map() map[string]interface{} {
@@ -44,14 +44,14 @@ func (c Coalesce) Compile() Node {
 func (c Coalesce) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	lv, err := c.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return lv, errors.Wrap(err, "Error evaluating left value of coalesce: "+c.Left.Dfl(quotes, false))
+		return lv, errors.Wrap(err, "Error evaluating left value of coalesce: "+c.Left.Dfl(quotes, false, 0))
 	}
 
 	switch lv.(type) {
 	case Null:
 		rv, err := c.Right.Evaluate(ctx, funcs, quotes)
 		if err != nil {
-			return rv, errors.Wrap(err, "Error evaluating right value of Coalesce: "+c.Left.Dfl(quotes, false))
+			return rv, errors.Wrap(err, "Error evaluating right value of Coalesce: "+c.Left.Dfl(quotes, false, 0))
 		}
 		return rv, nil
 	}

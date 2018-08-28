@@ -17,13 +17,13 @@ type Set struct {
 	Nodes []Node
 }
 
-func (a Set) Dfl(quotes []string, pretty bool) string {
+func (a Set) Dfl(quotes []string, pretty bool, tabs int) string {
 	str := "{"
 	for i, x := range a.Nodes {
 		if i > 0 {
 			str += ", "
 		}
-		str += x.Dfl(quotes, pretty)
+		str += x.Dfl(quotes, pretty, tabs)
 	}
 	str = str + "}"
 	return str

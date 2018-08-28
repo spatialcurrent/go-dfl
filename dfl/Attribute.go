@@ -7,6 +7,10 @@
 
 package dfl
 
+import (
+	"strings"
+)
+
 // Attribute is a Node representing the value of an attribute in the context map.
 // Attributes start with a "@" and follow with the name or full path into the object if multiple levels deep.
 // For example, @a and @a.b.c.d.  You can also use a null-safe operator, e.g., @a?.b?.c?.d
@@ -14,7 +18,10 @@ type Attribute struct {
 	Name string
 }
 
-func (a Attribute) Dfl(quotes []string, pretty bool) string {
+func (a Attribute) Dfl(quotes []string, pretty bool, tabs int) string {
+	if pretty {
+		return strings.Repeat("  ", tabs) + "@" + a.Name
+	}
 	return "@" + a.Name
 }
 

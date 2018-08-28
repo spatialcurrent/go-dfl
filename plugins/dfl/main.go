@@ -19,8 +19,6 @@ import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
-var GO_DFL_VERSION = "0.0.4"
-
 func main() {}
 
 func buildContext(argc C.int, argv **C.char) map[string]interface{} {
@@ -54,7 +52,7 @@ func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char
 	}
 	node = node.Compile()
 
-	r, err := dfl.EvaluateBool(node, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults())
+	r, err := dfl.EvaluateBool(node, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
 	if err != nil {
 		return C.CString(err.Error())
 	}
@@ -66,4 +64,9 @@ func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char
 	}
 
 	return nil
+}
+
+//export Version
+func Version() *C.char {
+	return C.CString(dfl.VERSION)
 }

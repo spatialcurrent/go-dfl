@@ -33,6 +33,10 @@ type Node struct {
 	FunctionMap dfl.FunctionMap
 }
 
+func (n Node) Pretty() string {
+	return n.Node.Dfl(GO_DFL_DEFAULT_QUOTES[1:], true, 0)
+}
+
 func (n Node) Compile() *js.Object {
 	return js.MakeWrapper(Node{
 		Node:        n.Node.Compile(),
@@ -49,7 +53,7 @@ func (n Node) Evaluate(options *js.Object) interface{} {
 
 	result, err := n.Node.Evaluate(ctx, n.FunctionMap, GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return false
 	}
 	return result
@@ -91,7 +95,7 @@ func EvaluateBool(s string, options *js.Object) bool {
 
 	result, err := dfl.EvaluateBool(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return false
 	}
 
@@ -101,7 +105,7 @@ func EvaluateBool(s string, options *js.Object) bool {
 func EvaluateInt(s string, options *js.Object) int {
 	root, err := dfl.Parse(s)
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return 0
 	}
 
@@ -114,7 +118,7 @@ func EvaluateInt(s string, options *js.Object) int {
 
 	result, err := dfl.EvaluateInt(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return 0
 	}
 
@@ -124,7 +128,7 @@ func EvaluateInt(s string, options *js.Object) int {
 func EvaluateFloat64(s string, options *js.Object) float64 {
 	root, err := dfl.Parse(s)
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return 0.0
 	}
 
@@ -137,7 +141,7 @@ func EvaluateFloat64(s string, options *js.Object) float64 {
 
 	result, err := dfl.EvaluateFloat64(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return 0.0
 	}
 
@@ -147,7 +151,7 @@ func EvaluateFloat64(s string, options *js.Object) float64 {
 func EvaluateString(s string, options *js.Object) string {
 	root, err := dfl.Parse(s)
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return ""
 	}
 
@@ -158,9 +162,9 @@ func EvaluateString(s string, options *js.Object) string {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateString(root, ctx, dfl.NewFuntionMapWithDefaults() GO_DFL_DEFAULT_QUOTES[1:])
+	result, err := dfl.EvaluateString(root, ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		console.Log(err.Error())
+		console.Error(err.Error())
 		return ""
 	}
 

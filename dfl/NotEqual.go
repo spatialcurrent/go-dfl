@@ -21,8 +21,8 @@ type NotEqual struct {
 // Dfl returns the DFL expression representation of the node as a string value.
 // For example
 //	"( @amenity  !=  shop )"
-func (ne NotEqual) Dfl(quotes []string, pretty bool) string {
-	return "(" + ne.Left.Dfl(quotes, pretty) + " != " + ne.Right.Dfl(quotes, pretty) + ")"
+func (ne NotEqual) Dfl(quotes []string, pretty bool, tabs int) string {
+	return ne.BinaryOperator.Dfl("!=", quotes, pretty, tabs)
 }
 
 func (ne NotEqual) Map() map[string]interface{} {

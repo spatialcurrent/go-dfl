@@ -25,8 +25,8 @@ type ILike struct {
 	*BinaryOperator
 }
 
-func (i ILike) Dfl(quotes []string, pretty bool) string {
-	return "(" + i.Left.Dfl(quotes, pretty) + " ilike " + i.Right.Dfl(quotes, pretty) + ")"
+func (i ILike) Dfl(quotes []string, pretty bool, tabs int) string {
+	return i.BinaryOperator.Dfl("ilike", quotes, pretty, tabs)
 }
 
 func (i ILike) Map() map[string]interface{} {
@@ -62,7 +62,7 @@ func (i ILike) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (in
 
 	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false))
+		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false, 0))
 	}
 	return pattern.MatchString(lvs), nil
 }

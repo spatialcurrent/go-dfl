@@ -13,8 +13,8 @@ type GreaterThanOrEqual struct {
 	*NumericBinaryOperator
 }
 
-func (gte GreaterThanOrEqual) Dfl(quotes []string, pretty bool) string {
-	return "(" + gte.Left.Dfl(quotes, pretty) + " >= " + gte.Right.Dfl(quotes, pretty) + ")"
+func (gte GreaterThanOrEqual) Dfl(quotes []string, pretty bool, tabs int) string {
+	return gte.BinaryOperator.Dfl(">=", quotes, pretty, tabs)
 }
 
 func (gte GreaterThanOrEqual) Map() map[string]interface{} {

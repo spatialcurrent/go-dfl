@@ -16,8 +16,8 @@ type Pipe struct {
 	*BinaryOperator
 }
 
-func (p Pipe) Dfl(quotes []string, pretty bool) string {
-	return p.Left.Dfl(quotes, pretty) + " | " + p.Right.Dfl(quotes, pretty)
+func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
+	return p.BinaryOperator.Dfl("|", quotes, pretty, tabs)
 }
 
 func (p Pipe) Map() map[string]interface{} {
@@ -47,11 +47,11 @@ func (p Pipe) Compile() Node {
 func (p Pipe) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
 	lv, err := p.Left.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return lv, errors.Wrap(err, "error processing left value of "+p.Dfl(quotes, false))
+		return lv, errors.Wrap(err, "error processing left value of "+p.Dfl(quotes, false, 0))
 	}
 	rv, err := p.Right.Evaluate(lv, funcs, quotes)
 	if err != nil {
-		return rv, errors.Wrap(err, "error processing right value of "+p.Dfl(quotes, false))
+		return rv, errors.Wrap(err, "error processing right value of "+p.Dfl(quotes, false, 0))
 	}
 	return rv, nil
 }

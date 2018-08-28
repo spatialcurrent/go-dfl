@@ -18,8 +18,8 @@ type Equal struct {
 	*BinaryOperator
 }
 
-func (e Equal) Dfl(quotes []string, pretty bool) string {
-	return "(" + e.Left.Dfl(quotes, pretty) + " == " + e.Right.Dfl(quotes, pretty) + ")"
+func (e Equal) Dfl(quotes []string, pretty bool, tabs int) string {
+	return e.BinaryOperator.Dfl("==", quotes, pretty, tabs)
 }
 
 func (e Equal) Map() map[string]interface{} {

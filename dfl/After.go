@@ -13,8 +13,8 @@ type After struct {
 	*TemporalBinaryOperator // Extends the TemporalBinaryOperator struct
 }
 
-func (a After) Dfl(quotes []string, pretty bool) string {
-	return "(" + a.Left.Dfl(quotes, pretty) + " after " + a.Right.Dfl(quotes, pretty) + ")"
+func (a After) Dfl(quotes []string, pretty bool, tabs int) string {
+	return a.BinaryOperator.Dfl("after", quotes, pretty, tabs)
 }
 
 func (a After) Map() map[string]interface{} {

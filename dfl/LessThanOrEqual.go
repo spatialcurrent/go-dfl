@@ -7,12 +7,14 @@
 
 package dfl
 
+// LessThanOrEqual is a NumericBinaryOperator that evaluating to true if parameter a is less than or equal to parameter b.
+// The parameters may be of type int, int64, or float64.
 type LessThanOrEqual struct {
 	*NumericBinaryOperator
 }
 
-func (lte LessThanOrEqual) Dfl(quotes []string, pretty bool) string {
-	return "(" + lte.Left.Dfl(quotes, pretty) + " <= " + lte.Right.Dfl(quotes, pretty) + ")"
+func (lte LessThanOrEqual) Dfl(quotes []string, pretty bool, tabs int) string {
+	return lte.BinaryOperator.Dfl("<=", quotes, pretty, tabs)
 }
 
 func (lte LessThanOrEqual) Map() map[string]interface{} {

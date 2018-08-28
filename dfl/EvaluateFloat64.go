@@ -20,7 +20,7 @@ import (
 func EvaluateFloat64(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (float64, error) {
 	result, err := n.Evaluate(ctx, funcs, quotes)
 	if err != nil {
-		return 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false))
+		return 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	switch result.(type) {

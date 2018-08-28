@@ -1,3 +1,10 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 import (
@@ -9,7 +16,7 @@ import (
 // The use of a string -> empty struct backend provides a higher write performance versus a slice backend.
 type StringSet map[string]struct{}
 
-func (set StringSet) Dfl(quotes []string, pretty bool) string {
+func (set StringSet) Dfl(quotes []string, pretty bool, tabs int) string {
 	values := make([]string, 0, len(set))
 	for v := range set {
 		values = append(values, quotes[0]+v+quotes[0])
