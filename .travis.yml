@@ -27,10 +27,18 @@ install:
 
 script:
   - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./dfl/
+  - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./dfljs/
   - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./plugins/dfl/
   - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./cmd/dfl/
   - gometalinter --misspell-locale=US --disable-all --enable=misspell --enable=vet ./cmd/dfl.js/
-  - cd cmd/dfl
+  - cd dfl
+  - go fmt
+  - go test
+  - cd ../dfljs
+  - go fmt
+  - cd ../cmd/dfl
   - go fmt
   - go build
-  - go test
+  - cd ../../cmd/dfljs
+  - go fmt
+  - go build

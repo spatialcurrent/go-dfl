@@ -5,7 +5,7 @@
 //
 // =================================================================
 
-// Dfl is the command line utility for testing DFL expressions.
+// dfl is the command line program for DFL.
 //
 // Usage
 //
