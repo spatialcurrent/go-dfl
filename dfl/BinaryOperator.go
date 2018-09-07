@@ -41,16 +41,16 @@ func (bo BinaryOperator) Dfl(operator string, quotes []string, pretty bool, tabs
 
 // EvaluateLeftAndRight evaluates the value of the left node and right node given a context map (ctx) and function map (funcs).
 // Returns a 3 value tuple of left value, right value, and error.
-func (bo BinaryOperator) EvaluateLeftAndRight(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, interface{}, error) {
-	lv, err := bo.Left.Evaluate(ctx, funcs, quotes)
+func (bo BinaryOperator) EvaluateLeftAndRight(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, interface{}, error) {
+	vars, lv, err := bo.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, false, err
+		return vars, false, false, err
 	}
-	rv, err := bo.Right.Evaluate(ctx, funcs, quotes)
+	vars, rv, err := bo.Right.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, false, err
+		return vars, false, false, err
 	}
-	return lv, rv, nil
+	return vars, lv, rv, nil
 }
 
 // Attributes returns a slice of all attributes used in the evluation of this node, including a children nodes.

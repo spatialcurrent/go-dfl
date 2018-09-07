@@ -41,21 +41,21 @@ func (l Like) Compile() Node {
 	return Like{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (l Like) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := l.Left.Evaluate(ctx, funcs, quotes)
+func (l Like) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := l.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 
-	rv, err := l.Right.Evaluate(ctx, funcs, quotes)
+	vars, rv, err := l.Right.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 
 	match, err := CompareStrings(fmt.Sprint(lv), fmt.Sprint(rv))
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+l.Dfl(quotes, false, 0))
+		return vars, false, errors.Wrap(err, "Error evaluating expression "+l.Dfl(quotes, false, 0))
 	}
 
-	return match, nil
+	return vars, match, nil
 }

@@ -42,12 +42,12 @@ func (a After) Compile() Node {
 	return After{&TemporalBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (a After) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (a After) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 
-	v, err := a.EvaluateAndCompare(ctx, funcs, quotes)
+	vars, v, err := a.EvaluateAndCompare(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 
-	return v > 0, nil
+	return vars, v > 0, nil
 }

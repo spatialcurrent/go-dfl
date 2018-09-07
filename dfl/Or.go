@@ -50,24 +50,24 @@ func (o Or) Compile() Node {
 	return Or{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (o Or) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := o.Left.Evaluate(ctx, funcs, quotes)
+func (o Or) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := o.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 	switch lv.(type) {
 	case bool:
 		if lv.(bool) {
-			return true, nil
+			return vars, true, nil
 		}
-		rv, err := o.Right.Evaluate(ctx, funcs, quotes)
+		vars, rv, err := o.Right.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return false, err
+			return vars, false, err
 		}
 		switch rv.(type) {
 		case bool:
-			return rv.(bool), nil
+			return vars, rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + o.Dfl(quotes, false, 0))
+	return vars, false, errors.New("Error evaluating expression " + o.Dfl(quotes, false, 0))
 }

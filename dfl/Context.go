@@ -21,6 +21,10 @@ type Context struct {
 	Data map[string]interface{}
 }
 
+func (c *Context) Len() int {
+	return len(c.Data)
+}
+
 func (c *Context) Has(key string) bool {
 	_, ok := c.Data[key]
 	return ok
@@ -32,4 +36,12 @@ func (c *Context) Get(key string) interface{} {
 
 func (c *Context) Set(key string, value interface{}) {
 	c.Data[key] = value
+}
+
+func (c *Context) Values() []interface{} {
+	values := make([]interface{}, 0, len(c.Data))
+	for _, v := range c.Data {
+		values = append(values, v)
+	}
+	return values
 }

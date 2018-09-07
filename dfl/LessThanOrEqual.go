@@ -42,12 +42,12 @@ func (lte LessThanOrEqual) Compile() Node {
 	return LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (lte LessThanOrEqual) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (lte LessThanOrEqual) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 
-	v, err := lte.EvaluateAndCompare(ctx, funcs, quotes)
+	vars, v, err := lte.EvaluateAndCompare(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 
-	return v <= 0, nil
+	return vars, v <= 0, nil
 }

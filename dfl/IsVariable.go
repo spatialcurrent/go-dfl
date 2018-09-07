@@ -7,4 +7,12 @@
 
 package dfl
 
-var VERSION = "0.0.8"
+import (
+	"strings"
+	"unicode"
+)
+
+// IsVariable returns true if the string is a formatted variable.
+func IsVariable(s string) bool {
+	return strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), VariablePrefix)
+}

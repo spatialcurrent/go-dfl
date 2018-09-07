@@ -8,12 +8,13 @@
 package dfl
 
 import (
+	"github.com/spatialcurrent/go-counter/counter"
 	"reflect"
 )
 
 // TryConvertArray attempts to convert the []interface{} array into []int, []int64, []float64, or []string, if possible.
 func TryConvertArray(a []interface{}) interface{} {
-	counter := Counter(map[string]int{})
+	counter := counter.New()
 	for _, v := range a {
 		counter.Increment(reflect.TypeOf(v).String())
 	}

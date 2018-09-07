@@ -20,8 +20,23 @@ type Function struct {
 
 func (f Function) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
-		out := strings.Repeat("  ", tabs) + f.Name + "("
 		if len(f.Arguments) > 0 {
+			if len(f.Arguments) == 1 {
+				switch arg := f.Arguments[0].(type) {
+				case *Attribute:
+					return strings.Repeat("  ", tabs) + f.Name + "(" + arg.Dfl(quotes, false, tabs+1) + ")"
+				case *Function:
+					if len(arg.Arguments) == 0 {
+						return strings.Repeat("  ", tabs) + f.Name + "(" + arg.Dfl(quotes, false, tabs+1) + ")"
+					} else if len(arg.Arguments) == 1 {
+						switch arg.Arguments[0].(type) {
+						case *Attribute:
+							return strings.Repeat("  ", tabs) + f.Name + "(" + arg.Dfl(quotes, false, tabs+1) + ")"
+						}
+					}
+				}
+			}
+			out := strings.Repeat("  ", tabs) + f.Name + "("
 			for i, arg := range f.Arguments {
 				out += "\n" + arg.Dfl(quotes, pretty, tabs+1)
 				if i < len(f.Arguments)-1 {
@@ -31,9 +46,10 @@ func (f Function) Dfl(quotes []string, pretty bool, tabs int) string {
 				}
 			}
 			out += strings.Repeat("  ", tabs)
+			out += ")"
+			return out
 		}
-		out += ")"
-		return out
+		return strings.Repeat("  ", tabs) + f.Name + "()"
 	}
 
 	out := f.Name + "("
@@ -63,19 +79,20 @@ func (f Function) Map() map[string]interface{} {
 	}
 }
 
-func (f Function) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (f Function) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	if fn, ok := funcs[f.Name]; ok {
 		values := make([]interface{}, 0, len(f.Arguments))
 		for _, arg := range f.Arguments {
-			value, err := arg.Evaluate(ctx, funcs, quotes)
+			_, value, err := arg.Evaluate(vars, ctx, funcs, quotes)
 			if err != nil {
-				return &Null{}, err
+				return vars, &Null{}, err
 			}
 			values = append(values, value)
 		}
-		return fn(funcs, ctx, values, quotes)
+		v, err := fn(funcs, vars, ctx, values, quotes)
+		return vars, v, err
 	} else {
-		return "", errors.New("attempted to evaluate unknown function " + f.Name)
+		return vars, "", errors.New("attempted to evaluate unknown function " + f.Name)
 	}
 }
 

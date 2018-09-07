@@ -52,21 +52,21 @@ func (x Xor) Compile() Node {
 	return Xor{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (x Xor) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := x.Left.Evaluate(ctx, funcs, quotes)
+func (x Xor) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := x.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 	switch lv.(type) {
 	case bool:
-		rv, err := x.Right.Evaluate(ctx, funcs, quotes)
+		vars, rv, err := x.Right.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return false, err
+			return vars, false, err
 		}
 		switch rv.(type) {
 		case bool:
-			return lv.(bool) != rv.(bool), nil
+			return vars, lv.(bool) != rv.(bool), nil
 		}
 	}
-	return false, errors.New("Error evaluating expression " + x.Dfl(quotes, false, 0))
+	return vars, false, errors.New("Error evaluating expression " + x.Dfl(quotes, false, 0))
 }

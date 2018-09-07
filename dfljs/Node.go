@@ -38,7 +38,7 @@ func (n Node) Evaluate(options *js.Object) interface{} {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := n.Node.Evaluate(ctx, n.FunctionMap, DefaultQuotes[1:])
+	_, result, err := n.Node.Evaluate(map[string]interface{}{}, ctx, n.FunctionMap, DefaultQuotes[1:])
 	if err != nil {
 		console.Error(errors.Wrap(err, "error evaluating").Error())
 		return false

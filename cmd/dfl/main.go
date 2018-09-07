@@ -28,7 +28,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -54,6 +56,7 @@ func main() {
 	var verbose bool
 	var version bool
 	var pretty bool
+	var dry_run bool
 	var help bool
 
 	flag.StringVar(&filter_text, "f", "", "The DFL expression to evaulate")
@@ -62,6 +65,7 @@ func main() {
 	flag.BoolVar(&load_env, "env", false, "Load environment variables")
 	flag.BoolVar(&verbose, "verbose", false, "Provide verbose output")
 	flag.BoolVar(&version, "version", false, "Prints version to stdout")
+	flag.BoolVar(&dry_run, "dry_run", false, "Do a dry run (parse and compile expression but do not evaluate)")
 	flag.BoolVar(&help, "help", false, "Print help")
 
 	flag.Parse()
@@ -96,21 +100,29 @@ func main() {
 		}
 	}
 
+	funcs := dfl.NewFuntionMapWithDefaults()
+
 	for _, a := range flag.Args() {
 		if !strings.Contains(a, "=") {
-			fmt.Println("Context attribute \"" + a + "\" does not contain \"=\".")
-			os.Exit(1)
+			log.Fatal(errors.New("Context attribute \"" + a + "\" does not contain \"=\"."))
 		}
 		pair := strings.SplitN(a, "=", 2)
 		value, err := dfl.Parse(strings.TrimSpace(pair[1]))
 		if err != nil {
-			fmt.Println(errors.Wrap(err, "Could not parse context variable"))
-			os.Exit(1)
+			log.Fatal(errors.Wrap(err, "Could not parse context variable"))
 		}
 		value = value.Compile()
 		switch value.(type) {
+		case dfl.Array:
+			_, arr, err := value.(dfl.Array).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, GO_DFL_DEFAULT_QUOTES[1:])
+			if err != nil {
+				log.Fatal(errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0])))
+			}
+			ctx[strings.TrimSpace(pair[0])] = arr
 		case dfl.Literal:
 			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
+		case *dfl.Literal:
+			ctx[strings.TrimSpace(pair[0])] = value.(*dfl.Literal).Value
 		default:
 			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(pair[1])
 		}
@@ -118,9 +130,7 @@ func main() {
 
 	root, err := dfl.Parse(filter_text)
 	if err != nil {
-		fmt.Println("Error parsing filter expression.")
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(errors.Wrap(err, "error parsing filter expression"))
 	}
 
 	if pretty {
@@ -164,11 +174,13 @@ func main() {
 		fmt.Println(GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:], false, 0) + GO_DFL_DEFAULT_QUOTES[0])
 	}
 
-	result, err := root.Evaluate(ctx, dfl.NewFuntionMapWithDefaults(), GO_DFL_DEFAULT_QUOTES[1:])
+	if dry_run {
+		os.Exit(0)
+	}
+
+	_, result, err := root.Evaluate(map[string]interface{}{}, ctx, funcs, GO_DFL_DEFAULT_QUOTES[1:])
 	if err != nil {
-		fmt.Println("Error evaluating expression.")
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(errors.Wrap(err, "error evaluating expression"))
 	}
 
 	switch result.(type) {
@@ -176,22 +188,22 @@ func main() {
 		result_bool := result.(bool)
 		if verbose {
 			fmt.Println("******************* Result *******************")
-			if result_bool {
-				fmt.Println("true")
-			} else {
-				fmt.Println("false")
-			}
-
+			fmt.Println(dfl.TryFormatLiteral(result, GO_DFL_DEFAULT_QUOTES[1:], false, 0))
 			elapsed := time.Since(start)
 			fmt.Println("Done in " + elapsed.String())
 		}
-
 		if result_bool {
 			os.Exit(0)
 		} else {
 			os.Exit(1)
 		}
 	default:
-		os.Exit(1)
+		if verbose {
+			fmt.Println("******************* Result *******************")
+			fmt.Println("Type:", reflect.TypeOf(result))
+			fmt.Println("Value:", dfl.TryFormatLiteral(result, GO_DFL_DEFAULT_QUOTES[1:], false, 0))
+			elapsed := time.Since(start)
+			fmt.Println("Done in " + elapsed.String())
+		}
 	}
 }

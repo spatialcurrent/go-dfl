@@ -39,7 +39,7 @@ func TestAttribute(t *testing.T) {
 		NewTestCase("@g[0] == 10", ctx, true),
 		NewTestCase("@g[0:2] == [10,20]", ctx, true),
 		NewTestCase("@h?.i[1:3] == [20,30]", ctx, true),
-		NewTestCase("@h?.i[1:3] == [20,30]", ctx, true),
+		NewTestCase("@h.i[1:3] == [20,30]", ctx, true),
 		NewTestCase("@j[0:3] == bar", ctx, true),
 		NewTestCase("@j[:3] == bar", ctx, true),
 		NewTestCase("@k[0]l == m", ctx, true),
@@ -52,7 +52,7 @@ func TestAttribute(t *testing.T) {
 			continue
 		}
 		node = node.Compile()
-		got, err := node.Evaluate(testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
+		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {

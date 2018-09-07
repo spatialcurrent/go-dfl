@@ -72,3 +72,6 @@
 package dfl
 
 var DefaultQuotes = []string{"'", "\"", "`"}
+
+var AttributePrefix = "@"
+var VariablePrefix = "$"

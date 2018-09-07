@@ -86,7 +86,7 @@ func ParseList(in string) ([]Node, error) {
 			leftparentheses == rightparentheses &&
 			leftsquarebrackets == rightsquarebrackets &&
 			leftcurlybrackets == rightcurlybrackets {
-			// If end of input or argumnet
+			// If end of input or argument
 			if i+1 == len(in) || in[i+1] == ',' {
 				s = strings.TrimSpace(s)
 				if IsQuoted(s) {
@@ -97,6 +97,12 @@ func ParseList(in string) ([]Node, error) {
 						return nodes, errors.Wrap(err, "error parsing attribute in list "+s)
 					}
 					nodes = append(nodes, attr)
+				} else if IsVariable(s) {
+					variable, err := ParseVariable(s, "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing variable in list "+s)
+					}
+					nodes = append(nodes, variable)
 				} else if IsArray(s) {
 					arr, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
 					if err != nil {
@@ -109,18 +115,18 @@ func ParseList(in string) ([]Node, error) {
 						return nodes, errors.Wrap(err, "error parsing set in list "+s)
 					}
 					nodes = append(nodes, set)
-				} else if strings.Contains(s, "(") {
-					f, err := ParseFunction(s, "")
-					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing function in list "+s)
-					}
-					nodes = append(nodes, f)
 				} else if IsSub(s) {
 					sub, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing sub in list "+s)
 					}
 					nodes = append(nodes, sub)
+				} else if IsFunction(s) {
+					f, err := ParseFunction(s, "")
+					if err != nil {
+						return nodes, errors.Wrap(err, "error parsing function in list "+s)
+					}
+					nodes = append(nodes, f)
 				} else {
 					nodes = append(nodes, &Literal{Value: TryConvertString(s)})
 				}

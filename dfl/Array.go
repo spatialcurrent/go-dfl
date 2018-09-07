@@ -52,16 +52,16 @@ func (a Array) Compile() Node {
 	return Literal{Value: TryConvertArray(values)}
 }
 
-func (a Array) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	values := make([]interface{}, len(a.Nodes))
-	for i, n := range a.Nodes {
-		v, err := n.Evaluate(ctx, funcs, quotes)
+func (a Array) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	values := make([]interface{}, 0, len(a.Nodes))
+	for _, n := range a.Nodes {
+		vars, v, err := n.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return values, err
+			return vars, values, err
 		}
-		values[i] = v
+		values = append(values, v)
 	}
-	return TryConvertArray(values), nil
+	return vars, TryConvertArray(values), nil
 }
 
 func (a Array) Attributes() []string {

@@ -13,5 +13,5 @@ import (
 
 // IsFunction returns true if the string is a formatted function
 func IsFunction(s string) bool {
-	return len(s) >= 3 && strings.Contains(s, "(") && strings.HasSuffix(s, ")")
+	return len(s) >= 3 && (strings.Index(s, "(") > 0) && strings.HasSuffix(s, ")")
 }

@@ -62,12 +62,12 @@ func (a Set) Compile() Node {
 	return Literal{Value: set}
 }
 
-func (a Set) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (a Set) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	values := make([]interface{}, len(a.Nodes))
 	for i, n := range a.Nodes {
-		v, err := n.Evaluate(ctx, funcs, quotes)
+		vars, v, err := n.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return values, err
+			return vars, values, err
 		}
 		values[i] = v
 	}
@@ -82,7 +82,7 @@ func (a Set) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (inte
 		}
 	}
 
-	return set, nil
+	return vars, set, nil
 }
 
 func (a Set) Attributes() []string {

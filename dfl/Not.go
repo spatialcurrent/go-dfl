@@ -49,14 +49,14 @@ func (n Not) Compile() Node {
 }
 
 // Evaluate evaluates this node within a context and returns the bool result, and error if any.
-func (n Not) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	v, err := n.Node.Evaluate(ctx, funcs, quotes)
+func (n Not) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, v, err := n.Node.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 	switch v.(type) {
 	case bool:
-		return !(v.(bool)), nil
+		return vars, !(v.(bool)), nil
 	}
-	return false, errors.New("Error evaluating expression " + n.Dfl(quotes, false, 0))
+	return vars, false, errors.New("Error evaluating expression " + n.Dfl(quotes, false, 0))
 }

@@ -42,12 +42,12 @@ func (gt GreaterThan) Compile() Node {
 	return GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
-func (gt GreaterThan) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (gt GreaterThan) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 
-	v, err := gt.EvaluateAndCompare(ctx, funcs, quotes)
+	vars, v, err := gt.EvaluateAndCompare(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 
-	return v > 0, nil
+	return vars, v > 0, nil
 }

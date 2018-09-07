@@ -41,20 +41,20 @@ func (c Coalesce) Compile() Node {
 	return Coalesce{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (c Coalesce) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := c.Left.Evaluate(ctx, funcs, quotes)
+func (c Coalesce) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := c.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return lv, errors.Wrap(err, "Error evaluating left value of coalesce: "+c.Left.Dfl(quotes, false, 0))
+		return vars, lv, errors.Wrap(err, "Error evaluating left value of coalesce: "+c.Left.Dfl(quotes, false, 0))
 	}
 
 	switch lv.(type) {
 	case Null:
-		rv, err := c.Right.Evaluate(ctx, funcs, quotes)
+		vars, rv, err := c.Right.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return rv, errors.Wrap(err, "Error evaluating right value of Coalesce: "+c.Left.Dfl(quotes, false, 0))
+			return vars, rv, errors.Wrap(err, "Error evaluating right value of Coalesce: "+c.Left.Dfl(quotes, false, 0))
 		}
-		return rv, nil
+		return vars, rv, nil
 	}
 
-	return lv, nil
+	return vars, lv, nil
 }

@@ -14,5 +14,5 @@ import (
 
 // IsAttribute returns true if the string is a formatted attribute
 func IsAttribute(s string) bool {
-	return strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), "@")
+	return strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), AttributePrefix)
 }

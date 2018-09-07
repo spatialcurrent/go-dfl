@@ -20,14 +20,14 @@ type Attribute struct {
 
 func (a Attribute) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
-		return strings.Repeat("  ", tabs) + "@" + a.Name
+		return strings.Repeat("  ", tabs) + AttributePrefix + a.Name
 	}
-	return "@" + a.Name
+	return AttributePrefix + a.Name
 }
 
 func (a Attribute) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"attribute": "@" + a.Name,
+		"attribute": AttributePrefix + a.Name,
 	}
 }
 
@@ -35,11 +35,12 @@ func (a Attribute) Compile() Node {
 	return Attribute{Name: a.Name}
 }
 
-func (a Attribute) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (a Attribute) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	if len(a.Name) == 0 {
-		return ctx, nil
+		return vars, ctx, nil
 	}
-	return Extract(a.Name, ctx)
+	ctx, err := Extract(a.Name, ctx, vars, ctx, funcs, quotes)
+	return vars, ctx, err
 }
 
 func (a Attribute) Attributes() []string {

@@ -18,18 +18,18 @@ type TemporalBinaryOperator struct {
 // If the left value and right value are at the same time, returns 0.
 // If the left value is before the right value, returns -1.
 // if the left value is after the right value, returns 1.
-func (tbo TemporalBinaryOperator) EvaluateAndCompare(ctx interface{}, funcs FunctionMap, quotes []string) (int, error) {
+func (tbo TemporalBinaryOperator) EvaluateAndCompare(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, int, error) {
 
-	lv, rv, err := tbo.EvaluateLeftAndRight(ctx, funcs, quotes)
+	vars, lv, rv, err := tbo.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 	if err != nil {
-		return 0, err
+		return vars, 0, err
 	}
 
 	v, err := CompareTimes(lv, rv)
 	if err != nil {
-		return 0, err
+		return vars, 0, err
 	}
 
-	return v, err
+	return vars, v, err
 
 }

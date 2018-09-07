@@ -27,8 +27,10 @@ func Parse(in string) (Node, error) {
 
 	leftparentheses := 0
 	rightparentheses := 0
-	curlybrackets := 0
-	squarebrackets := 0
+	leftcurlybrackets := 0
+	rightcurlybrackets := 0
+	leftsquarebrackets := 0
+	rightsquarebrackets := 0
 	singlequotes := 0
 	doublequotes := 0
 	backticks := 0
@@ -39,19 +41,19 @@ func Parse(in string) (Node, error) {
 		s_lc := strings.ToLower(s)
 		remainder := strings.TrimSpace(in[i+1:])
 
-		if c == '(' {
-			leftparentheses += 1
-		} else if c == ')' {
-			rightparentheses += 1
-		} else if singlequotes == 0 && doublequotes == 0 && backticks == 0 {
-			if squarebrackets == 0 && c == '[' {
-				squarebrackets += 1
-			} else if squarebrackets == 1 && c == ']' {
-				squarebrackets -= 1
-			} else if curlybrackets == 0 && c == '{' {
-				curlybrackets += 1
-			} else if curlybrackets == 1 && c == '}' {
-				curlybrackets -= 1
+		if singlequotes == 0 && doublequotes == 0 && backticks == 0 {
+			if c == '(' {
+				leftparentheses += 1
+			} else if c == ')' {
+				rightparentheses += 1
+			} else if c == '[' {
+				leftsquarebrackets += 1
+			} else if c == ']' {
+				rightsquarebrackets += 1
+			} else if c == '{' {
+				leftcurlybrackets += 1
+			} else if c == '}' {
+				rightcurlybrackets += 1
 			} else if c == '\'' {
 				singlequotes += 1
 			} else if c == '"' {
@@ -68,8 +70,8 @@ func Parse(in string) (Node, error) {
 		}
 
 		if leftparentheses == rightparentheses &&
-			squarebrackets == 0 &&
-			curlybrackets == 0 &&
+			leftsquarebrackets == rightsquarebrackets &&
+			leftcurlybrackets == rightcurlybrackets &&
 			singlequotes == 0 &&
 			doublequotes == 0 &&
 			backticks == 0 {
@@ -149,6 +151,14 @@ func Parse(in string) (Node, error) {
 				}
 				return &Subtract{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
 
+			} else if s_lc == "/" {
+
+				right, err := Parse(remainder)
+				if err != nil {
+					return right, err
+				}
+				return &Divide{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+
 			} else if s_lc == "|" {
 
 				right, err := Parse(remainder)
@@ -157,17 +167,29 @@ func Parse(in string) (Node, error) {
 				}
 				return &Pipe{&BinaryOperator{Right: right}}, nil
 
+			} else if s_lc == ":=" {
+
+				right, err := Parse(remainder)
+				if err != nil {
+					return right, err
+				}
+				return &Declare{&BinaryOperator{Right: right}}, nil
+
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
 				if IsQuoted(s) {
 					return ParseLiteral(s[1:len(s)-1], remainder)
 				} else if IsAttribute(s) {
 					return ParseAttribute(s, remainder)
+				} else if IsVariable(s) {
+					return ParseVariable(s, remainder)
 				} else if IsArray(s) {
 					return ParseArray(strings.TrimSpace(s[1:len(s)-1]), remainder)
 				} else if IsSet(s) {
 					return ParseSet(strings.TrimSpace(s[1:len(s)-1]), remainder)
 				} else if IsSub(s) {
 					return ParseSub(strings.TrimSpace(s[1:len(s)-1]), remainder)
+				} else if IsFunction(s) {
+					return ParseFunction(strings.TrimSpace(s), remainder)
 				} else if s_lc == "and" {
 
 					right, err := Parse(remainder)
@@ -239,9 +261,6 @@ func Parse(in string) (Node, error) {
 						return right, err
 					}
 					return &After{&TemporalBinaryOperator{&BinaryOperator{Right: right}}}, nil
-
-				} else if strings.Contains(s, "(") {
-					return ParseFunction(s, remainder)
 				} else {
 					return ParseLiteral(TryConvertString(s), remainder)
 				}

@@ -52,7 +52,7 @@ func TestEqual(t *testing.T) {
 			continue
 		}
 		node = node.Compile()
-		got, err := node.Evaluate(testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
+		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {

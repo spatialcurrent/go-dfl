@@ -14,6 +14,8 @@ import (
 // AttachLeft attaches the left Node as the left child node to the parent root Node.
 func AttachLeft(root Node, left Node) error {
 	switch root.(type) {
+	case *Declare:
+		root.(*Declare).Left = left
 	case *Pipe:
 		root.(*Pipe).Left = left
 	case *And:
@@ -46,6 +48,8 @@ func AttachLeft(root Node, left Node) error {
 		root.(*Add).Left = left
 	case *Subtract:
 		root.(*Subtract).Left = left
+	case *Divide:
+		root.(*Divide).Left = left
 	case *Before:
 		root.(*Before).Left = left
 	case *After:

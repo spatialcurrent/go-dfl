@@ -8,8 +8,6 @@
 package dfl
 
 import (
-	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -19,28 +17,12 @@ import (
 //	Literal{Value: ""}
 //	Literal{Value: 0.0}
 type Literal struct {
-	Value interface{} // the variable containing the actual value
+	Value interface{} // the field containing the actual value
 }
 
 func (l Literal) Dfl(quotes []string, pretty bool, tabs int) string {
 
-	str := ""
-	switch value := l.Value.(type) {
-	case string:
-		str = quotes[0] + value + quotes[0]
-		//return fmt.Sprintf("%q", value)
-	case []string:
-		out, _ := json.Marshal(value)
-		str = string(out)
-	case map[string]struct{}:
-		str = StringSet(value).Dfl(quotes, pretty, tabs)
-	case StringSet:
-		str = value.Dfl(quotes, pretty, tabs)
-	case Null:
-		str = value.Dfl()
-	default:
-		str = fmt.Sprint(l.Value)
-	}
+	str := TryFormatLiteral(l.Value, quotes, pretty, tabs)
 
 	if pretty {
 		str = strings.Repeat("  ", tabs) + str
@@ -59,8 +41,8 @@ func (l Literal) Compile() Node {
 	return l
 }
 
-func (l Literal) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	return l.Value, nil
+func (l Literal) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	return vars, l.Value, nil
 }
 
 func (l Literal) Attributes() []string {

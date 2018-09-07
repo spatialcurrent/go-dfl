@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // Pipe is a BinaryOperator which represents the "|" pipe operation of left and right values.
@@ -17,7 +18,24 @@ type Pipe struct {
 }
 
 func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
-	return p.BinaryOperator.Dfl("|", quotes, pretty, tabs)
+	if pretty {
+		switch p.Left.(type) {
+		case *Literal:
+			switch p.Left.(*Literal).Value.(type) {
+			case string, int, []byte, Null:
+				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, false, tabs) + " | " + p.Right.Dfl(quotes, false, tabs)
+			}
+		}
+		switch p.Right.(type) {
+		case *Literal:
+			switch p.Right.(*Literal).Value.(type) {
+			case string, int, []byte, Null:
+				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, false, tabs) + " | " + p.Right.Dfl(quotes, false, tabs)
+			}
+		}
+		return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, pretty, tabs) + " | " + "\n" + p.Right.Dfl(quotes, pretty, tabs)
+	}
+	return p.Left.Dfl(quotes, pretty, tabs) + " | " + p.Right.Dfl(quotes, pretty, tabs)
 }
 
 func (p Pipe) Map() map[string]interface{} {
@@ -44,14 +62,14 @@ func (p Pipe) Compile() Node {
 	return Pipe{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (p Pipe) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := p.Left.Evaluate(ctx, funcs, quotes)
+func (p Pipe) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := p.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return lv, errors.Wrap(err, "error processing left value of "+p.Dfl(quotes, false, 0))
+		return vars, lv, errors.Wrap(err, "error processing left value of "+p.Dfl(quotes, false, 0))
 	}
-	rv, err := p.Right.Evaluate(lv, funcs, quotes)
+	vars, rv, err := p.Right.Evaluate(vars, lv, funcs, quotes)
 	if err != nil {
-		return rv, errors.Wrap(err, "error processing right value of "+p.Dfl(quotes, false, 0))
+		return vars, rv, errors.Wrap(err, "error processing right value of "+p.Dfl(quotes, false, 0))
 	}
-	return rv, nil
+	return vars, rv, nil
 }

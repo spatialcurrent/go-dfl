@@ -47,17 +47,17 @@ func (a Add) Compile() Node {
 }
 
 // Evaluate returns the value of this node given Context ctx, and an error if any.
-func (a Add) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
+func (a Add) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 
-	lv, rv, err := a.EvaluateLeftAndRight(ctx, funcs, quotes)
+	vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 	if err != nil {
-		return 0, err
+		return vars, 0, err
 	}
 
 	v, err := AddValues(lv, rv)
 	if err != nil {
-		return 0, err
+		return vars, 0, err
 	}
 
-	return v, err
+	return vars, v, err
 }

@@ -43,26 +43,26 @@ func (i ILike) Compile() Node {
 	return ILike{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (i ILike) Evaluate(ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	lv, err := i.Left.Evaluate(ctx, funcs, quotes)
+func (i ILike) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, lv, err := i.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 	lvs := strings.ToLower(fmt.Sprint(lv))
 
-	rv, err := i.Right.Evaluate(ctx, funcs, quotes)
+	vars, rv, err := i.Right.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return false, err
+		return vars, false, err
 	}
 	rvs := strings.ToLower(fmt.Sprint(rv))
 
 	if len(rvs) == 0 {
-		return len(lvs) == 0, nil
+		return vars, len(lvs) == 0, nil
 	}
 
 	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
-		return false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false, 0))
+		return vars, false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false, 0))
 	}
-	return pattern.MatchString(lvs), nil
+	return vars, pattern.MatchString(lvs), nil
 }
