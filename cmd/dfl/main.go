@@ -119,6 +119,12 @@ func main() {
 				log.Fatal(errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0])))
 			}
 			ctx[strings.TrimSpace(pair[0])] = arr
+		case dfl.Set:
+			_, arr, err := value.(dfl.Set).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, GO_DFL_DEFAULT_QUOTES[1:])
+			if err != nil {
+				log.Fatal(errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0])))
+			}
+			ctx[strings.TrimSpace(pair[0])] = arr
 		case dfl.Literal:
 			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
 		case *dfl.Literal:

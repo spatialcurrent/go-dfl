@@ -4,7 +4,9 @@
 
 # Description
 
-**go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).
+**go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).  **go-dfl** depends on:
+- [go-adaptive-functions](https://github.com/spatialcurrent/go-adaptive-functions) for many of the basic functions.
+- [go-counter](https://github.com/spatialcurrent/go-counter) for counting for statistical functions.
 
 Using cross compilers, this library can also be called by other languages.  This library is cross compiled into a Shared Object file (`*.so`).  The Shared Object file can be called by `C`, `C++`, and `Python` on Linux machines.  See the examples folder for patterns that you can use.  This library is also compiled to pure `JavaScript` using [GopherJS](https://github.com/gopherjs/gopherjs).
 
