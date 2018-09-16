@@ -7,10 +7,6 @@
 
 package dfl
 
-import (
-	"github.com/pkg/errors"
-)
-
 // Or is a BinaryOperator which represents the logical boolean OR operation of left and right values.
 type Or struct {
 	*BinaryOperator
@@ -20,12 +16,13 @@ func (o Or) Dfl(quotes []string, pretty bool, tabs int) string {
 	return o.BinaryOperator.Dfl("or", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (o Or) Sql(pretty bool, tabs int) string {
+	return o.BinaryOperator.Sql("or", pretty, tabs)
+}
+
 func (o Or) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "or",
-		"left":  o.Left.Map(),
-		"right": o.Right.Map(),
-	}
+	return o.BinaryOperator.Map("or", o.Left, o.Right)
 }
 
 // Compile returns a compiled version of this node.
@@ -69,5 +66,5 @@ func (o Or) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 			return vars, rv.(bool), nil
 		}
 	}
-	return vars, false, errors.New("Error evaluating expression " + o.Dfl(quotes, false, 0))
+	return vars, false, &ErrorEvaluate{Node: o, Quotes: quotes}
 }

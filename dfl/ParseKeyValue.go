@@ -16,10 +16,54 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ParseList parses a list of values.
-func ParseList(in string) ([]Node, error) {
+func parseKeyOrValueString(s string) (Node, error) {
+	if IsQuoted(s) {
+		return &Literal{Value: s[1 : len(s)-1]}, nil
+	} else if IsAttribute(s) {
+		attr, err := ParseAttribute(s, "")
+		if err != nil {
+			return attr, errors.Wrap(err, "error parsing attribute in list "+s)
+		}
+		return attr, nil
+	} else if IsVariable(s) {
+		variable, err := ParseVariable(s, "")
+		if err != nil {
+			return variable, errors.Wrap(err, "error parsing variable in list "+s)
+		}
+		return variable, nil
+	} else if IsArray(s) {
+		arr, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
+		if err != nil {
+			return arr, errors.Wrap(err, "error parsing array in list "+s)
+		}
+		return arr, nil
+	} else if IsSetOrDictionary(s) {
+		setOrDictionary, err := ParseSetOrDictionary(strings.TrimSpace(s[1:len(s)-1]), "")
+		if err != nil {
+			return setOrDictionary, errors.Wrap(err, "error parsing set in list "+s)
+		}
+		return setOrDictionary, nil
+	} else if IsSub(s) {
+		sub, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
+		if err != nil {
+			return sub, errors.Wrap(err, "error parsing sub in list "+s)
+		}
+		return sub, nil
+	} else if IsFunction(s) {
+		f, err := ParseFunction(s, "")
+		if err != nil {
+			return f, errors.Wrap(err, "error parsing function in list "+s)
+		}
+		return f, nil
+	}
 
-	nodes := make([]Node, 0)
+	return &Literal{Value: TryConvertString(s)}, nil
+}
+
+// ParseKeyValue parses a sequence of key value pairs
+func ParseKeyValue(in string) (map[Node]Node, error) {
+
+	nodes := map[Node]Node{}
 
 	singlequotes := 0
 	doublequotes := 0
@@ -34,6 +78,7 @@ func ParseList(in string) ([]Node, error) {
 
 	in = strings.TrimSpace(in)
 	s := ""
+	key := ""
 
 	for i, c := range in {
 
@@ -75,7 +120,7 @@ func ParseList(in string) ([]Node, error) {
 			leftparentheses == rightparentheses &&
 			leftcurlybrackets == rightcurlybrackets &&
 			leftsquarebrackets == rightsquarebrackets &&
-			c == ',') {
+			(c == ',' || c == ':')) {
 			s += string(c)
 		}
 
@@ -87,48 +132,22 @@ func ParseList(in string) ([]Node, error) {
 			leftsquarebrackets == rightsquarebrackets &&
 			leftcurlybrackets == rightcurlybrackets {
 			// If end of input or argument
-			if i+1 == len(in) || in[i+1] == ',' {
-				s = strings.TrimSpace(s)
-				if IsQuoted(s) {
-					nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
-				} else if IsAttribute(s) {
-					attr, err := ParseAttribute(s, "")
+			if i+1 == len(in) || in[i+1] == ',' || in[i+1] == ':' {
+				if i+1 != len(in) && in[i+1] == ':' {
+					key = strings.TrimSpace(s)
+				} else if len(key) > 0 {
+					keyNode, err := parseKeyOrValueString(key)
 					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing attribute in list "+s)
+						return nodes, errors.Wrap(err, "error parsing key for key-pair")
 					}
-					nodes = append(nodes, attr)
-				} else if IsVariable(s) {
-					variable, err := ParseVariable(s, "")
+					valueNode, err := parseKeyOrValueString(strings.TrimSpace(s))
 					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing variable in list "+s)
+						return nodes, errors.Wrap(err, "error parsing value for key-pair")
 					}
-					nodes = append(nodes, variable)
-				} else if IsArray(s) {
-					arr, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
-					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing array in list "+s)
-					}
-					nodes = append(nodes, arr)
-				} else if IsSetOrDictionary(s) {
-					setOrDictionary, err := ParseSetOrDictionary(strings.TrimSpace(s[1:len(s)-1]), "")
-					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing set in list "+s)
-					}
-					nodes = append(nodes, setOrDictionary)
-				} else if IsSub(s) {
-					sub, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
-					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing sub in list "+s)
-					}
-					nodes = append(nodes, sub)
-				} else if IsFunction(s) {
-					f, err := ParseFunction(s, "")
-					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing function in list "+s)
-					}
-					nodes = append(nodes, f)
+					nodes[keyNode] = valueNode
+					key = ""
 				} else {
-					nodes = append(nodes, &Literal{Value: TryConvertString(s)})
+					return nodes, errors.New("missing key when parsing key-value pairs")
 				}
 				s = ""
 			}

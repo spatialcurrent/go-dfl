@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"sort"
 	"strings"
 	"unicode"
 )
@@ -198,6 +197,8 @@ func suffix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 
 }
 
+/*
+// no current uses for custom sorting, so just going to use simpler one from go-adaptive-functions
 func sortArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
 	if len(args) != 1 && len(args) != 2 && len(args) != 3 {
@@ -304,7 +305,7 @@ func sortArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, 
 	}
 
 	return 0, errors.New("Invalid arguments for sortArray " + reflect.TypeOf(args[0]).String())
-}
+}*/
 
 func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 	if len(args) != 2 && len(args) != 3 {

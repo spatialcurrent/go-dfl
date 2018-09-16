@@ -26,9 +26,16 @@ func (v Variable) Dfl(quotes []string, pretty bool, tabs int) string {
 	return VariablePrefix + v.Name
 }
 
+func (v Variable) Sql(pretty bool, tabs int) string {
+	if pretty {
+		return strings.Repeat("  ", tabs) + v.Name
+	}
+	return v.Name
+}
+
 func (v Variable) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"attribute": VariablePrefix + v.Name,
+		"variable": VariablePrefix + v.Name,
 	}
 }
 

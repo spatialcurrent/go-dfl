@@ -17,12 +17,13 @@ func (a After) Dfl(quotes []string, pretty bool, tabs int) string {
 	return a.BinaryOperator.Dfl("after", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (a After) Sql(pretty bool, tabs int) string {
+	return a.BinaryOperator.Sql(">", pretty, tabs)
+}
+
 func (a After) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "after",
-		"left":  a.Left.Map(),
-		"right": a.Right.Map(),
-	}
+	return a.BinaryOperator.Map("after", a.Left, a.Right)
 }
 
 func (a After) Compile() Node {

@@ -7,10 +7,6 @@
 
 package dfl
 
-import (
-	"github.com/pkg/errors"
-)
-
 // Xor is a BinaryOperator which represents the logical boolean XOR operation of left and right values.
 //
 //	- https://en.wikipedia.org/wiki/Exclusive_or
@@ -22,12 +18,25 @@ func (x Xor) Dfl(quotes []string, pretty bool, tabs int) string {
 	return x.BinaryOperator.Dfl("xor", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+// Equivalent to (A and not B) or (not A and B)
+func (x Xor) Sql(pretty bool, tabs int) string {
+
+	left := &And{&BinaryOperator{
+		Left:  x.Left,
+		Right: &Not{&UnaryOperator{Node: x.Right}},
+	}}
+
+	right := &And{&BinaryOperator{
+		Left:  &Not{&UnaryOperator{Node: x.Left}},
+		Right: x.Right,
+	}}
+
+	return Or{&BinaryOperator{Left: left, Right: right}}.Sql(pretty, tabs)
+}
+
 func (x Xor) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "xor",
-		"left":  x.Left.Map(),
-		"right": x.Right.Map(),
-	}
+	return x.BinaryOperator.Map("xor", x.Left, x.Right)
 }
 
 // Compile returns a compiled version of this node.
@@ -68,5 +77,5 @@ func (x Xor) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 			return vars, lv.(bool) != rv.(bool), nil
 		}
 	}
-	return vars, false, errors.New("Error evaluating expression " + x.Dfl(quotes, false, 0))
+	return vars, false, &ErrorEvaluate{Node: x, Quotes: quotes}
 }

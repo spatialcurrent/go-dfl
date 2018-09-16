@@ -16,21 +16,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestPipe(t *testing.T) {
+func TestWithin(t *testing.T) {
 
-	ctx := map[string]interface{}{
-		"a": 1,
-		"b": map[string]interface{}{
-			"c": 2,
-		},
-		"d": []string{"bar", "restaurant", "shop"},
-	}
+	ctx := map[string]interface{}{"a": 2, "b": []int{1, 3}}
 
 	testCases := []TestCase{
-		NewTestCase("true | false", ctx, false),
-		NewTestCase("@b | @c == 2", ctx, true),
-		NewTestCase("@d | bar in @", ctx, true),
-		NewTestCase("@d | sort(@, true) | limit(@, 1) | @[0] == shop", ctx, true),
+		NewTestCase("2 within @b", ctx, true),
+		NewTestCase("@a within [1,3]", ctx, true),
+		NewTestCase("@a within 1 AND 3", ctx, true),
+		NewTestCase("@a between 1 AND 3", ctx, true),
+		NewTestCase("@a within @b", ctx, true),
 	}
 
 	for _, testCase := range testCases {
@@ -44,7 +39,7 @@ func TestPipe(t *testing.T) {
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
 		} else if got != testCase.Result {
-			t.Errorf("TestPipe(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+			t.Errorf("TestGreaterThan(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

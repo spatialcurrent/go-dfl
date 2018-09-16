@@ -7,10 +7,6 @@
 
 package dfl
 
-import (
-	"github.com/pkg/errors"
-)
-
 // And is a BinaryOperator which represents the logical boolean AND operation of left and right values.
 type And struct {
 	*BinaryOperator
@@ -20,12 +16,13 @@ func (a And) Dfl(quotes []string, pretty bool, tabs int) string {
 	return a.BinaryOperator.Dfl("and", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (a And) Sql(pretty bool, tabs int) string {
+	return a.BinaryOperator.Sql("and", pretty, tabs)
+}
+
 func (a And) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "and",
-		"left":  a.Left.Map(),
-		"right": a.Right.Map(),
-	}
+	return a.BinaryOperator.Map("and", a.Left, a.Right)
 }
 
 // Compile returns a compiled version of this node.
@@ -69,5 +66,5 @@ func (a And) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 			return vars, rv.(bool), nil
 		}
 	}
-	return vars, false, errors.New("Error evaluating expression " + a.Dfl(quotes, false, 0))
+	return vars, false, &ErrorEvaluate{Node: a, Quotes: quotes}
 }

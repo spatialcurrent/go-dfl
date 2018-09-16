@@ -17,15 +17,33 @@ type Set struct {
 	Nodes []Node
 }
 
-func (a Set) Dfl(quotes []string, pretty bool, tabs int) string {
+// Len returns the length of the underlying array.
+func (s Set) Len() int {
+	return len(s.Nodes)
+}
+
+func (s Set) Dfl(quotes []string, pretty bool, tabs int) string {
 	str := "{"
-	for i, x := range a.Nodes {
+	for i, x := range s.Nodes {
 		if i > 0 {
 			str += ", "
 		}
 		str += x.Dfl(quotes, pretty, tabs)
 	}
 	str = str + "}"
+	return str
+}
+
+// Sql returns the SQL representation of this node as a string
+func (s Set) Sql(pretty bool, tabs int) string {
+	str := SqlArrayPrefix
+	for i, x := range s.Nodes {
+		if i > 0 {
+			str += ", "
+		}
+		str += x.Sql(pretty, tabs)
+	}
+	str = str + SqlArraySuffix
 	return str
 }
 

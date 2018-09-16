@@ -7,9 +7,15 @@
 
 package dfl
 
-// Add is a NumericBinaryOperator that represents the mathematical addition of two nodes.
+import (
+	"fmt"
+	"github.com/pkg/errors"
+	"github.com/spatialcurrent/go-adaptive-functions/af"
+)
+
+// Add is a BinaryOperator that represents the addition of two nodes.
 type Add struct {
-	*NumericBinaryOperator
+	*BinaryOperator
 }
 
 // Dfl returns the DFL representation of this node as a string
@@ -17,13 +23,14 @@ func (a Add) Dfl(quotes []string, pretty bool, tabs int) string {
 	return a.BinaryOperator.Dfl("+", quotes, pretty, tabs)
 }
 
-// Map returns a map representation of this node
+// Sql returns the SQL representation of this node.
+func (a Add) Sql(pretty bool, tabs int) string {
+	return a.BinaryOperator.Sql("+", pretty, tabs)
+}
+
+// Map returns a map representation of this node.
 func (a Add) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "+",
-		"left":  a.Left.Map(),
-		"right": a.Right.Map(),
-	}
+	return a.BinaryOperator.Map("+", a.Left, a.Right)
 }
 
 // Compile returns a compiled version of this node.
@@ -32,18 +39,44 @@ func (a Add) Map() map[string]interface{} {
 func (a Add) Compile() Node {
 	left := a.Left.Compile()
 	right := a.Right.Compile()
+
 	switch left.(type) {
 	case Literal:
 		switch right.(type) {
 		case Literal:
-			v, err := AddValues(left.(Literal).Value, right.(Literal).Value)
+			v, err := af.Add.ValidateRun([]interface{}{left.(Literal).Value, right.(Literal).Value})
 			if err != nil {
-				panic(err)
+				return &Add{&BinaryOperator{Left: left, Right: right}}
 			}
 			return Literal{Value: v}
 		}
+		switch left.(Literal).Value.(type) {
+		case string:
+			switch right.(type) {
+			case Concat:
+				switch right.(Concat).Arguments[0].(type) {
+				case Literal:
+					n := Literal{
+						Value: left.(Literal).Value.(string) + fmt.Sprint(right.(Concat).Arguments[0].(Literal).Value),
+					}
+					return Concat{Arguments: append([]Node{n}, right.(Concat).Arguments[1:]...)}
+				}
+				return Concat{Arguments: append([]Node{left}, right.(Concat).Arguments...)}
+			}
+			return Concat{Arguments: []Node{left, right}}
+		}
+	case Attribute, *Attribute, Variable, *Variable:
+		switch right.(type) {
+		case Literal:
+			switch right.(Literal).Value.(type) {
+			case string:
+				return Concat{Arguments: []Node{left, right}}
+			}
+		case Concat:
+			return Concat{Arguments: append([]Node{left}, right.(Concat).Arguments...)}
+		}
 	}
-	return Add{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+	return &Add{&BinaryOperator{Left: left, Right: right}}
 }
 
 // Evaluate returns the value of this node given Context ctx, and an error if any.
@@ -54,9 +87,9 @@ func (a Add) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 		return vars, 0, err
 	}
 
-	v, err := AddValues(lv, rv)
+	v, err := af.Add.ValidateRun([]interface{}{lv, rv})
 	if err != nil {
-		return vars, 0, err
+		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
 	}
 
 	return vars, v, err

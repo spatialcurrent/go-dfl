@@ -75,3 +75,7 @@ var DefaultQuotes = []string{"'", "\"", "`"}
 
 var AttributePrefix = "@"
 var VariablePrefix = "$"
+
+var SqlArrayPrefix = "{"
+var SqlArraySuffix = "}"
+var SqlQuote = "'"

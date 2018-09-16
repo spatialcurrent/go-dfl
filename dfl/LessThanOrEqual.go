@@ -13,16 +13,18 @@ type LessThanOrEqual struct {
 	*NumericBinaryOperator
 }
 
+// Sql returns the DFL representation of this node as a string
 func (lte LessThanOrEqual) Dfl(quotes []string, pretty bool, tabs int) string {
 	return lte.BinaryOperator.Dfl("<=", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (lte LessThanOrEqual) Sql(pretty bool, tabs int) string {
+	return lte.BinaryOperator.Sql("<=", pretty, tabs)
+}
+
 func (lte LessThanOrEqual) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "<=",
-		"left":  lte.Left.Map(),
-		"right": lte.Right.Map(),
-	}
+	return lte.BinaryOperator.Map("<=", lte.Left, lte.Right)
 }
 
 func (lte LessThanOrEqual) Compile() Node {

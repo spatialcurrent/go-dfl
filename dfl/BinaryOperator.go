@@ -39,9 +39,22 @@ func (bo BinaryOperator) Dfl(operator string, quotes []string, pretty bool, tabs
 	return "(" + bo.Left.Dfl(quotes, pretty, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, pretty, tabs) + ")"
 }
 
+func (bo BinaryOperator) Sql(operator string, pretty bool, tabs int) string {
+	return "(" + bo.Left.Sql(pretty, tabs) + " " + operator + " " + bo.Right.Sql(pretty, tabs) + ")"
+}
+
+func (bo BinaryOperator) Map(operator string, left Node, right Node) map[string]interface{} {
+	return map[string]interface{}{
+		"op":    operator,
+		"left":  left.Map(),
+		"right": right.Map(),
+	}
+}
+
 // EvaluateLeftAndRight evaluates the value of the left node and right node given a context map (ctx) and function map (funcs).
 // Returns a 3 value tuple of left value, right value, and error.
 func (bo BinaryOperator) EvaluateLeftAndRight(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, interface{}, error) {
+
 	vars, lv, err := bo.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
 		return vars, false, false, err

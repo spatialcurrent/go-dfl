@@ -30,10 +30,9 @@ func TestFunction(t *testing.T) {
 
 	testCases := []TestCase{
 		NewTestCase("min(1, @a) == 1", ctx, true),
-		NewTestCase("min(2, @b) == 2", ctx, true),
-		NewTestCase("max(3, @a) == 3", ctx, true),
-		NewTestCase("min(3, @b) == 3.0", ctx, true),
-		NewTestCase("min(1, max(@a, @b)) == 1", ctx, true),
+		NewTestCase("min(2, @a) == 2", ctx, true),
+		NewTestCase("min(3.0, @b) == 3.0", ctx, true),
+		NewTestCase("min(1, max(@a, 2)) == 1", ctx, true),
 		NewTestCase("len(bytes(@c)) == 3", ctx, true),
 		NewTestCase("f in map(@d, '@e')", ctx, true),
 	}

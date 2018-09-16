@@ -7,11 +7,14 @@
 
 package dfl
 
-import (
-	"strings"
-)
-
-// IsSet returns true if the string is formatted set.
-func IsSet(s string) bool {
-	return len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")
+// FormatNodes formats an array of nodes to a string.
+func FormatNodes(nodes []Node, delim string, quotes []string, pretty bool, tabs int) string {
+	str := ""
+	for i, arg := range nodes {
+		if i > 0 {
+			str += delim
+		}
+		str += arg.Dfl(quotes, pretty, tabs)
+	}
+	return str
 }

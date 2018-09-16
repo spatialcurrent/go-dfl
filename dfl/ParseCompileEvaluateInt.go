@@ -13,6 +13,7 @@ import (
 	"reflect"
 )
 
+// ParseCompileEvaluateInt parses the expression, compiles the node, evaluates on the given context, and returns a result of type int if valid, otherwise returns and error.
 func ParseCompileEvaluateInt(exp string, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, int, error) {
 
 	vars, value, err := ParseCompileEvaluate(exp, vars, ctx, funcs, quotes)

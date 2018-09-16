@@ -25,6 +25,13 @@ func (a Attribute) Dfl(quotes []string, pretty bool, tabs int) string {
 	return AttributePrefix + a.Name
 }
 
+func (a Attribute) Sql(pretty bool, tabs int) string {
+	if pretty {
+		return strings.Repeat("  ", tabs) + a.Name
+	}
+	return a.Name
+}
+
 func (a Attribute) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"attribute": AttributePrefix + a.Name,

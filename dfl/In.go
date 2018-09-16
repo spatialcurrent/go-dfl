@@ -10,7 +10,6 @@ package dfl
 import (
 	"fmt"
 	"net"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -35,24 +34,46 @@ func (i In) Dfl(quotes []string, pretty bool, tabs int) string {
 	return i.BinaryOperator.Dfl("in", quotes, pretty, tabs)
 }
 
-func (i In) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "in",
-		"left":  i.Left.Map(),
-		"right": i.Right.Map(),
+func (i In) Sql(pretty bool, tabs int) string {
+
+	switch right := i.Right.(type) {
+	case *Attribute:
+		switch left := i.Left.(type) {
+		case *Literal:
+			switch lv := left.Value.(type) {
+			case string:
+				like := &Like{&BinaryOperator{
+					Left:  i.Right,
+					Right: &Literal{Value: "%" + lv + "%"},
+				}}
+				return like.Sql(pretty, tabs)
+			}
+		}
+	case *Set:
+		eq := &Equal{&BinaryOperator{
+			Left:  i.Left,
+			Right: &Function{Name: "ANY", Arguments: []Node{right}},
+		}}
+		return eq.Sql(pretty, tabs)
 	}
+
+	return ""
+}
+
+func (i In) Map() map[string]interface{} {
+	return i.BinaryOperator.Map("in", i.Left, i.Right)
 }
 
 func (i In) Compile() Node {
 	left := i.Left.Compile()
 	right := i.Right.Compile()
-	return In{&BinaryOperator{Left: left, Right: right}}
+	return &In{&BinaryOperator{Left: left, Right: right}}
 }
 
 func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	vars, lv, err := i.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return vars, false, errors.Wrap(err, "Error evaluating in with left value for "+i.Dfl(quotes, false, 0))
+		return vars, false, errors.Wrap(err, "Error evaluating left value for "+i.Dfl(quotes, false, 0))
 	}
 
 	vars, rv, err := i.Right.Evaluate(vars, ctx, funcs, quotes)
@@ -70,6 +91,22 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 		case *net.IPNet:
 			rv_net := rv.(*net.IPNet)
 			return vars, rv_net.Contains(lv_ip), nil
+		}
+	}
+
+	switch lv.(type) {
+	case int:
+		switch rv.(type) {
+		case []int:
+			for _, x := range rv.([]int) {
+				r, err := CompareNumbers(lv, x)
+				if err != nil {
+					return vars, false, nil
+				} else if r == 0 {
+					return vars, true, nil
+				}
+			}
+			return vars, false, nil
 		}
 	}
 
@@ -193,5 +230,5 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 		return vars, false, nil
 	}
 
-	return vars, false, errors.Wrap(err, "Error evaluating in with left value ("+fmt.Sprint(reflect.TypeOf(lv))+") and right value ("+fmt.Sprint(reflect.TypeOf(rv))+")")
+	return vars, false, &ErrorEvaluate{Node: i, Quotes: quotes}
 }

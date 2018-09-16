@@ -11,33 +11,41 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ParseSet parses a Set Node and recursively any remainder.
+// ParseSetOrDictionary parses a Set or Dictionary Node and recursively any remainder.
 // If parameter "in" is gramatically a child node, then return the parent node.
-// DFL sets can include Attribute or Literal Nodes.
-// As all attribute references must start with an "@" character, parantheses are optional for literals except if a comma exists.
+// DFL sets/dictionaries can include Attribute or Literal Nodes.
+// As all attribute references must start with an "@" character, parentheses are optional for literals except if a comma exists.
 // Below are some example inputs
 //
 //	{bank, bureau_de_change, atm}
 //	{1, 2, @target}
 //	{Taco, Tacos, Burrito, Burritos, "Mexican Food", @example}
-func ParseSet(in string, remainder string) (Node, error) {
+//	{amenity: bank}
+func ParseSetOrDictionary(in string, remainder string) (Node, error) {
 
-	nodes, err := ParseList(in)
+	isSet, list, kv, err := ParseListOrKeyValue(in)
 	if err != nil {
-		return &Array{}, errors.Wrap(err, "error parsing set "+in)
+		return &Set{}, errors.Wrap(err, "error parsing set "+in)
 	}
 
 	if len(remainder) == 0 {
-		return &Set{Nodes: nodes}, nil
+		if isSet {
+			return &Set{Nodes: list}, nil
+		}
+		return &Dictionary{Nodes: kv}, nil
 	}
 
-	left := &Set{Nodes: nodes}
 	root, err := Parse(remainder)
 	if err != nil {
 		return root, err
 	}
 
-	err = AttachLeft(root, left)
+	if isSet {
+		err = AttachLeft(root, &Set{Nodes: list})
+	} else {
+		err = AttachLeft(root, &Dictionary{Nodes: kv})
+	}
+
 	if err != nil {
 		return root, errors.Wrap(err, "error attaching left for "+in)
 	}

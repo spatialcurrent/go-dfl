@@ -16,15 +16,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestSubtract(t *testing.T) {
+func TestDictionary(t *testing.T) {
 
 	ctx := map[string]interface{}{"a": 2, "b": 3.0}
 
 	testCases := []TestCase{
-		NewTestCase("2 - 7", ctx, -5),
-		NewTestCase("@a - 1", ctx, 1),
-		NewTestCase("3.0 - @b", ctx, 0.0),
-		NewTestCase("@a - @b", ctx, -1.0),
+		NewTestCase("{c: @a}", ctx, map[interface{}]interface{}{"c": 2}),
+		NewTestCase("{'c': @}", ctx, map[interface{}]interface{}{"c": ctx}),
+		NewTestCase("{'c': {d:@a}}", ctx, map[interface{}]interface{}{"c": map[interface{}]interface{}{"d": 2}}),
 	}
 
 	for _, testCase := range testCases {
@@ -37,8 +36,8 @@ func TestSubtract(t *testing.T) {
 		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
-		} else if got != testCase.Result {
-			t.Errorf("TestSubtract(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
+		} else if !reflect.DeepEqual(got, testCase.Result) {
+			t.Errorf("TestDictionary(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}
 

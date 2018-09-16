@@ -52,12 +52,17 @@ func (f Function) Dfl(quotes []string, pretty bool, tabs int) string {
 		return strings.Repeat("  ", tabs) + f.Name + "()"
 	}
 
+	return f.Name + "(" + FormatNodes(f.Arguments, ", ", quotes, pretty, tabs) + ")"
+}
+
+// Sql returns the SQL representation of this node as a string
+func (f Function) Sql(pretty bool, tabs int) string {
 	out := f.Name + "("
 	for i, arg := range f.Arguments {
 		if i > 0 {
 			out += ", "
 		}
-		out += arg.Dfl(quotes, pretty, tabs)
+		out += arg.Sql(pretty, tabs)
 	}
 	out += ")"
 	return out

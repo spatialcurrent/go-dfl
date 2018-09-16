@@ -22,12 +22,22 @@ func (e Equal) Dfl(quotes []string, pretty bool, tabs int) string {
 	return e.BinaryOperator.Dfl("==", quotes, pretty, tabs)
 }
 
-func (e Equal) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "equal",
-		"left":  e.Left.Map(),
-		"right": e.Right.Map(),
+// Sql returns the SQL representation of this node as a string
+func (e Equal) Sql(pretty bool, tabs int) string {
+	switch right := e.Right.(type) {
+	case Literal:
+		switch right.Value.(type) {
+		case Null:
+			if pretty {
+				return e.Left.Sql(pretty, tabs) + " IS NULL"
+			}
+		}
 	}
+	return e.BinaryOperator.Sql("=", pretty, tabs)
+}
+
+func (e Equal) Map() map[string]interface{} {
+	return e.BinaryOperator.Map("equal", e.Left, e.Right)
 }
 
 func (e Equal) Compile() Node {

@@ -16,6 +16,12 @@ type Array struct {
 	Nodes []Node
 }
 
+// Len returns the length of the underlying array.
+func (a Array) Len() int {
+	return len(a.Nodes)
+}
+
+// Dfl returns the DFL representation of this node as a string
 func (a Array) Dfl(quotes []string, pretty bool, tabs int) string {
 	str := "["
 	for i, x := range a.Nodes {
@@ -25,6 +31,19 @@ func (a Array) Dfl(quotes []string, pretty bool, tabs int) string {
 		str += x.Dfl(quotes, pretty, tabs)
 	}
 	str = str + "]"
+	return str
+}
+
+// Sql returns the SQL representation of this node as a string
+func (a Array) Sql(pretty bool, tabs int) string {
+	str := "{"
+	for i, x := range a.Nodes {
+		if i > 0 {
+			str += ", "
+		}
+		str += x.Sql(pretty, tabs)
+	}
+	str = str + "}"
 	return str
 }
 

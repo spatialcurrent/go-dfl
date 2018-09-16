@@ -55,11 +55,13 @@ func main() {
 	var load_env bool
 	var verbose bool
 	var version bool
+	var sql bool
 	var pretty bool
 	var dry_run bool
 	var help bool
 
 	flag.StringVar(&filter_text, "f", "", "The DFL expression to evaulate")
+	flag.BoolVar(&sql, "sql", false, "Prints SQL version of expression to stdout")
 	flag.BoolVar(&pretty, "pretty", false, "Prints pretty version of expression to stdout")
 
 	flag.BoolVar(&load_env, "env", false, "Load environment variables")
@@ -143,6 +145,10 @@ func main() {
 		fmt.Println("# Pretty Version \n" + root.Dfl(dfl.DefaultQuotes[1:], true, 0) + "\n")
 	}
 
+	if sql {
+		fmt.Println("# SQL Version \n" + root.Sql(pretty, 0) + "\n")
+	}
+
 	if verbose {
 
 		fmt.Println("******************* Context *******************")
@@ -175,9 +181,11 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(string(out))
-
-		fmt.Println(GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:], false, 0) + GO_DFL_DEFAULT_QUOTES[0])
+		fmt.Println("# YAML Version\n" + string(out))
+		fmt.Println("# DFL Version\n" + GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:], false, 0) + GO_DFL_DEFAULT_QUOTES[0])
+		if sql {
+			fmt.Println("# SQL Version\n" + root.Sql(pretty, 0) + "\n")
+		}
 	}
 
 	if dry_run {

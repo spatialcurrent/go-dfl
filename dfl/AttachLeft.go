@@ -8,54 +8,31 @@
 package dfl
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
+	"reflect"
 )
 
 // AttachLeft attaches the left Node as the left child node to the parent root Node.
 func AttachLeft(root Node, left Node) error {
-	switch root.(type) {
-	case *Declare:
-		root.(*Declare).Left = left
-	case *Pipe:
-		root.(*Pipe).Left = left
-	case *And:
-		root.(*And).Left = left
-	case *Or:
-		root.(*Or).Left = left
-	case *Xor:
-		root.(*Xor).Left = left
-	case *Coalesce:
-		root.(*Coalesce).Left = left
-	case *In:
-		root.(*In).Left = left
-	case *Like:
-		root.(*Like).Left = left
-	case *ILike:
-		root.(*ILike).Left = left
-	case *LessThan:
-		root.(*LessThan).Left = left
-	case *LessThanOrEqual:
-		root.(*LessThanOrEqual).Left = left
-	case *GreaterThan:
-		root.(*GreaterThan).Left = left
-	case *GreaterThanOrEqual:
-		root.(*GreaterThanOrEqual).Left = left
-	case *Equal:
-		root.(*Equal).Left = left
-	case *NotEqual:
-		root.(*NotEqual).Left = left
-	case *Add:
-		root.(*Add).Left = left
-	case *Subtract:
-		root.(*Subtract).Left = left
-	case *Divide:
-		root.(*Divide).Left = left
-	case *Before:
-		root.(*Before).Left = left
-	case *After:
-		root.(*After).Left = left
-	default:
-		return errors.New("Could not attach left as root is not a binary operator")
+
+	t := reflect.TypeOf(root)
+	v := reflect.ValueOf(root)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		v = v.Elem()
 	}
+	if t.Kind() != reflect.Struct {
+		return errors.New("could not attach left as root is not a struct but " + fmt.Sprint(t))
+	}
+	f := v.FieldByName("Left")
+	if !f.IsValid() {
+		return errors.New("could not attach left as root does not have a field with name Left")
+	}
+	if !f.CanSet() {
+		return errors.New("could not attach left as root does not have a field with name Left that can be set")
+	}
+	f.Set(reflect.ValueOf(left))
+
 	return nil
 }

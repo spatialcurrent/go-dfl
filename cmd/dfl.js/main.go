@@ -30,6 +30,7 @@ func main() {
 		"EvaluateBool":   dfljs.EvaluateBool,
 		"EvaluateInt":    dfljs.EvaluateInt,
 		"EvaluateFloat":  dfljs.EvaluateFloat64,
+		"EvaluateMap":    dfljs.EvaluateMap,
 		"EvaluateString": dfljs.EvaluateString,
 	})
 }

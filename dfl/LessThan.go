@@ -13,16 +13,18 @@ type LessThan struct {
 	*NumericBinaryOperator
 }
 
+// Sql returns the DFL representation of this node as a string
 func (lt LessThan) Dfl(quotes []string, pretty bool, tabs int) string {
 	return lt.BinaryOperator.Dfl("<", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (lt LessThan) Sql(pretty bool, tabs int) string {
+	return lt.BinaryOperator.Sql("<", pretty, tabs)
+}
+
 func (lt LessThan) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "<",
-		"left":  lt.Left.Map(),
-		"right": lt.Right.Map(),
-	}
+	return lt.BinaryOperator.Map("<", lt.Left, lt.Right)
 }
 
 func (lt LessThan) Compile() Node {

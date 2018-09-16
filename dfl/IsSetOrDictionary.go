@@ -7,13 +7,11 @@
 
 package dfl
 
-// Null is used as return value for Extract and DFL functions instead of returning nil pointers.
-type Null struct{}
+import (
+	"strings"
+)
 
-func (n Null) Dfl() string {
-	return "null"
-}
-
-func (n Null) Sql() string {
-	return "NULL"
+// IsSetOrDictionary returns true if the string is a formatted set or dictionary.
+func IsSetOrDictionary(s string) bool {
+	return len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")
 }

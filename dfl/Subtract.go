@@ -7,6 +7,11 @@
 
 package dfl
 
+import (
+	"github.com/pkg/errors"
+	"github.com/spatialcurrent/go-adaptive-functions/af"
+)
+
 type Subtract struct {
 	*NumericBinaryOperator
 }
@@ -15,12 +20,12 @@ func (s Subtract) Dfl(quotes []string, pretty bool, tabs int) string {
 	return s.BinaryOperator.Dfl("-", quotes, pretty, tabs)
 }
 
+func (s Subtract) Sql(pretty bool, tabs int) string {
+	return s.BinaryOperator.Sql("-", pretty, tabs)
+}
+
 func (s Subtract) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "-",
-		"left":  s.Left.Map(),
-		"right": s.Right.Map(),
-	}
+	return s.BinaryOperator.Map("subtract", s.Left, s.Right)
 }
 
 func (s Subtract) Compile() Node {
@@ -30,14 +35,14 @@ func (s Subtract) Compile() Node {
 	case Literal:
 		switch right.(type) {
 		case Literal:
-			v, err := SubtractNumbers(left.(Literal).Value, right.(Literal).Value)
+			v, err := af.Subtract.ValidateRun([]interface{}{left.(Literal).Value, right.(Literal).Value})
 			if err != nil {
-				panic(err)
+				return &Subtract{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 			}
 			return Literal{Value: v}
 		}
 	}
-	return Subtract{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+	return &Subtract{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
 func (s Subtract) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
@@ -47,10 +52,10 @@ func (s Subtract) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 		return vars, 0, err
 	}
 
-	v, err := SubtractNumbers(lv, rv)
+	v, err := af.Subtract.ValidateRun([]interface{}{lv, rv})
 	if err != nil {
-		return vars, 0, err
+		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: s, Quotes: quotes}.Error())
 	}
 
-	return vars, v, err
+	return vars, v, nil
 }

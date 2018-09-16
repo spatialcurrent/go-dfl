@@ -20,12 +20,13 @@ func (c Coalesce) Dfl(quotes []string, pretty bool, tabs int) string {
 	return "(" + c.Left.Dfl(quotes, pretty, tabs) + " ?: " + c.Right.Dfl(quotes, pretty, tabs) + ")"
 }
 
+// Sql returns the SQL representation of this node as a string
+func (c Coalesce) Sql(pretty bool, tabs int) string {
+	return "COALESCE(" + c.Left.Sql(pretty, tabs) + ", " + c.Right.Sql(pretty, tabs) + ")"
+}
+
 func (c Coalesce) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "?:",
-		"left":  c.Left.Map(),
-		"right": c.Right.Map(),
-	}
+	return c.BinaryOperator.Map("?:", c.Left, c.Right)
 }
 
 // Compile returns a compiled version of this node.

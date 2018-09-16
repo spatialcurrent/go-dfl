@@ -29,12 +29,13 @@ func (i ILike) Dfl(quotes []string, pretty bool, tabs int) string {
 	return i.BinaryOperator.Dfl("ilike", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (i ILike) Sql(pretty bool, tabs int) string {
+	return i.BinaryOperator.Sql("ILIKE", pretty, tabs)
+}
+
 func (i ILike) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "ilike",
-		"left":  i.Left.Map(),
-		"right": i.Right.Map(),
-	}
+	return i.BinaryOperator.Map("ilike", i.Left, i.Right)
 }
 
 func (i ILike) Compile() Node {
@@ -62,7 +63,7 @@ func (i ILike) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Func
 
 	pattern, err := regexp.Compile("^" + strings.Replace(rvs, "%", ".*", -1) + "$")
 	if err != nil {
-		return vars, false, errors.Wrap(err, "Error evaluating expression "+i.Dfl(quotes, false, 0))
+		return vars, false, errors.Wrap(err, ErrorEvaluate{Node: i, Quotes: quotes}.Error())
 	}
 	return vars, pattern.MatchString(lvs), nil
 }

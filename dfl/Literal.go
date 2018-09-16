@@ -31,6 +31,17 @@ func (l Literal) Dfl(quotes []string, pretty bool, tabs int) string {
 	return str
 }
 
+// Sql returns the SQL representation of this node as a string
+func (l Literal) Sql(pretty bool, tabs int) string {
+	str := FormatSql(l.Value, pretty, tabs)
+
+	if pretty {
+		str = strings.Repeat("  ", tabs) + str
+	}
+
+	return str
+}
+
 func (l Literal) Map() map[string]interface{} {
 	return map[string]interface{}{
 		"value": l.Value,

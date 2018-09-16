@@ -16,6 +16,7 @@ import (
 // This interface is inherited by most structs in the dfl package.
 type Node interface {
 	Dfl(quotes []string, pretty bool, tabs int) string                                                                                      // returns the DFL expression representation of this node
+	Sql(pretty bool, tabs int) string                                                                                                       // returns the SQL representation of this node
 	Map() map[string]interface{}                                                                                                            // returns a map representing this node
 	Compile() Node                                                                                                                          // compiles this node (and all children).
 	Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) // evaluates the value of a node given a context

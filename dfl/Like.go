@@ -27,12 +27,13 @@ func (l Like) Dfl(quotes []string, pretty bool, tabs int) string {
 	return l.BinaryOperator.Dfl("like", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (l Like) Sql(pretty bool, tabs int) string {
+	return l.BinaryOperator.Sql("LIKE", pretty, tabs)
+}
+
 func (l Like) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "like",
-		"left":  l.Left.Map(),
-		"right": l.Right.Map(),
-	}
+	return l.BinaryOperator.Map("like", l.Left, l.Right)
 }
 
 func (l Like) Compile() Node {
@@ -54,7 +55,7 @@ func (l Like) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Funct
 
 	match, err := CompareStrings(fmt.Sprint(lv), fmt.Sprint(rv))
 	if err != nil {
-		return vars, false, errors.Wrap(err, "Error evaluating expression "+l.Dfl(quotes, false, 0))
+		return vars, false, errors.Wrap(err, ErrorEvaluate{Node: l, Quotes: quotes}.Error())
 	}
 
 	return vars, match, nil

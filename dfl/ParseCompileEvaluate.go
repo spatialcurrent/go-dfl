@@ -7,10 +7,12 @@
 
 package dfl
 
+// ParseCompileEvaluate parses the expression, compiles the node, and evaluates on the given context.
 func ParseCompileEvaluate(exp string, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
-	node, err := Parse(exp)
+	node, err := ParseCompile(exp)
 	if err != nil {
 		return vars, Null{}, err
 	}
-	return node.Compile().Evaluate(vars, ctx, funcs, quotes)
+
+	return node.Evaluate(vars, ctx, funcs, quotes)
 }

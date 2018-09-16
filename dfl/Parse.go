@@ -135,15 +135,15 @@ func Parse(in string) (Node, error) {
 				}
 				return &NotEqual{&BinaryOperator{Right: right}}, nil
 
-			} else if s_lc == "+" {
+			} else if s_lc == "+" && in[i+1] != '=' {
 
 				right, err := Parse(remainder)
 				if err != nil {
 					return right, err
 				}
-				return &Add{&NumericBinaryOperator{&BinaryOperator{Right: right}}}, nil
+				return &Add{&BinaryOperator{Right: right}}, nil
 
-			} else if s_lc == "-" {
+			} else if s_lc == "-" && in[i+1] == ' ' { // space is require to exclude negative numbers and -=
 
 				right, err := Parse(remainder)
 				if err != nil {
@@ -173,7 +173,23 @@ func Parse(in string) (Node, error) {
 				if err != nil {
 					return right, err
 				}
-				return &Declare{&BinaryOperator{Right: right}}, nil
+				return &Assign{&BinaryOperator{Right: right}}, nil
+
+			} else if s_lc == "+=" {
+
+				right, err := Parse(remainder)
+				if err != nil {
+					return right, err
+				}
+				return &AssignAdd{&BinaryOperator{Right: right}}, nil
+
+			} else if s_lc == "-=" {
+
+				right, err := Parse(remainder)
+				if err != nil {
+					return right, err
+				}
+				return &AssignSubtract{&BinaryOperator{Right: right}}, nil
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
 				if IsQuoted(s) {
@@ -184,8 +200,8 @@ func Parse(in string) (Node, error) {
 					return ParseVariable(s, remainder)
 				} else if IsArray(s) {
 					return ParseArray(strings.TrimSpace(s[1:len(s)-1]), remainder)
-				} else if IsSet(s) {
-					return ParseSet(strings.TrimSpace(s[1:len(s)-1]), remainder)
+				} else if IsSetOrDictionary(s) {
+					return ParseSetOrDictionary(strings.TrimSpace(s[1:len(s)-1]), remainder)
 				} else if IsSub(s) {
 					return ParseSub(strings.TrimSpace(s[1:len(s)-1]), remainder)
 				} else if IsFunction(s) {
@@ -229,6 +245,14 @@ func Parse(in string) (Node, error) {
 						return right, err
 					}
 					return &In{&BinaryOperator{Right: right}}, nil
+
+				} else if s_lc == "within" || s_lc == "between" {
+
+					right, err := Parse(remainder)
+					if err != nil {
+						return right, err
+					}
+					return &Within{&BinaryOperator{Right: right}}, nil
 
 				} else if s_lc == "like" {
 

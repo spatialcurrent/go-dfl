@@ -25,6 +25,11 @@ func (n Not) Dfl(quotes []string, pretty bool, tabs int) string {
 	return "not " + n.Node.Dfl(quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (n Not) Sql(pretty bool, tabs int) string {
+	panic("Not is not supported yet!")
+}
+
 // Map returns a map representation of this node (and its children nodes)
 func (n Not) Map() map[string]interface{} {
 	return map[string]interface{}{

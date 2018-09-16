@@ -17,13 +17,14 @@ func (d Divide) Dfl(quotes []string, pretty bool, tabs int) string {
 	return d.BinaryOperator.Dfl("/", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (d Divide) Sql(pretty bool, tabs int) string {
+	return d.BinaryOperator.Sql("/", pretty, tabs)
+}
+
 // Map returns a map representation of this node.
 func (d Divide) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "/",
-		"left":  d.Left.Map(),
-		"right": d.Right.Map(),
-	}
+	return d.BinaryOperator.Map("divide", d.Left, d.Right)
 }
 
 // Compile returns a compiled version of this node.

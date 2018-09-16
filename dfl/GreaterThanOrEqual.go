@@ -17,12 +17,13 @@ func (gte GreaterThanOrEqual) Dfl(quotes []string, pretty bool, tabs int) string
 	return gte.BinaryOperator.Dfl(">=", quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (gte GreaterThanOrEqual) Sql(pretty bool, tabs int) string {
+	return gte.BinaryOperator.Sql(">=", pretty, tabs)
+}
+
 func (gte GreaterThanOrEqual) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    ">=",
-		"left":  gte.Left.Map(),
-		"right": gte.Right.Map(),
-	}
+	return gte.BinaryOperator.Map(">=", gte.Left, gte.Right)
 }
 
 func (gte GreaterThanOrEqual) Compile() Node {

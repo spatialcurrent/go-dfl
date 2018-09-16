@@ -25,12 +25,22 @@ func (ne NotEqual) Dfl(quotes []string, pretty bool, tabs int) string {
 	return ne.BinaryOperator.Dfl("!=", quotes, pretty, tabs)
 }
 
-func (ne NotEqual) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "equal",
-		"left":  ne.Left.Map(),
-		"right": ne.Right.Map(),
+// Sql returns the SQL representation of this node as a string
+func (ne NotEqual) Sql(pretty bool, tabs int) string {
+	switch right := ne.Right.(type) {
+	case Literal:
+		switch right.Value.(type) {
+		case Null:
+			if pretty {
+				return ne.Left.Sql(pretty, tabs) + " IS NOT NULL"
+			}
+		}
 	}
+	return ne.BinaryOperator.Sql("!=", pretty, tabs)
+}
+
+func (ne NotEqual) Map() map[string]interface{} {
+	return ne.BinaryOperator.Map("notequal", ne.Left, ne.Right)
 }
 
 func (ne NotEqual) Compile() Node {
@@ -44,6 +54,11 @@ func (ne NotEqual) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 	vars, lv, rv, err := ne.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 	if err != nil {
 		return vars, 0, err
+	}
+
+	switch lv.(type) {
+	case []interface{}:
+		lv = TryConvertArray(lv.([]interface{}))
 	}
 
 	switch lv.(type) {
@@ -187,6 +202,8 @@ func (ne NotEqual) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 	case []float64:
 		lva := lv.([]float64)
 		switch rv.(type) {
+		case Null:
+			return vars, true, nil
 		case []int:
 			rva := rv.([]int)
 			if len(lva) != len(rva) {

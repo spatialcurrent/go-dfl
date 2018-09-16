@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -38,12 +39,14 @@ func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
 	return p.Left.Dfl(quotes, pretty, tabs) + " | " + p.Right.Dfl(quotes, pretty, tabs)
 }
 
+// Sql returns the SQL representation of this node as a string
+func (p Pipe) Sql(pretty bool, tabs int) string {
+	stmt := "SELECT * FROM (SELECT * FROM $TABLE " + p.Left.Sql(pretty, tabs) + ") as A" + fmt.Sprint(tabs) + " WHERE " + p.Right.Sql(pretty, tabs) + ";"
+	return stmt
+}
+
 func (p Pipe) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"op":    "pipe",
-		"left":  p.Left.Map(),
-		"right": p.Right.Map(),
-	}
+	return p.BinaryOperator.Map("pipe", p.Left, p.Right)
 }
 
 // Compile returns a compiled version of this node.

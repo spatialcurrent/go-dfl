@@ -42,7 +42,7 @@ func NewFuntionMapWithDefaults() FunctionMap {
 
 	funcs["filter"] = filterArray
 	funcs["map"] = mapArray
-	funcs["sort"] = sortArray
+	//funcs["sort"] = sortArray
 	funcs["dict"] = toDict
 	funcs["hist"] = histArray
 	funcs["prefix"] = prefix
@@ -69,22 +69,6 @@ func NewFuntionMapWithDefaults() FunctionMap {
 		}
 
 		return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
-	}
-
-	funcs["min"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-		if len(args) < 1 {
-			return 0, errors.New("Invalid number of arguments to len.")
-		}
-
-		return Min(TryConvertArray(args))
-	}
-
-	funcs["max"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-		if len(args) < 1 {
-			return 0, errors.New("Invalid number of arguments to len.")
-		}
-
-		return Max(TryConvertArray(args))
 	}
 
 	funcs["first"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {

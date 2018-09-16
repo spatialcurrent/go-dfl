@@ -43,3 +43,36 @@ func TestAdd(t *testing.T) {
 	}
 
 }
+
+func TestAddSql(t *testing.T) {
+
+	testCases := []struct {
+		Dfl string
+		Sql string
+	}{
+		struct {
+			Dfl string
+			Sql string
+		}{Dfl: "@population + 2", Sql: "(population + 2)"},
+		struct {
+			Dfl string
+			Sql string
+		}{Dfl: "@name + '-' + @type", Sql: "concat(name, '-', type)"},
+	}
+
+	for _, testCase := range testCases {
+		node, err := Parse(testCase.Dfl)
+		if err != nil {
+			t.Errorf(errors.Wrap(err, "Error parsing expression \""+testCase.Dfl+"\"").Error())
+			continue
+		}
+		node = node.Compile()
+		got := node.Sql(false, 0)
+		if err != nil {
+			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Dfl+"\"").Error())
+		} else if got != testCase.Sql {
+			t.Errorf("TestAdd(%q) == %v , want %v", testCase.Dfl, got, testCase.Sql)
+		}
+	}
+
+}
