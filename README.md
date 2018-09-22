@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/spatialcurrent/go-dfl.svg)](https://travis-ci.org/spatialcurrent/go-dfl) [![Go Report Card](https://goreportcard.com/badge/spatialcurrent/go-dfl)](https://goreportcard.com/report/spatialcurrent/go-dfl)  [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/spatialcurrent/go-dfl/blob/master/LICENSE.md)
+[![CircleCI](https://circleci.com/gh/spatialcurrent/go-dfl/tree/master.svg?style=svg)](https://circleci.com/gh/spatialcurrent/go-dfl/tree/master) [![Go Report Card](https://goreportcard.com/badge/spatialcurrent/go-dfl)](https://goreportcard.com/report/spatialcurrent/go-dfl)  [![GoDoc](https://godoc.org/github.com/spatialcurrent/go-dfl?status.svg)](https://godoc.org/github.com/spatialcurrent/go-dfl) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/spatialcurrent/go-dfl/blob/master/LICENSE.md)
 
 # go-dfl
 
@@ -7,6 +7,7 @@
 **go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).  **go-dfl** depends on:
 - [go-adaptive-functions](https://github.com/spatialcurrent/go-adaptive-functions) for many of the basic functions.
 - [go-counter](https://github.com/spatialcurrent/go-counter) for counting for statistical functions.
+- [go-try-get](https://github.com/spatialcurrent/go-try-get) for abstracting how to get values by name from unknown objects.
 
 Using cross compilers, this library can also be called by other languages.  This library is cross compiled into a Shared Object file (`*.so`).  The Shared Object file can be called by `C`, `C++`, and `Python` on Linux machines.  See the examples folder for patterns that you can use.  This library is also compiled to pure `JavaScript` using [GopherJS](https://github.com/gopherjs/gopherjs).
 

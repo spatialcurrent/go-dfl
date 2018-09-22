@@ -1,10 +1,17 @@
+// =================================================================
+//
+// Copyright (C) 2018 Spatial Current, Inc. - All Rights Reserved
+// Released as open source under the MIT License.  See LICENSE file.
+//
+// =================================================================
+
 package dfl
 
 // ParseCompile parses the input expression and compiles the DFL node.
-func ParseCompile(in string) (Node, error) {
-	n, err := Parse(in)
+func ParseCompile(expression string) (Node, error) {
+	node, _, err := Parse(expression)
 	if err != nil {
-		return n, err
+		return node, err
 	}
-	return n.Compile(), nil
+	return node.Compile(), nil
 }

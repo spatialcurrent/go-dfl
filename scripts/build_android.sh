@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DEST=$(realpath ${1:-$DIR/../bin})
+DEST=${1:-$DIR/../bin}
 
 mkdir -p $DEST
 

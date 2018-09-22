@@ -73,9 +73,8 @@ package dfl
 
 var DefaultQuotes = []string{"'", "\"", "`"}
 
-var AttributePrefix = "@"
-var VariablePrefix = "$"
-
 var SqlArrayPrefix = "{"
 var SqlArraySuffix = "}"
 var SqlQuote = "'"
+var NoVars = map[string]interface{}{}
+var NoContext = map[string]interface{}{}

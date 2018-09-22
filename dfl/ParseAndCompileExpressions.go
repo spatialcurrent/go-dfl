@@ -15,7 +15,7 @@ import (
 func ParseAndCompileExpressions(expressions map[string]string) (map[string]Node, error) {
 	nodes := map[string]Node{}
 	for k, exp := range expressions {
-		node, err := Parse(exp)
+		node, _, err := Parse(exp)
 		if err != nil {
 			return nodes, errors.Wrap(err, "error parsing expression "+exp)
 		}

@@ -18,7 +18,8 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-reader/reader"
+	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-try-get/gtg"
 )
 
 func parseExtractPath(path string) (int, int, int, int, error) {
@@ -237,8 +238,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 						return v.Interface(), nil
 					}
 
-					switch o := obj.(type) {
-					case *reader.Cache:
+					if o, ok := obj.(grw.ByteReadCloser); ok {
 						return o.ReadRange(start, end-1)
 					}
 
@@ -253,8 +253,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 						return s.Slice(start, s.Len()).Interface(), nil
 					}
 
-					switch obj.(type) {
-					case *reader.Cache:
+					if _, ok := obj.(grw.ByteReadCloser); ok {
 						return make([]byte, 0), errors.New("Reader cannot evaluate [start:]")
 					}
 
@@ -306,8 +305,8 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 						}
 					}
 				}
-				switch o := obj.(type) {
-				case *reader.Cache:
+
+				if o, ok := obj.(grw.ByteReadCloser); ok {
 					slice_index := 0
 					switch i.(type) {
 					case int:
@@ -321,6 +320,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 					}
 					return values[0], nil
 				}
+
 				return Null{}, errors.New("object \"" + fmt.Sprint(obj) + "\" (" + reflect.TypeOf(obj).String() + ") is not a slice.")
 			}
 			return Null{}, errors.New("slice range \"" + (path[1:slice_end_index]) + "\" is invalid ")
@@ -374,14 +374,24 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 			}
 			return values.Interface(), nil
 		}
-		value := m.MapIndex(reflect.ValueOf(path))
-		if !value.IsValid() {
+
+		value := gtg.TryGet(obj, path, nil)
+		if value == nil {
 			return Null{}, nil
 		}
-		if value.IsNil() {
+		return value, nil
+
+	} else if t.Kind() == reflect.Struct {
+
+		if path == "*" {
+			return Null{}, errors.New("object is invalid type " + reflect.TypeOf(obj).String())
+		}
+
+		value := gtg.TryGet(obj, path, nil)
+		if value == nil {
 			return Null{}, nil
 		}
-		return value.Interface(), nil
+		return value, nil
 	}
 
 	switch o := obj.(type) {

@@ -17,18 +17,18 @@ import (
 )
 
 // EvaluateInt returns the int value of a node given a context.  If the result is not an int, then returns an error.
-func EvaluateInt(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (int, error) {
-	_, result, err := n.Evaluate(map[string]interface{}{}, ctx, funcs, quotes)
+func EvaluateInt(n Node, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, int, error) {
+	vars, result, err := n.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return 0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
+		return vars, 0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	switch result.(type) {
 	case int:
-		return result.(int), nil
+		return vars, result.(int), nil
 	case float64:
-		return int(result.(float64)), nil
+		return vars, int(result.(float64)), nil
 	}
 
-	return 0, errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of int")
+	return vars, 0, errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of int")
 }

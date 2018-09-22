@@ -16,7 +16,7 @@ import (
 )
 
 // ParseFunction parses a function from in and attaches the remainder.
-func ParseFunction(in string, remainder string) (Node, error) {
+func ParseFunction(in string, remainder string) (Node, string, error) {
 
 	s := strings.TrimSpace(in)
 	for i, c := range s {
@@ -25,26 +25,26 @@ func ParseFunction(in string, remainder string) (Node, error) {
 			functionName := s[:i]
 			arguments, err := ParseList(s[i+1 : len(s)-1])
 			if err != nil {
-				return &Function{}, errors.Wrap(err, "error parsing function arguments from "+s[i+1:len(s)-2])
+				return &Function{}, remainder, errors.Wrap(err, "error parsing function arguments from "+s[i+1:len(s)-2])
 			}
 
-			if len(remainder) == 0 {
-				return &Function{Name: functionName, Arguments: arguments}, nil
+			if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
+				return &Function{Name: functionName, MultiOperator: &MultiOperator{Arguments: arguments}}, remainder, nil
 			}
 
-			root, err := Parse(remainder)
+			root, remainder, err := Parse(remainder)
 			if err != nil {
-				return root, err
+				return root, remainder, err
 			}
 
-			err = AttachLeft(root, &Function{Name: functionName, Arguments: arguments})
+			err = AttachLeft(root, &Function{Name: functionName, MultiOperator: &MultiOperator{Arguments: arguments}})
 			if err != nil {
-				return root, errors.Wrap(err, "error attaching left for "+in)
+				return root, remainder, errors.Wrap(err, "error attaching left for "+in)
 			}
 
-			return root, nil
+			return root, remainder, nil
 		}
 	}
 
-	return &Function{}, errors.New("no left parentheses found when parsing function string " + in)
+	return &Function{}, remainder, errors.New("no left parentheses found when parsing function string " + in)
 }

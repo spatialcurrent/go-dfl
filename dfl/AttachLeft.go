@@ -23,14 +23,14 @@ func AttachLeft(root Node, left Node) error {
 		v = v.Elem()
 	}
 	if t.Kind() != reflect.Struct {
-		return errors.New("could not attach left as root is not a struct but " + fmt.Sprint(t))
+		return errors.New("could not attach left as root " + fmt.Sprint(t) + " is not a struct but " + fmt.Sprint(t))
 	}
 	f := v.FieldByName("Left")
 	if !f.IsValid() {
-		return errors.New("could not attach left as root does not have a field with name Left")
+		return errors.New("could not attach left as root " + fmt.Sprint(t) + " does not have a field with name Left")
 	}
 	if !f.CanSet() {
-		return errors.New("could not attach left as root does not have a field with name Left that can be set")
+		return errors.New("could not attach left as root " + fmt.Sprint(t) + " does not have a field with name Left that can be set")
 	}
 	f.Set(reflect.ValueOf(left))
 

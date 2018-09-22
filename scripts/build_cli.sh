@@ -1,18 +1,12 @@
 #!/bin/bash
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DEST=$(realpath ${1:-$DIR/../bin})
+
+set -eu
+
+DEST=${1:-$DIR/../bin}
 
 mkdir -p $DEST
 
-echo "******************"
-echo "Formatting $(realpath $DIR/../dfl)"
-cd $DIR/../dfl
-go fmt
-echo "Formatting $(realpath $DIR/../cmd/dfl)"
-cd $DIR/../cmd/dfl
-go fmt
-echo "Done formatting."
 echo "******************"
 echo "Building program for go-dfl"
 cd $DEST

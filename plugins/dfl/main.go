@@ -46,13 +46,14 @@ func buildContext(argc C.int, argv **C.char) map[string]interface{} {
 //export EvaluateBool
 func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char {
 
-	node, err := dfl.Parse(C.GoString(exp))
+	node, err := dfl.ParseCompile(C.GoString(exp))
 	if err != nil {
 		return C.CString(err.Error())
 	}
-	node = node.Compile()
 
-	r, err := dfl.EvaluateBool(node, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
+	vars := map[string]interface{}{}
+
+	vars, r, err := dfl.EvaluateBool(node, vars, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
 	if err != nil {
 		return C.CString(err.Error())
 	}
@@ -68,5 +69,5 @@ func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char
 
 //export Version
 func Version() *C.char {
-	return C.CString(dfl.VERSION)
+	return C.CString(dfl.Version)
 }

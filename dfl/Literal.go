@@ -59,3 +59,7 @@ func (l Literal) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Fu
 func (l Literal) Attributes() []string {
 	return []string{}
 }
+
+func (l Literal) Variables() []string {
+	return []string{}
+}

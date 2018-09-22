@@ -27,12 +27,11 @@ func TestDictionary(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		node, err := Parse(testCase.Expression)
+		node, err := ParseCompile(testCase.Expression)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error parsing expression \""+testCase.Expression+"\"").Error())
 			continue
 		}
-		node = node.Compile()
 		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())

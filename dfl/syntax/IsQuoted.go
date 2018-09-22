@@ -5,7 +5,7 @@
 //
 // =================================================================
 
-package dfl
+package syntax
 
 // IsQuoted returns true if the string is a quoted string (using single quotes, double quotes, or backticks)
 func IsQuoted(s string) bool {

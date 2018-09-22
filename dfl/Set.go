@@ -116,3 +116,17 @@ func (a Set) Attributes() []string {
 	}
 	return attrs
 }
+
+func (a Set) Variables() []string {
+	set := make(map[string]struct{})
+	for _, n := range a.Nodes {
+		for _, x := range n.Variables() {
+			set[x] = struct{}{}
+		}
+	}
+	attrs := make([]string, 0, len(set))
+	for x := range set {
+		attrs = append(attrs, x)
+	}
+	return attrs
+}

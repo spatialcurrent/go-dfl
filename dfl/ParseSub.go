@@ -17,27 +17,27 @@ import (
 // For Example with an input string "(@cuisine like mexican) or (@name ilike %burrito%)",
 //	node, err : ParseSub("@cuisine like mexican", "or (@name ilike %burrito%)")
 //
-func ParseSub(s string, remainder string) (Node, error) {
+func ParseSub(s string, remainder string) (Node, string, error) {
 
-	if len(remainder) == 0 {
+	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
 		return Parse(s)
 	}
 
 	var root Node
-	left, err := Parse(s)
+	left, _, err := Parse(s)
 	if err != nil {
-		return root, err
+		return root, "", err
 	}
 
-	root, err = Parse(remainder)
+	root, remainder, err = Parse(remainder)
 	if err != nil {
-		return root, err
+		return root, remainder, err
 	}
 
 	err = AttachLeft(root, left)
 	if err != nil {
-		return root, errors.Wrap(err, "error attaching left for "+s)
+		return root, remainder, errors.Wrap(err, "error attaching left for "+s)
 	}
 
-	return root, nil
+	return root, remainder, nil
 }

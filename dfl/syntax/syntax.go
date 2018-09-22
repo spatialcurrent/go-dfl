@@ -5,13 +5,8 @@
 //
 // =================================================================
 
-package dfl
+package syntax
 
-import (
-	"strings"
-)
+var AttributePrefix = "@"
 
-// IsFunction returns true if the string is a formatted function
-func IsFunction(s string) bool {
-	return len(s) >= 3 && (strings.Index(s, "(") > 0) && strings.HasSuffix(s, ")")
-}
+var VariablePrefix = "$"

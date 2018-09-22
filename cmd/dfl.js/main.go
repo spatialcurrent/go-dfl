@@ -25,7 +25,7 @@ import (
 
 func main() {
 	js.Global.Set("dfl", map[string]interface{}{
-		"version":        dfl.VERSION,
+		"version":        dfl.Version,
 		"Parse":          dfljs.Parse,
 		"EvaluateBool":   dfljs.EvaluateBool,
 		"EvaluateInt":    dfljs.EvaluateInt,

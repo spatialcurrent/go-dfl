@@ -22,7 +22,7 @@ func ParseCompileEvaluateMap(exp string, vars map[string]interface{}, ctx interf
 	}
 
 	if reflect.TypeOf(value).Kind() != reflect.Map {
-		return vars, value, errors.New("ParseCompileEvaluateString evaluation returns invalid type " + fmt.Sprint(reflect.TypeOf(value)) + "")
+		return vars, value, errors.New("ParseCompileEvaluateMap evaluation returns invalid type " + fmt.Sprint(reflect.TypeOf(value)) + "")
 	}
 
 	return vars, value, nil

@@ -19,6 +19,7 @@ import (
 
 import (
 	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-reader-writer/grw"
 )
 
 // FunctionMap is a map of functions by string that are reference by name in the Function Node.
@@ -41,6 +42,7 @@ func NewFuntionMapWithDefaults() FunctionMap {
 	}
 
 	funcs["filter"] = filterArray
+	funcs["group"] = groupArray
 	funcs["map"] = mapArray
 	//funcs["sort"] = sortArray
 	funcs["dict"] = toDict
@@ -72,19 +74,29 @@ func NewFuntionMapWithDefaults() FunctionMap {
 	}
 
 	funcs["first"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-		if len(args) != 1 {
-			return 0, errors.New("Invalid number of arguments to upper.")
+
+		if v, ok := args[0].(grw.ByteReadCloser); ok {
+			return v.ReadFirst()
 		}
 
-		return First(args[0])
+		return af.First.ValidateRun(args)
+
 	}
 
 	funcs["last"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-		if len(args) != 1 {
-			return 0, errors.New("Invalid number of arguments to upper.")
+
+		if v, ok := args[0].(grw.ByteReadCloser); ok {
+			b, err := v.ReadAll()
+			if err != nil {
+				return byte(0), err
+			}
+			if len(b) == 0 {
+				return byte(0), errors.New("last cannot run on an empty grw.ByteReadCloser")
+			}
+			return b[len(b)-1], nil
 		}
 
-		return Last(args[0])
+		return af.Last.ValidateRun(args)
 	}
 
 	return funcs

@@ -1,18 +1,10 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DEST=$(realpath ${1:-$DIR/../bin})
+DEST=${1:-$DIR/../bin}
 
 mkdir -p $DEST
 
-echo "******************"
-echo "Formatting $(realpath $DIR/../dfl)"
-cd $DIR/../dfl
-go fmt
-echo "Formatting $(realpath $DIR/../plugins/dfl)"
-cd $DIR/../plugins/dfl
-go fmt
-echo "Done formatting."
 echo "******************"
 echo "Building Shared Object (*.so) for dfl"
 cd $DEST

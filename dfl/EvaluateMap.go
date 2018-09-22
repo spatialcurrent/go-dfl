@@ -17,15 +17,15 @@ import (
 )
 
 // EvaluateMap returns the map value of a node given a context.  If the result is not a map, then returns an error.
-func EvaluateMap(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (interface{}, error) {
-	_, result, err := n.Evaluate(map[string]interface{}{}, ctx, funcs, quotes)
+func EvaluateMap(n Node, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+	vars, result, err := n.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return "", errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
+		return vars, "", errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	if reflect.TypeOf(result).Kind() != reflect.Map {
-		return "", errors.New("evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of a map")
+		return vars, "", errors.New("evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of a map")
 	}
 
-	return result, nil
+	return vars, result, nil
 }

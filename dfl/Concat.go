@@ -14,7 +14,7 @@ import (
 
 // Concat concatenates the string representation of all the arguments
 type Concat struct {
-	Arguments []Node `json:"arguments" bson:"arguments" yaml:"arguments" hcl:"arguments"` // list of function arguments
+	*MultiOperator
 }
 
 // Suffix returns the suffix of the result of evaluation, if the last argument is a Literal.  If the last argument is not a literal, then returns an empty string.
@@ -85,18 +85,11 @@ func (c Concat) Compile() Node {
 	} else if len(c.Arguments) == 1 {
 		return c.Arguments[0]
 	}
-	return Concat{Arguments: c.Arguments}
+	return Concat{&MultiOperator{Arguments: c.Arguments}}
 }
 
 func (c Concat) Map() map[string]interface{} {
-	arguments := make([]map[string]interface{}, 0, len(c.Arguments))
-	for _, a := range c.Arguments {
-		arguments = append(arguments, a.Map())
-	}
-	return map[string]interface{}{
-		"op":        "concat",
-		"arguments": arguments,
-	}
+	return c.MultiOperator.Map("concat")
 }
 
 func (c Concat) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
@@ -110,18 +103,4 @@ func (c Concat) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Fun
 		str += fmt.Sprint(value)
 	}
 	return vars, str, nil
-}
-
-func (c Concat) Attributes() []string {
-	set := make(map[string]struct{})
-	for _, n := range c.Arguments {
-		for _, x := range n.Attributes() {
-			set[x] = struct{}{}
-		}
-	}
-	attrs := make([]string, 0, len(set))
-	for x := range set {
-		attrs = append(attrs, x)
-	}
-	return attrs
 }

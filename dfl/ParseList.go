@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+	"github.com/spatialcurrent/go-dfl/dfl/syntax"
 	"strings"
 )
 
@@ -89,40 +90,40 @@ func ParseList(in string) ([]Node, error) {
 			// If end of input or argument
 			if i+1 == len(in) || in[i+1] == ',' {
 				s = strings.TrimSpace(s)
-				if IsQuoted(s) {
+				if syntax.IsQuoted(s) {
 					nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
-				} else if IsAttribute(s) {
-					attr, err := ParseAttribute(s, "")
+				} else if syntax.IsAttribute(s) {
+					attr, _, err := ParseAttribute(s, "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing attribute in list "+s)
 					}
 					nodes = append(nodes, attr)
-				} else if IsVariable(s) {
-					variable, err := ParseVariable(s, "")
+				} else if syntax.IsVariable(s) {
+					variable, _, err := ParseVariable(s, "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing variable in list "+s)
 					}
 					nodes = append(nodes, variable)
-				} else if IsArray(s) {
-					arr, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
+				} else if syntax.IsArray(s) {
+					arr, _, err := ParseArray(strings.TrimSpace(s[1:len(s)-1]), "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing array in list "+s)
 					}
 					nodes = append(nodes, arr)
-				} else if IsSetOrDictionary(s) {
-					setOrDictionary, err := ParseSetOrDictionary(strings.TrimSpace(s[1:len(s)-1]), "")
+				} else if syntax.IsSetOrDictionary(s) {
+					setOrDictionary, _, err := ParseSetOrDictionary(strings.TrimSpace(s[1:len(s)-1]), "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing set in list "+s)
 					}
 					nodes = append(nodes, setOrDictionary)
-				} else if IsSub(s) {
-					sub, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
+				} else if syntax.IsSub(s) {
+					sub, _, err := ParseSub(strings.TrimSpace(s[1:len(s)-1]), "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing sub in list "+s)
 					}
 					nodes = append(nodes, sub)
-				} else if IsFunction(s) {
-					f, err := ParseFunction(s, "")
+				} else if syntax.IsFunction(s) {
+					f, _, err := ParseFunction(s, "")
 					if err != nil {
 						return nodes, errors.Wrap(err, "error parsing function in list "+s)
 					}

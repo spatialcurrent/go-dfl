@@ -21,6 +21,7 @@ type Node interface {
 	Compile() Node                                                                                                                          // compiles this node (and all children).
 	Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) // evaluates the value of a node given a context
 	Attributes() []string                                                                                                                   // returns a slice of all attributes used by this node (and all children nodes)
+	Variables() []string                                                                                                                    // returns a slice of all variables used by this node (and all children nodes)
 }
 
 // Used with reflection

@@ -8,7 +8,7 @@
 package dfl
 
 import (
-	"strings"
+	"github.com/spatialcurrent/go-dfl/dfl/builder"
 )
 
 // BinaryOperator is a DFL Node that represents the binary operator of a left value and right value.
@@ -18,29 +18,35 @@ type BinaryOperator struct {
 	Right Node
 }
 
+func (bo BinaryOperator) Builder(operator string, quotes []string, tabs int) builder.Builder {
+	return builder.New(quotes, tabs).Left(bo.Left).Op(operator).Right(bo.Right)
+}
+
 func (bo BinaryOperator) Dfl(operator string, quotes []string, pretty bool, tabs int) string {
+	b := bo.Builder(operator, quotes, tabs)
 	if pretty {
+		b = b.Indent(tabs)
 		switch bo.Left.(type) {
 		case *Literal:
 			switch bo.Left.(*Literal).Value.(type) {
 			case string, int, []byte, Null:
-				return strings.Repeat("  ", tabs) + "(" + bo.Left.Dfl(quotes, false, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, false, tabs) + ")"
+				return b.Dfl()
 			}
 		}
 		switch bo.Right.(type) {
 		case *Literal:
 			switch bo.Right.(*Literal).Value.(type) {
 			case string, int, []byte, Null:
-				return strings.Repeat("  ", tabs) + "(" + bo.Left.Dfl(quotes, false, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, false, tabs) + ")"
+				return b.Dfl()
 			}
 		}
-		return strings.Repeat("  ", tabs) + "(\n" + bo.Left.Dfl(quotes, pretty, tabs+1) + " " + operator + " " + "\n" + bo.Right.Dfl(quotes, pretty, tabs+1) + "\n" + strings.Repeat("  ", tabs) + ")"
+		return b.Pretty(true).Tabs(tabs + 1).Dfl()
 	}
-	return "(" + bo.Left.Dfl(quotes, pretty, tabs) + " " + operator + " " + bo.Right.Dfl(quotes, pretty, tabs) + ")"
+	return b.Dfl()
 }
 
 func (bo BinaryOperator) Sql(operator string, pretty bool, tabs int) string {
-	return "(" + bo.Left.Sql(pretty, tabs) + " " + operator + " " + bo.Right.Sql(pretty, tabs) + ")"
+	return builder.New([]string{}, tabs).Left(bo.Left).Op(operator).Right(bo.Right).Sql()
 }
 
 func (bo BinaryOperator) Map(operator string, left Node, right Node) map[string]interface{} {
@@ -66,7 +72,7 @@ func (bo BinaryOperator) EvaluateLeftAndRight(vars map[string]interface{}, ctx i
 	return vars, lv, rv, nil
 }
 
-// Attributes returns a slice of all attributes used in the evluation of this node, including a children nodes.
+// Attributes returns a slice of all attributes used in the evaluation of this node, including a children nodes.
 // Attributes de-duplicates values from the left node and right node using a set.
 func (bo BinaryOperator) Attributes() []string {
 	set := make(map[string]struct{})
@@ -74,6 +80,23 @@ func (bo BinaryOperator) Attributes() []string {
 		set[x] = struct{}{}
 	}
 	for _, x := range bo.Right.Attributes() {
+		set[x] = struct{}{}
+	}
+	attrs := make([]string, 0, len(set))
+	for x := range set {
+		attrs = append(attrs, x)
+	}
+	return attrs
+}
+
+// Variables returns a slice of all variables used in the evaluation of this node, including a children nodes.
+// Attributes de-duplicates values from the left node and right node using a set.
+func (bo BinaryOperator) Variables() []string {
+	set := make(map[string]struct{})
+	for _, x := range bo.Left.Variables() {
+		set[x] = struct{}{}
+	}
+	for _, x := range bo.Right.Variables() {
 		set[x] = struct{}{}
 	}
 	attrs := make([]string, 0, len(set))

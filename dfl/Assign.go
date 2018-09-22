@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"reflect"
 	"strings"
-	"unicode"
 )
 
 // Assign is a BinaryOperator which sets the value of the right side to the attribute or variable defined by the left side.
@@ -21,22 +20,24 @@ type Assign struct {
 }
 
 func (a Assign) Dfl(quotes []string, pretty bool, tabs int) string {
+	b := a.Builder(":=", quotes, tabs)
 	if pretty {
+		b = b.Indent(tabs).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
 		switch a.Left.(type) {
 		case *Attribute:
 			switch a.Right.(type) {
 			case *Function, *Pipe:
-				return strings.Repeat("  ", tabs) + "(\n" + a.Left.Dfl(quotes, true, tabs+1) + " := " + strings.TrimLeftFunc(a.Right.Dfl(quotes, pretty, tabs+1), unicode.IsSpace) + "\n" + strings.Repeat("  ", tabs) + ")"
+				return b.Dfl()
 			}
 		case *Variable:
 			switch a.Right.(type) {
 			case *Function, *Pipe:
-				return strings.Repeat("  ", tabs) + "(\n" + a.Left.Dfl(quotes, true, tabs+1) + " := " + strings.TrimLeftFunc(a.Right.Dfl(quotes, pretty, tabs+1), unicode.IsSpace) + "\n" + strings.Repeat("  ", tabs) + ")"
+				return b.Dfl()
 			}
 		}
-		return a.BinaryOperator.Dfl(":= ", quotes, pretty, tabs)
+		return a.BinaryOperator.Dfl(":=", quotes, pretty, tabs)
 	}
-	return "(" + a.Left.Dfl(quotes, pretty, tabs) + " := " + a.Right.Dfl(quotes, pretty, tabs) + ")"
+	return b.Dfl()
 }
 
 func (a Assign) Sql(pretty bool, tabs int) string {

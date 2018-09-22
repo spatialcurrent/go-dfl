@@ -18,6 +18,14 @@ type Pipe struct {
 	*BinaryOperator
 }
 
+func (p Pipe) Last() Node {
+	switch right := p.Right.(type) {
+	case Pipe:
+		return right.Last()
+	}
+	return p
+}
+
 func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
 		switch p.Left.(type) {

@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"github.com/spatialcurrent/go-dfl/dfl/syntax"
 	"strings"
 )
 
@@ -20,9 +21,9 @@ type Attribute struct {
 
 func (a Attribute) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
-		return strings.Repeat("  ", tabs) + AttributePrefix + a.Name
+		return strings.Repeat("  ", tabs) + syntax.AttributePrefix + a.Name
 	}
-	return AttributePrefix + a.Name
+	return syntax.AttributePrefix + a.Name
 }
 
 func (a Attribute) Sql(pretty bool, tabs int) string {
@@ -34,7 +35,7 @@ func (a Attribute) Sql(pretty bool, tabs int) string {
 
 func (a Attribute) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"attribute": AttributePrefix + a.Name,
+		"attribute": syntax.AttributePrefix + a.Name,
 	}
 }
 
@@ -52,4 +53,8 @@ func (a Attribute) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 
 func (a Attribute) Attributes() []string {
 	return []string{a.Name}
+}
+
+func (a Attribute) Variables() []string {
+	return []string{}
 }

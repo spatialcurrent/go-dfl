@@ -17,16 +17,16 @@ import (
 )
 
 // EvaluateString returns the string value of a node given a context.  If the result is not a string, then returns an error.
-func EvaluateString(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (string, error) {
-	_, result, err := n.Evaluate(map[string]interface{}{}, ctx, funcs, quotes)
+func EvaluateString(n Node, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, string, error) {
+	vars, result, err := n.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return "", errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
+		return vars, "", errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	switch result.(type) {
 	case string:
-		return result.(string), nil
+		return vars, result.(string), nil
 	}
 
-	return "", errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of string")
+	return vars, "", errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of string")
 }

@@ -14,8 +14,8 @@ import (
 
 // Function is a refrenced function in a DFL filter.  The actual function in a given FunctionMap is derefernced by name.
 type Function struct {
-	Name      string `json:"name" bson:"name" yaml:"name" hcl:"name"`                     // name of the function
-	Arguments []Node `json:"arguments" bson:"arguments" yaml:"arguments" hcl:"arguments"` // list of function arguments
+	*MultiOperator
+	Name string `json:"name" bson:"name" yaml:"name" hcl:"name"` // name of the function
 }
 
 func (f Function) Dfl(quotes []string, pretty bool, tabs int) string {
@@ -99,18 +99,4 @@ func (f Function) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 	} else {
 		return vars, "", errors.New("attempted to evaluate unknown function " + f.Name)
 	}
-}
-
-func (f Function) Attributes() []string {
-	set := make(map[string]struct{})
-	for _, n := range f.Arguments {
-		for _, x := range n.Attributes() {
-			set[x] = struct{}{}
-		}
-	}
-	attrs := make([]string, 0, len(set))
-	for x := range set {
-		attrs = append(attrs, x)
-	}
-	return attrs
 }

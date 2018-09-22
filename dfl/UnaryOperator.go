@@ -17,3 +17,8 @@ type UnaryOperator struct {
 func (uo UnaryOperator) Attributes() []string {
 	return uo.Node.Attributes()
 }
+
+// Variables returns the variables used by the child node, if any.
+func (uo UnaryOperator) Variables() []string {
+	return uo.Node.Variables()
+}

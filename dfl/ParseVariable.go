@@ -20,23 +20,23 @@ import (
 // Given those rules the remainder, if any, if simply parsed from the input strings
 // Examples:
 //	node, err := ParseAttribute("$amenities := [bar, restaurant]")
-func ParseVariable(in string, remainder string) (Node, error) {
+func ParseVariable(in string, remainder string) (Node, string, error) {
 
-	if len(remainder) == 0 {
-		return &Variable{Name: strings.TrimLeftFunc(in, unicode.IsSpace)[1:]}, nil
+	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
+		return &Variable{Name: strings.TrimLeftFunc(in, unicode.IsSpace)[1:]}, remainder, nil
 	}
 
 	left := &Variable{Name: strings.TrimLeftFunc(in, unicode.IsSpace)[1:]}
-	root, err := Parse(remainder)
+	root, remainder, err := Parse(remainder)
 	if err != nil {
-		return root, errors.Wrap(err, "error parsing remainder < "+remainder+" >")
+		return root, remainder, errors.Wrap(err, "error parsing remainder < "+remainder+" >")
 	}
 
 	err = AttachLeft(root, left)
 	if err != nil {
-		return root, errors.Wrap(err, "error attaching left for variable "+in)
+		return root, remainder, errors.Wrap(err, "error attaching left for variable "+in)
 	}
 
-	return root, nil
+	return root, remainder, nil
 
 }

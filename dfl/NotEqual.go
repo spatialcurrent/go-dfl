@@ -62,9 +62,9 @@ func (ne NotEqual) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 	}
 
 	switch lv.(type) {
-	case Null:
+	case nil, Null:
 		switch rv.(type) {
-		case Null:
+		case nil, Null:
 			return vars, false, nil
 		}
 		return vars, true, nil

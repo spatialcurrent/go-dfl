@@ -5,14 +5,13 @@
 //
 // =================================================================
 
-package dfl
+package syntax
 
 import (
 	"strings"
-	"unicode"
 )
 
-// IsVariable returns true if the string is a formatted variable.
-func IsVariable(s string) bool {
-	return strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), VariablePrefix)
+// IsSetOrDictionary returns true if the string is a formatted set or dictionary.
+func IsSetOrDictionary(s string) bool {
+	return len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")
 }

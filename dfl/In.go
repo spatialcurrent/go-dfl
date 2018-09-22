@@ -10,6 +10,7 @@ package dfl
 import (
 	"fmt"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -19,7 +20,7 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-reader/reader"
+	"github.com/spatialcurrent/go-reader-writer/grw"
 )
 
 // In is a BinaryOperator that evaluates to true if the left value is in the right value.
@@ -52,7 +53,7 @@ func (i In) Sql(pretty bool, tabs int) string {
 	case *Set:
 		eq := &Equal{&BinaryOperator{
 			Left:  i.Left,
-			Right: &Function{Name: "ANY", Arguments: []Node{right}},
+			Right: &Function{Name: "ANY", MultiOperator: &MultiOperator{Arguments: []Node{right}}},
 		}}
 		return eq.Sql(pretty, tabs)
 	}
@@ -158,8 +159,8 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 				}
 			}
 			return vars, false, nil
-		case *reader.Cache:
-			rvr := rv.(*reader.Cache)
+		}
+		if rvr, ok := rv.(grw.ByteReadCloser); ok {
 			rvb, err := rvr.ReadAll()
 			if err != nil {
 				return vars, false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
@@ -182,8 +183,16 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 				}
 			}
 			return vars, false, nil
-
 		}
+	}
+
+	rt := reflect.TypeOf(rv)
+	if rt.Kind() == reflect.Map {
+		ok := reflect.ValueOf(rv).MapIndex(reflect.ValueOf(lv)).IsValid()
+		return vars, ok, nil
+	} else if rt.Kind() == reflect.Struct {
+		_, ok := rt.FieldByName(fmt.Sprint(lv))
+		return vars, ok, nil
 	}
 
 	lvs := fmt.Sprint(lv)
@@ -199,21 +208,6 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 		return vars, strings.Contains(fmt.Sprint(rv), lvs), nil
 	case float64:
 		return vars, strings.Contains(strconv.FormatFloat(rv.(float64), 'f', 6, 64), lvs), nil
-	case map[interface{}]struct{}:
-		_, ok := rv.(map[interface{}]struct{})[lv]
-		return vars, ok, nil
-	case map[string]struct{}:
-		_, ok := rv.(map[string]struct{})[lvs]
-		return vars, ok, nil
-	case map[interface{}]interface{}:
-		_, ok := rv.(map[interface{}]interface{})[lvs]
-		return vars, ok, nil
-	case map[string]interface{}:
-		_, ok := rv.(map[string]interface{})[lvs]
-		return vars, ok, nil
-	case map[string]string:
-		_, ok := rv.(map[string]string)[lvs]
-		return vars, ok, nil
 	case []string:
 		for _, x := range rv.([]string) {
 			if lvs == x {

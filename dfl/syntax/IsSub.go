@@ -5,13 +5,13 @@
 //
 // =================================================================
 
-package dfl
+package syntax
 
 import (
 	"strings"
 )
 
-// IsSetOrDictionary returns true if the string is a formatted set or dictionary.
-func IsSetOrDictionary(s string) bool {
-	return len(s) >= 2 && strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")
+// IsSub returns true if the string is formatted sub
+func IsSub(s string) bool {
+	return len(s) >= 2 && strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")")
 }

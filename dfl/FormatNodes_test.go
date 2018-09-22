@@ -38,12 +38,11 @@ func TestFormatNodes(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		node, err := Parse(testCase.Dfl)
+		node, err := ParseCompile(testCase.Dfl)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error parsing expression \""+testCase.Dfl+"\"").Error())
 			continue
 		}
-		node = node.Compile()
 		got := node.Sql(false, 0)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Dfl+"\"").Error())

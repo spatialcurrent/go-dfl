@@ -23,7 +23,7 @@ import (
 import (
 	"github.com/spatialcurrent/go-adaptive-functions/af"
 	"github.com/spatialcurrent/go-counter/counter"
-	"github.com/spatialcurrent/go-reader/reader"
+	"github.com/spatialcurrent/go-reader-writer/grw"
 )
 
 func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
@@ -63,8 +63,7 @@ func prefix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 		return 0, errors.New("Invalid number of arguments to prefix.")
 	}
 
-	switch lv := args[0].(type) {
-	case *reader.Cache:
+	if lv, ok := args[0].(grw.ByteReadCloser); ok {
 		switch prefix := args[1].(type) {
 		case []byte:
 			data, err := lv.ReadRange(0, len(prefix)-1)
@@ -94,40 +93,9 @@ func prefix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 			return true, nil
 		}
 		return Null{}, errors.New("Invalid arguments for prefix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
-	case []byte:
-		switch prefix := args[1].(type) {
-		case []byte:
-			if len(prefix) > len(lv) {
-				return false, nil
-			}
-			for i, c := range prefix {
-				if lv[i] != c {
-					return false, nil
-				}
-			}
-			return true, nil
-		case string:
-			prefix_bytes := []byte(prefix)
-			if len(prefix_bytes) > len(lv) {
-				return false, nil
-			}
-			for i, c := range prefix_bytes {
-				if lv[i] != c {
-					return false, nil
-				}
-			}
-			return true, nil
-		}
-		return Null{}, errors.New("Invalid arguments for prefix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
-	case string:
-		switch prefix := args[1].(type) {
-		case string:
-			return strings.HasPrefix(lv, prefix), nil
-		}
-		return Null{}, errors.New("Invalid arguments for prefix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
 	}
 
-	return 0, errors.New("Invalid arguments for prefix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
+	return af.Prefix.ValidateRun(args)
 
 }
 
@@ -137,8 +105,7 @@ func suffix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 		return 0, errors.New("Invalid number of arguments to suffix.")
 	}
 
-	switch lv := args[0].(type) {
-	case *reader.Cache:
+	if lv, ok := args[0].(grw.ByteReadCloser); ok {
 		switch suffix := args[1].(type) {
 		case []byte:
 			data, err := lv.ReadAll()
@@ -171,30 +138,9 @@ func suffix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 			return true, nil
 		}
 		return Null{}, errors.New("Invalid arguments for suffix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
-	case []byte:
-		switch suffix := args[1].(type) {
-		case []byte:
-			if len(suffix) > len(lv) {
-				return false, nil
-			}
-			for i, _ := range suffix {
-				if lv[len(lv)-i-1] != suffix[len(suffix)-i-1] {
-					return false, nil
-				}
-			}
-			return true, nil
-		}
-		return Null{}, errors.New("Invalid arguments for suffix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
-	case string:
-		switch suffix := args[1].(type) {
-		case string:
-			return strings.HasSuffix(lv, suffix), nil
-		}
-		return Null{}, errors.New("Invalid arguments for suffix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
 	}
 
-	return 0, errors.New("Invalid arguments for suffix function " + reflect.TypeOf(args[0]).String() + ", " + reflect.TypeOf(args[1]).String())
-
+	return af.Suffix.ValidateRun(args)
 }
 
 /*
@@ -336,11 +282,13 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 	var node Node
 	t := reflect.TypeOf(args[1])
 	if t.Kind() == reflect.String {
-		n, err := Parse(args[1].(string))
+		n, err := ParseCompile(args[1].(string))
 		if err != nil {
 			return 0, errors.Wrap(err, "error parsing expression for filter()")
 		}
-		node = n.Compile()
+		node = n
+	} else if n, ok := args[1].(Node); ok {
+		node = n
 	} else {
 		return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
 	}
@@ -353,7 +301,7 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 		m := originalSlice.Index(i).Interface()
 		_, valid, err := node.Evaluate(vars, m, funcs, quotes)
 		if err != nil {
-			return 0, errors.Wrap(err, "Error evaluating object "+fmt.Sprint(m))
+			return 0, errors.Wrap(err, "error evaluating object "+fmt.Sprint(m))
 		}
 		if reflect.TypeOf(valid).Kind() == reflect.Bool && valid.(bool) {
 			output_slice = reflect.Append(output_slice, reflect.ValueOf(m))
@@ -362,7 +310,91 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 			break
 		}
 	}
+
 	return output_slice.Interface(), nil
+
+}
+
+func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+	if len(args) != 2 && len(args) != 3 {
+		return 0, errors.New("Invalid number of arguments to group.")
+	}
+
+	arrayType := reflect.TypeOf(args[0])
+
+	if arrayType.Kind() != reflect.Array && arrayType.Kind() != reflect.Slice {
+		return 0, errors.New("Invalid arguments for groupArray " + arrayType.String() + ", " + reflect.TypeOf(args[1]).String())
+	}
+
+	if t := reflect.TypeOf(args[1]); t.Kind() == reflect.Bool {
+		if args[1].(bool) {
+			return args[0], nil
+		}
+		return reflect.MakeSlice(t, 0, 0).Interface(), nil
+	}
+
+	max_count := -1
+	if len(args) == 3 {
+		if t := reflect.TypeOf(args[2]); t.Kind() != reflect.Int {
+			return 0, errors.New("Invalid max count for groupArray " + t.String())
+		}
+		max_count = args[2].(int)
+	}
+
+	var node Node
+	t := reflect.TypeOf(args[1])
+	if t.Kind() == reflect.String {
+		n, err := ParseCompile(args[1].(string))
+		if err != nil {
+			return 0, errors.Wrap(err, "error parsing expression for filter()")
+		}
+		node = n
+	} else if n, ok := args[1].(Node); ok {
+		node = n
+	} else {
+		return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
+	}
+
+	originalSlice := reflect.ValueOf(args[0])
+	originalLength := originalSlice.Len()
+
+	if _, ok := node.(Lengther); !ok {
+		return 0, errors.New("cannot get length from node")
+	}
+
+	outputMap := CreateGroups(node.(Lengther).Len())
+	for i := 0; i < originalLength; i++ {
+		obj := originalSlice.Index(i)
+		_, keys, err := EvaluateArray(node, vars, obj.Interface(), funcs, quotes)
+		if err != nil {
+			return 0, errors.Wrap(err, "error evaluating object "+fmt.Sprint(obj.Interface()))
+		}
+		currentMap := reflect.ValueOf(outputMap)
+		keysValue := reflect.ValueOf(keys)
+		for j := 0; j < keysValue.Len(); j++ {
+			key := fmt.Sprint(keysValue.Index(j).Interface())
+			next := currentMap.MapIndex(reflect.ValueOf(key))
+			if j < keysValue.Len()-1 {
+				if !next.IsValid() {
+					next = reflect.MakeMap(currentMap.Type().Elem())
+					currentMap.SetMapIndex(reflect.ValueOf(key), next)
+				}
+				currentMap = next
+			} else {
+				if next.IsValid() {
+					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.Append(next, obj))
+				} else {
+					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf([]interface{}{obj.Interface()}))
+				}
+			}
+		}
+
+		if max_count != -1 && (i+1) == max_count {
+			break
+		}
+	}
+
+	return outputMap, nil
 
 }
 
@@ -375,18 +407,16 @@ func histArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, 
 
 		switch dfl_value := args[2].(type) {
 		case string:
-			node_values, err := Parse(dfl_value)
+			node_values, err := ParseCompile(dfl_value)
 			if err != nil {
 				return 0, errors.Wrap(err, "error parsing expression for histArray")
 			}
-			node_values = node_values.Compile()
 			switch dfl_key := args[1].(type) {
 			case string:
-				node_key, err := Parse(dfl_key)
+				node_key, err := ParseCompile(dfl_key)
 				if err != nil {
 					return 0, errors.Wrap(err, "error parsing expression for histArray")
 				}
-				node_key = node_key.Compile()
 				switch arr := args[0].(type) {
 				case []map[string]interface{}:
 					if len(arr) == 0 {
@@ -476,11 +506,10 @@ func histArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, 
 
 		switch exp := args[1].(type) {
 		case string:
-			n, err := Parse(exp)
+			n, err := ParseCompile(exp)
 			if err != nil {
 				return 0, errors.Wrap(err, "error parsing expression for histArray")
 			}
-			n = n.Compile()
 			switch arr := args[0].(type) {
 			case []map[string]interface{}:
 				if len(arr) == 0 {
@@ -568,11 +597,11 @@ func mapArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, a
 	var node Node
 	t := reflect.TypeOf(args[1])
 	if t.Kind() == reflect.String {
-		n, err := Parse(args[1].(string))
+		n, err := ParseCompile(args[1].(string))
 		if err != nil {
 			return 0, errors.Wrap(err, "error parsing expression for map("+(args[1].(string))+")")
 		}
-		node = n.Compile()
+		node = n
 	} else {
 		return 0, errors.New("Invalid arguments for mapArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
 	}
@@ -619,17 +648,19 @@ func trimString(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 		return 0, errors.New("Invalid number of arguments to split.")
 	}
 
-	switch a := args[0].(type) {
-	case string:
-		return strings.TrimSpace(a), nil
-	case []byte:
-		return []byte(strings.TrimSpace(string(a))), nil
-	case *reader.Cache:
+	if a, ok := args[0].(grw.ByteReadCloser); ok {
 		b, err := a.ReadAll()
 		if err != nil {
 			return make([]byte, 0), errors.Wrap(err, "error reading all bytes from *reader.Cache")
 		}
 		return []byte(strings.TrimSpace(string(b))), nil
+	}
+
+	switch a := args[0].(type) {
+	case string:
+		return strings.TrimSpace(a), nil
+	case []byte:
+		return []byte(strings.TrimSpace(string(a))), nil
 	}
 
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
@@ -640,12 +671,8 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 		return 0, errors.New("Invalid number of arguments to ltrim.")
 	}
 
-	switch a := args[0].(type) {
-	case string:
-		return strings.TrimLeftFunc(a, unicode.IsSpace), nil
-	case []byte:
-		return []byte(strings.TrimLeftFunc(string(a), unicode.IsSpace)), nil
-	case *reader.Cache:
+	if a, ok := args[0].(grw.ByteReadCloser); ok {
+		content := make([]byte, 0)
 		i := 0
 		for i = 0; ; i++ {
 			b, err := a.ReadAt(i)
@@ -657,10 +684,18 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 				}
 			}
 			if !unicode.IsSpace(bytes.Runes([]byte{b})[0]) {
+				content = append(content, b)
 				break
 			}
 		}
-		return reader.NewCacheWithContent(a.Reader, a.Content, i), nil
+		return grw.NewCacheWithContent(a, &content, i), nil
+	}
+
+	switch a := args[0].(type) {
+	case string:
+		return strings.TrimLeftFunc(a, unicode.IsSpace), nil
+	case []byte:
+		return []byte(strings.TrimLeftFunc(string(a), unicode.IsSpace)), nil
 	}
 
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
@@ -671,18 +706,21 @@ func trimStringRight(funcs FunctionMap, vars map[string]interface{}, ctx interfa
 		return 0, errors.New("Invalid number of arguments to rtrim.")
 	}
 
-	switch a := args[0].(type) {
-	case string:
-		return strings.TrimRightFunc(a, unicode.IsSpace), nil
-	case []byte:
-		return []byte(strings.TrimRightFunc(string(a), unicode.IsSpace)), nil
-	case *reader.Cache:
+	if a, ok := args[0].(grw.ByteReadCloser); ok {
 		b, err := a.ReadAll()
 		if err != nil {
 			return make([]byte, 0), errors.Wrap(err, "error reading all bytes from *reader.Cache")
 		}
 		return []byte(strings.TrimRightFunc(string(b), unicode.IsSpace)), nil
 	}
+
+	switch a := args[0].(type) {
+	case string:
+		return strings.TrimRightFunc(a, unicode.IsSpace), nil
+	case []byte:
+		return []byte(strings.TrimRightFunc(string(a), unicode.IsSpace)), nil
+	}
+
 	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 }
 
@@ -690,8 +728,8 @@ func convertToString(funcs FunctionMap, vars map[string]interface{}, ctx interfa
 	if len(args) != 1 {
 		return 0, errors.New("Invalid number of arguments to convertToString.")
 	}
-	switch a := args[0].(type) {
-	case *reader.Cache:
+
+	if a, ok := args[0].(grw.ByteReadCloser); ok {
 		value, err := a.ReadAll()
 		if err != nil {
 			return "", errors.Wrap(err, "error reading all content from *reader.Cache in covertToString")

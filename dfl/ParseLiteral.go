@@ -23,22 +23,22 @@ import (
 // Given those rules the remainder, if any, if simply parsed from the input strings
 // Examples:
 //	node, err := ParseLiteral("brewery")
-func ParseLiteral(v interface{}, remainder string) (Node, error) {
+func ParseLiteral(v interface{}, remainder string) (Node, string, error) {
 
-	if len(remainder) == 0 {
-		return &Literal{Value: v}, nil
+	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
+		return &Literal{Value: v}, remainder, nil
 	}
 
 	left := &Literal{Value: v}
-	root, err := Parse(remainder)
+	root, remainder, err := Parse(remainder)
 	if err != nil {
-		return root, errors.Wrap(err, "error parsing remainder < "+remainder+" >")
+		return root, remainder, errors.Wrap(err, "error parsing remainder < "+remainder+" >")
 	}
 
 	err = AttachLeft(root, left)
 	if err != nil {
-		return root, errors.Wrap(err, "Could not attach left "+fmt.Sprint(v))
+		return root, remainder, errors.Wrap(err, "could not attach left "+fmt.Sprint(v)+" to root "+fmt.Sprint(root))
 	}
 
-	return root, nil
+	return root, remainder, nil
 }

@@ -5,13 +5,14 @@
 //
 // =================================================================
 
-package dfl
+package syntax
 
 import (
 	"strings"
+	"unicode"
 )
 
-// IsArray returns true if the string is a formatted array
-func IsArray(s string) bool {
-	return len(s) >= 2 && strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")
+// IsAttribute returns true if the string is a formatted attribute
+func IsAttribute(s string) bool {
+	return strings.HasPrefix(strings.TrimLeftFunc(s, unicode.IsSpace), AttributePrefix)
 }

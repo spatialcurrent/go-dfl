@@ -17,18 +17,18 @@ import (
 )
 
 // EvaluateFloat64 returns the float64 value of a node given a context.  If the result is not a float64, then returns an error.
-func EvaluateFloat64(n Node, ctx interface{}, funcs FunctionMap, quotes []string) (float64, error) {
-	_, result, err := n.Evaluate(map[string]interface{}{}, ctx, funcs, quotes)
+func EvaluateFloat64(n Node, vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, float64, error) {
+	vars, result, err := n.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
+		return vars, 0.0, errors.Wrap(err, "Error evaluating expression "+n.Dfl(quotes, false, 0))
 	}
 
 	switch result.(type) {
 	case int:
-		return float64(result.(int)), nil
+		return vars, float64(result.(int)), nil
 	case float64:
-		return result.(float64), nil
+		return vars, result.(float64), nil
 	}
 
-	return 0.0, errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of int")
+	return vars, 0.0, errors.New("Evaluation returned a " + fmt.Sprint(reflect.TypeOf(result)) + " instead of int")
 }

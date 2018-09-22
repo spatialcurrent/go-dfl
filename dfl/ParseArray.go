@@ -20,28 +20,28 @@ import (
 //	[bank, bureau_de_change, atm]
 //	[1, 2, @target]
 //	[Taco, Tacos, Burrito, Burritos, "Mexican Food", @example]
-func ParseArray(in string, remainder string) (Node, error) {
+func ParseArray(in string, remainder string) (Node, string, error) {
 
 	nodes, err := ParseList(in)
 	if err != nil {
-		return &Array{}, errors.Wrap(err, "error parsing array "+in)
+		return &Array{}, remainder, errors.Wrap(err, "error parsing array "+in)
 	}
 
-	if len(remainder) == 0 {
-		return &Array{Nodes: nodes}, nil
+	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
+		return &Array{Nodes: nodes}, remainder, nil
 	}
 
 	left := &Array{Nodes: nodes}
-	root, err := Parse(remainder)
+	root, remainder, err := Parse(remainder)
 	if err != nil {
-		return root, err
+		return root, remainder, err
 	}
 
 	err = AttachLeft(root, left)
 	if err != nil {
-		return root, errors.Wrap(err, "error attaching left for "+in)
+		return root, remainder, errors.Wrap(err, "error attaching left for "+in)
 	}
 
-	return root, nil
+	return root, remainder, nil
 
 }

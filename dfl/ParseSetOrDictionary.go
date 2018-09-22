@@ -21,23 +21,23 @@ import (
 //	{1, 2, @target}
 //	{Taco, Tacos, Burrito, Burritos, "Mexican Food", @example}
 //	{amenity: bank}
-func ParseSetOrDictionary(in string, remainder string) (Node, error) {
+func ParseSetOrDictionary(in string, remainder string) (Node, string, error) {
 
 	isSet, list, kv, err := ParseListOrKeyValue(in)
 	if err != nil {
-		return &Set{}, errors.Wrap(err, "error parsing set "+in)
+		return &Set{}, remainder, errors.Wrap(err, "error parsing set "+in)
 	}
 
-	if len(remainder) == 0 {
+	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
 		if isSet {
-			return &Set{Nodes: list}, nil
+			return &Set{Nodes: list}, remainder, nil
 		}
-		return &Dictionary{Nodes: kv}, nil
+		return &Dictionary{Nodes: kv}, remainder, nil
 	}
 
-	root, err := Parse(remainder)
+	root, remainder, err := Parse(remainder)
 	if err != nil {
-		return root, err
+		return root, remainder, err
 	}
 
 	if isSet {
@@ -47,9 +47,9 @@ func ParseSetOrDictionary(in string, remainder string) (Node, error) {
 	}
 
 	if err != nil {
-		return root, errors.Wrap(err, "error attaching left for "+in)
+		return root, remainder, errors.Wrap(err, "error attaching left for "+in)
 	}
 
-	return root, nil
+	return root, remainder, nil
 
 }

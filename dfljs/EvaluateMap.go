@@ -16,20 +16,20 @@ import (
 
 // EvaluateMap provides a simple function that parses, compiles, and executes an expression against a context object and returns a map.
 func EvaluateMap(s string, options *js.Object) interface{} {
-	root, err := dfl.Parse(s)
+	root, err := dfl.ParseCompile(s)
 	if err != nil {
 		console.Error(errors.Wrap(err, "error parsing expression in EvaluateMap").Error())
 		return ""
 	}
 
-	root = root.Compile()
+	vars := map[string]interface{}{}
 
 	ctx := map[string]interface{}{}
 	for _, key := range js.Keys(options) {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateMap(root, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
+	_, result, err := dfl.EvaluateMap(root, vars, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
 	if err != nil {
 		console.Error(errors.Wrap(err, "error evaluating a node in EvaluateMap").Error())
 		return ""

@@ -89,7 +89,7 @@ func main() {
 	}
 
 	if version {
-		fmt.Println(dfl.VERSION)
+		fmt.Println(dfl.Version)
 		os.Exit(0)
 	}
 
@@ -109,7 +109,7 @@ func main() {
 			log.Fatal(errors.New("Context attribute \"" + a + "\" does not contain \"=\"."))
 		}
 		pair := strings.SplitN(a, "=", 2)
-		value, err := dfl.Parse(strings.TrimSpace(pair[1]))
+		value, _, err := dfl.Parse(strings.TrimSpace(pair[1]))
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "Could not parse context variable"))
 		}
@@ -136,7 +136,7 @@ func main() {
 		}
 	}
 
-	root, err := dfl.Parse(filter_text)
+	root, _, err := dfl.Parse(filter_text)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error parsing filter expression"))
 	}

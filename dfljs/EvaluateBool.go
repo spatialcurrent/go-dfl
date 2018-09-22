@@ -16,20 +16,20 @@ import (
 
 // EvaluateBool provides a simple function that parses, compiles, and executes an expression against a context object and returns true or false.
 func EvaluateBool(s string, options *js.Object) bool {
-	root, err := dfl.Parse(s)
+	root, err := dfl.ParseCompile(s)
 	if err != nil {
 		console.Error(errors.Wrap(err, "error parsing expression in EvaluateBool").Error())
 		return false
 	}
 
-	root = root.Compile()
+	vars := map[string]interface{}{}
 
 	ctx := map[string]interface{}{}
 	for _, key := range js.Keys(options) {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateBool(root, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
+	_, result, err := dfl.EvaluateBool(root, vars, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
 	if err != nil {
 		console.Error(errors.Wrap(err, "error evaluating a node in EvaluateBool").Error())
 		return false

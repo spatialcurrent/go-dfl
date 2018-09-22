@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"strings"
+	"github.com/spatialcurrent/go-dfl/dfl/builder"
 )
 
 // Not is a UnaryOperator that inverts the boolean value of the children Node.
@@ -19,10 +19,11 @@ type Not struct {
 
 // Dfl returns the DFL representation of this node (and its children nodes)
 func (n Not) Dfl(quotes []string, pretty bool, tabs int) string {
+	b := builder.New(quotes, tabs).Pretty(pretty).Op("not").Right(n.Node)
 	if pretty {
-		return strings.Repeat("  ", tabs) + "not " + n.Node.Dfl(quotes, pretty, tabs)
+		b = b.Indent(tabs)
 	}
-	return "not " + n.Node.Dfl(quotes, pretty, tabs)
+	return b.Dfl()
 }
 
 // Sql returns the SQL representation of this node as a string

@@ -93,3 +93,20 @@ func (d Dictionary) Attributes() []string {
 	}
 	return attrs
 }
+
+func (d Dictionary) Variables() []string {
+	set := make(map[string]struct{})
+	for k, v := range d.Nodes {
+		for _, x := range k.Variables() {
+			set[x] = struct{}{}
+		}
+		for _, x := range v.Variables() {
+			set[x] = struct{}{}
+		}
+	}
+	attrs := make([]string, 0, len(set))
+	for x := range set {
+		attrs = append(attrs, x)
+	}
+	return attrs
+}

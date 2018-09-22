@@ -18,7 +18,11 @@ import (
 
 func TestIn(t *testing.T) {
 
-	ctx := map[string]interface{}{"a": "cafe", "b": []string{"bar", "cafe"}}
+	ctx := map[string]interface{}{
+		"a": "cafe",
+		"b": []string{"bar", "cafe"},
+		"c": struct{ foo string }{foo: ""},
+	}
 
 	testCases := []TestCase{
 		NewTestCase("bar in @b", ctx, true),
@@ -28,15 +32,16 @@ func TestIn(t *testing.T) {
 		NewTestCase("fast_food in [bar, cafe]", ctx, false),
 		NewTestCase("fast_food in {bar, cafe}", ctx, false),
 		NewTestCase("fast_food in @b", ctx, false),
+		NewTestCase("foo in @c", ctx, true),
+		NewTestCase("bar in @c", ctx, false),
 	}
 
 	for _, testCase := range testCases {
-		node, err := Parse(testCase.Expression)
+		node, err := ParseCompile(testCase.Expression)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error parsing expression \""+testCase.Expression+"\"").Error())
 			continue
 		}
-		node = node.Compile()
 		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())

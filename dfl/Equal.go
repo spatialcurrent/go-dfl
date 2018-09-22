@@ -54,15 +54,15 @@ func (e Equal) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Func
 	}
 
 	switch lv.(type) {
-	case Null:
+	case Null, nil:
 		switch rv.(type) {
-		case Null:
+		case Null, nil:
 			return vars, true, nil
 		}
 		return vars, false, nil
 	default:
 		switch rv.(type) {
-		case Null:
+		case Null, nil:
 			return vars, false, nil
 		}
 	}

@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
+	"github.com/spatialcurrent/go-dfl/dfl/syntax"
 	"strings"
 )
 
@@ -21,9 +22,9 @@ type Variable struct {
 
 func (v Variable) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
-		return strings.Repeat("  ", tabs) + VariablePrefix + v.Name
+		return strings.Repeat("  ", tabs) + syntax.VariablePrefix + v.Name
 	}
-	return VariablePrefix + v.Name
+	return syntax.VariablePrefix + v.Name
 }
 
 func (v Variable) Sql(pretty bool, tabs int) string {
@@ -35,7 +36,7 @@ func (v Variable) Sql(pretty bool, tabs int) string {
 
 func (v Variable) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"variable": VariablePrefix + v.Name,
+		"variable": syntax.VariablePrefix + v.Name,
 	}
 }
 
@@ -53,4 +54,8 @@ func (v Variable) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 
 func (v Variable) Attributes() []string {
 	return []string{}
+}
+
+func (v Variable) Variables() []string {
+	return []string{v.Name}
 }

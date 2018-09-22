@@ -59,21 +59,21 @@ func (a Add) Compile() Node {
 					n := Literal{
 						Value: left.(Literal).Value.(string) + fmt.Sprint(right.(Concat).Arguments[0].(Literal).Value),
 					}
-					return Concat{Arguments: append([]Node{n}, right.(Concat).Arguments[1:]...)}
+					return Concat{&MultiOperator{Arguments: append([]Node{n}, right.(Concat).Arguments[1:]...)}}
 				}
-				return Concat{Arguments: append([]Node{left}, right.(Concat).Arguments...)}
+				return Concat{&MultiOperator{Arguments: append([]Node{left}, right.(Concat).Arguments...)}}
 			}
-			return Concat{Arguments: []Node{left, right}}
+			return Concat{&MultiOperator{Arguments: []Node{left, right}}}
 		}
 	case Attribute, *Attribute, Variable, *Variable:
 		switch right.(type) {
 		case Literal:
 			switch right.(Literal).Value.(type) {
 			case string:
-				return Concat{Arguments: []Node{left, right}}
+				return Concat{&MultiOperator{Arguments: []Node{left, right}}}
 			}
 		case Concat:
-			return Concat{Arguments: append([]Node{left}, right.(Concat).Arguments...)}
+			return Concat{&MultiOperator{Arguments: append([]Node{left}, right.(Concat).Arguments...)}}
 		}
 	}
 	return &Add{&BinaryOperator{Left: left, Right: right}}

@@ -12,7 +12,6 @@ import (
 	"github.com/spatialcurrent/go-adaptive-functions/af"
 	"reflect"
 	"strings"
-	"unicode"
 )
 
 // AssignAdd is a BinaryOperator which sets the added value of the left side and right side to the attribute or variable defined by the left side.
@@ -21,22 +20,24 @@ type AssignAdd struct {
 }
 
 func (a AssignAdd) Dfl(quotes []string, pretty bool, tabs int) string {
+	b := a.Builder("+=", quotes, tabs)
 	if pretty {
+		b = b.Indent(tabs).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
 		switch a.Left.(type) {
 		case *Attribute:
 			switch a.Right.(type) {
 			case *Function, *Pipe:
-				return strings.Repeat("  ", tabs) + "(\n" + a.Left.Dfl(quotes, true, tabs+1) + " += " + strings.TrimLeftFunc(a.Right.Dfl(quotes, pretty, tabs+1), unicode.IsSpace) + "\n" + strings.Repeat("  ", tabs) + ")"
+				return b.Dfl()
 			}
 		case *Variable:
 			switch a.Right.(type) {
 			case *Function, *Pipe:
-				return strings.Repeat("  ", tabs) + "(\n" + a.Left.Dfl(quotes, true, tabs+1) + " += " + strings.TrimLeftFunc(a.Right.Dfl(quotes, pretty, tabs+1), unicode.IsSpace) + "\n" + strings.Repeat("  ", tabs) + ")"
+				return b.Dfl()
 			}
 		}
-		return a.BinaryOperator.Dfl("+= ", quotes, pretty, tabs)
+		return a.BinaryOperator.Dfl("+=", quotes, pretty, tabs)
 	}
-	return "(" + a.Left.Dfl(quotes, pretty, tabs) + " += " + a.Right.Dfl(quotes, pretty, tabs) + ")"
+	return b.Dfl()
 }
 
 func (a AssignAdd) Sql(pretty bool, tabs int) string {
@@ -80,6 +81,9 @@ func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 		value, err := af.Add.ValidateRun([]interface{}{lv, rv})
 		if err != nil {
 			return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
+		}
+		if len(left.Name) == 0 {
+			return vars, value, nil
 		}
 		if t := reflect.TypeOf(ctx); t.Kind() != reflect.Map {
 			ctx = map[string]interface{}{}

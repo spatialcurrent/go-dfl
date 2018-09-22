@@ -16,20 +16,20 @@ import (
 
 // EvaluateFloat64 provides a simple function that parses, compiles, and executes an expression against a context object and returns a float64.
 func EvaluateFloat64(s string, options *js.Object) float64 {
-	root, err := dfl.Parse(s)
+	root, err := dfl.ParseCompile(s)
 	if err != nil {
 		console.Error(errors.Wrap(err, "error parsing expression in EvaluateFloat64").Error())
 		return 0.0
 	}
 
-	root = root.Compile()
+	vars := map[string]interface{}{}
 
 	ctx := map[string]interface{}{}
 	for _, key := range js.Keys(options) {
 		ctx[key] = options.Get(key).Interface()
 	}
 
-	result, err := dfl.EvaluateFloat64(root, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
+	_, result, err := dfl.EvaluateFloat64(root, vars, ctx, dfl.NewFuntionMapWithDefaults(), DefaultQuotes[1:])
 	if err != nil {
 		console.Error(errors.Wrap(err, "error evaluating a node in EvaluateFloat64").Error())
 		return 0.0
