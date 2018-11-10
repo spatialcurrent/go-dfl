@@ -101,3 +101,5 @@ func NewFuntionMapWithDefaults() FunctionMap {
 
 	return funcs
 }
+
+var DefaultFunctionMap = NewFuntionMapWithDefaults()

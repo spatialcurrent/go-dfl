@@ -53,7 +53,7 @@ func (a AssignSubtract) Sql(pretty bool, tabs int) string {
 
 	switch left := a.Left.(type) {
 	case *Variable:
-		return "WHERE " + a.Right.Sql(pretty, tabs) + " INTO TEMP TABLE " + left.Sql(pretty, tabs) + ";"
+		return "WHERE " + a.Right.Sql(pretty, tabs) + " INTO TEMP TABLE " + left.Sql(pretty, tabs) + ";" // #nosec
 	}
 
 	return ""

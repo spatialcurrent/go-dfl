@@ -49,7 +49,7 @@ func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
 
 // Sql returns the SQL representation of this node as a string
 func (p Pipe) Sql(pretty bool, tabs int) string {
-	stmt := "SELECT * FROM (SELECT * FROM $TABLE " + p.Left.Sql(pretty, tabs) + ") as A" + fmt.Sprint(tabs) + " WHERE " + p.Right.Sql(pretty, tabs) + ";"
+	stmt := "SELECT * FROM (SELECT * FROM $TABLE " + p.Left.Sql(pretty, tabs) + ") as A" + fmt.Sprint(tabs) + " WHERE " + p.Right.Sql(pretty, tabs) + ";" // #nosec
 	return stmt
 }
 

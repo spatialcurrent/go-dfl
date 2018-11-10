@@ -269,6 +269,14 @@ func Parse(in string) (Node, string, error) {
 					}
 					return &Not{&UnaryOperator{Node: node}}, remainder, nil
 
+				} else if s_lc == "iin" {
+
+					right, remainder, err := Parse(remainder)
+					if err != nil {
+						return right, remainder, err
+					}
+					return &IIn{&BinaryOperator{Right: right}}, remainder, nil
+
 				} else if s_lc == "in" {
 
 					right, remainder, err := Parse(remainder)

@@ -53,7 +53,7 @@ func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char
 
 	vars := map[string]interface{}{}
 
-	vars, r, err := dfl.EvaluateBool(node, vars, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
+	_, r, err := dfl.EvaluateBool(node, vars, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
 	if err != nil {
 		return C.CString(err.Error())
 	}
