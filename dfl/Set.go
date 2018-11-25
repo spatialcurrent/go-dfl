@@ -77,7 +77,7 @@ func (a Set) Compile() Node {
 			set.Add(fmt.Sprint(x))
 		}
 	}
-	return Literal{Value: set}
+	return Literal{Value: map[string]struct{}(set)}
 }
 
 func (a Set) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
@@ -100,7 +100,7 @@ func (a Set) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 		}
 	}
 
-	return vars, set, nil
+	return vars, map[string]struct{}(set), nil
 }
 
 func (a Set) Attributes() []string {
