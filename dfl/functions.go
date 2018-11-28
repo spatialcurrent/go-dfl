@@ -271,12 +271,12 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 		return reflect.MakeSlice(t, 0, 0).Interface(), nil
 	}
 
-	max_count := -1
+	outputLimit := -1
 	if len(args) == 3 {
 		if t := reflect.TypeOf(args[2]); t.Kind() != reflect.Int {
 			return 0, errors.New("Invalid max count for filterArray " + t.String())
 		}
-		max_count = args[2].(int)
+		outputLimit = args[2].(int)
 	}
 
 	var node Node
@@ -306,7 +306,7 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 		if reflect.TypeOf(valid).Kind() == reflect.Bool && valid.(bool) {
 			output_slice = reflect.Append(output_slice, reflect.ValueOf(m))
 		}
-		if max_count != -1 && output_slice.Len() == max_count {
+		if outputLimit >= 0 && output_slice.Len() == outputLimit {
 			break
 		}
 	}
@@ -333,12 +333,12 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 		return reflect.MakeSlice(t, 0, 0).Interface(), nil
 	}
 
-	max_count := -1
+	outputLimit := -1
 	if len(args) == 3 {
 		if t := reflect.TypeOf(args[2]); t.Kind() != reflect.Int {
 			return 0, errors.New("Invalid max count for groupArray " + t.String())
 		}
-		max_count = args[2].(int)
+		outputLimit = args[2].(int)
 	}
 
 	var node Node
@@ -389,7 +389,7 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 			}
 		}
 
-		if max_count != -1 && (i+1) == max_count {
+		if outputLimit >= 0 && (i+1) == outputLimit {
 			break
 		}
 	}

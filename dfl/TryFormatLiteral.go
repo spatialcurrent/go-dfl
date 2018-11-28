@@ -10,6 +10,7 @@ package dfl
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int) string {
@@ -33,7 +34,10 @@ func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int)
 
 	switch value := value.(type) {
 	case string:
-		return quotes[0] + value + quotes[0]
+		if strings.ContainsAny(value, "-+=,.`'\"?: ") {
+			return quotes[0] + value + quotes[0]
+		}
+		return value
 	case map[string]struct{}:
 		return StringSet(value).Dfl(quotes, pretty, tabs)
 	case StringSet:

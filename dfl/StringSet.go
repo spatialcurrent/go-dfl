@@ -19,7 +19,7 @@ type StringSet map[string]struct{}
 func (set StringSet) Dfl(quotes []string, pretty bool, tabs int) string {
 	values := make([]string, 0, len(set))
 	for v := range set {
-		values = append(values, quotes[0]+v+quotes[0])
+		values = append(values, TryFormatLiteral(v, quotes, pretty, tabs))
 	}
 	return "{" + strings.Join(values, ", ") + "}"
 }
