@@ -8,12 +8,15 @@
 package dfl
 
 import (
-	"github.com/spatialcurrent/go-dfl/dfl/syntax"
 	"strings"
 )
 
 import (
 	"github.com/pkg/errors"
+)
+
+import (
+	"github.com/spatialcurrent/go-dfl/dfl/syntax"
 )
 
 // Parse parses a DFL expression into an an Abstract Synatax Tree (AST).
@@ -81,6 +84,10 @@ func Parse(in string) (Node, string, error) {
 				t, remainder, err := Parse(strings.TrimSpace(remainder))
 				if err != nil {
 					return t, remainder, err
+				}
+
+				if len(remainder) == 0 {
+					return t, remainder, errors.New("remainder is empty")
 				}
 
 				f, remainder, err := Parse(strings.TrimSpace(remainder[1:]))
@@ -224,7 +231,7 @@ func Parse(in string) (Node, string, error) {
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
 				if syntax.IsQuoted(s) {
-					return ParseLiteral(s[1:len(s)-1], remainder)
+					return ParseLiteral(UnescapeString(s[1:len(s)-1]), remainder)
 				} else if syntax.IsAttribute(s) {
 					return ParseAttribute(s, remainder)
 				} else if syntax.IsVariable(s) {

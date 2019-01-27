@@ -34,10 +34,11 @@ func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int)
 
 	switch value := value.(type) {
 	case string:
-		if strings.ContainsAny(value, "-+=,.`'\"?: ") {
-			return quotes[0] + value + quotes[0]
+		str := EscapeString(value)
+		if strings.ContainsAny(str, "\\-+=,.`'\"?:[]()\n\t ") {
+			return quotes[0] + str + quotes[0]
 		}
-		return value
+		return str
 	case map[string]struct{}:
 		return StringSet(value).Dfl(quotes, pretty, tabs)
 	case StringSet:

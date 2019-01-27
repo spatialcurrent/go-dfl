@@ -8,11 +8,16 @@
 package dfl
 
 import (
+	"strings"
+)
+
+import (
 	"github.com/pkg/errors"
 )
 
 import (
 	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-reader-writer/grw"
 )
 
 // In is a BinaryOperator that evaluates to true if the left value is in the right value.
@@ -52,6 +57,32 @@ func (i IIn) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 	vars, rv, err := i.Right.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
 		return vars, false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl(quotes, false, 0))
+	}
+
+	if rvr, ok := rv.(grw.ByteReadCloser); ok {
+		if lvb, ok := lv.([]byte); ok {
+			lvs := string(lvb)
+			rvb, err := rvr.ReadAll()
+			if err != nil {
+				return vars, false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
+			}
+			rvs := string(rvb)
+			if len(lvs) == len(rvs) && len(lvs) == 0 {
+				return vars, true, nil
+			}
+			return vars, strings.Contains(rvs, lvs), nil
+		}
+		if lvs, ok := lv.(string); ok {
+			rvb, err := rvr.ReadAll()
+			if err != nil {
+				return vars, false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
+			}
+			rvs := string(rvb)
+			if len(lvs) == len(rvs) && len(lvs) == 0 {
+				return vars, true, nil
+			}
+			return vars, strings.Contains(strings.ToLower(rvs), strings.ToLower(lvs)), nil
+		}
 	}
 
 	value, err := af.IIn.ValidateRun([]interface{}{lv, rv})

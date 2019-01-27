@@ -43,6 +43,7 @@ func TestAttribute(t *testing.T) {
 		NewTestCase("@j[0:3] == bar", ctx, true),
 		NewTestCase("@j[:3] == bar", ctx, true),
 		NewTestCase("@k[0]l == m", ctx, true),
+		NewTestCase("@k[0]n == o", ctx, false),
 	}
 
 	for _, testCase := range testCases {

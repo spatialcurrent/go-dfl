@@ -76,8 +76,33 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 		return vars, false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl(quotes, false, 0))
 	}
 
-	if lvb, ok := lv.([]byte); ok {
-		if rvr, ok := rv.(grw.ByteReadCloser); ok {
+	if rvr, ok := rv.(grw.ByteReadCloser); ok {
+		if lvb, ok := lv.([]byte); ok {
+			rvb, err := rvr.ReadAll()
+			if err != nil {
+				return vars, false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
+			}
+			if len(lvb) == len(rvb) && len(lvb) == 0 {
+				return vars, true, nil
+			}
+			for i, _ := range rvb {
+				if rvb[i] == lvb[0] && i+len(lvb) < len(rvb) {
+					match := true
+					for j, _ := range lvb {
+						if rvb[i+j] != lvb[j] {
+							match = false
+							break
+						}
+					}
+					if match {
+						return vars, true, nil
+					}
+				}
+			}
+			return vars, false, nil
+		}
+		if lvs, ok := lv.(string); ok {
+			lvb := []byte(lvs)
 			rvb, err := rvr.ReadAll()
 			if err != nil {
 				return vars, false, errors.Wrap(err, "error reading all byte for right value in expression "+i.Dfl(quotes, false, 0))
