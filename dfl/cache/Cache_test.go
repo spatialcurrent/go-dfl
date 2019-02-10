@@ -11,32 +11,36 @@ import (
 	"testing"
 )
 
+import (
+	"github.com/spatialcurrent/go-dfl/dfl"
+)
+
 func TestCache(t *testing.T) {
 
-  c := New()
+	c := New()
 
-  x := "((@a ?: 10) == 10)"
-  y := "(@a ?: 4) + 6"
+	x := "((@a ?: 10) == 10)"
+	y := "(@a ?: 4) + 6"
 
-  z := c.MustParseCompile(x)
-  if z.Dfl(DefaultQuotes, false, 0) != x {
-    t.Errorf("cache.Get(%q) == %q, want %q", x, z.Dfl(DefaultQuotes, false, 0), x)
-  }
+	z := c.MustParseCompile(x)
+	if z.Dfl(dfl.DefaultQuotes, false, 0) != x {
+		t.Errorf("cache.Get(%q) == %q, want %q", x, z.Dfl(dfl.DefaultQuotes, false, 0), x)
+	}
 
-  if cache.Has(y) {
-    t.Errorf("cache.Has(%q) == %v, want %v", y, true, false)
-  }
+	if c.Has(y) {
+		t.Errorf("cache.Has(%q) == %v, want %v", y, true, false)
+	}
 
-  if ! cache.Has(x) {
-    t.Errorf("cache.Has(%q) == %v, want %v", x, false, true)
-  }
+	if !c.Has(x) {
+		t.Errorf("cache.Has(%q) == %v, want %v", x, false, true)
+	}
 
-  if cache.Has(y) {
-    t.Errorf("cache.Has(%q) == %v, want %v", y, true, false)
-  }
+	if c.Has(y) {
+		t.Errorf("cache.Has(%q) == %v, want %v", y, true, false)
+	}
 
-  if t, ok := cache.Get(x); !ok || t.Dfl(DefaultQuotes, false, 0) != x {
-    t.Errorf("cache.Get(%q) == %q, want %q", x, t.Dfl(DefaultQuotes, false, 0), x)
-  }
+	if i, ok := c.Get(x); !ok || i.Dfl(dfl.DefaultQuotes, false, 0) != x {
+		t.Errorf("cache.Get(%q) == %q, want %q", x, i.Dfl(dfl.DefaultQuotes, false, 0), x)
+	}
 
 }

@@ -8,21 +8,21 @@
 package request
 
 import (
-  "context"
-  "reflect"
+	"context"
+	"reflect"
 )
 
-func EvaluateBool(ctx context.Context)(map[string]interface{}, bool, error) {
+func EvaluateBool(ctx context.Context) (map[string]interface{}, bool, error) {
 
 	vars, result, err := Evaluate(ctx)
 	if err != nil {
 		return vars, false, err
 	}
 
-  value, ok := result.(bool)
-  if ! ok {
-    return vars, false, &ErrInvalidResultType{Type: reflect.TypeOf(result)}
-  }
+	value, ok := result.(bool)
+	if !ok {
+		return vars, false, &ErrInvalidResultType{Type: reflect.TypeOf(result)}
+	}
 
 	return vars, value, nil
 }

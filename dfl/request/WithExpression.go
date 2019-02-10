@@ -8,9 +8,9 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 func WithExpression(ctx context.Context, expression string) context.Context {
-  return context.WithValue(ctx, contextKeyExpression, expression)
+	return context.WithValue(ctx, contextKeyExpression, expression)
 }

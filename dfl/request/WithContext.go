@@ -8,9 +8,9 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 func WithContext(requestContext context.Context, dflContext interface{}) context.Context {
-  return context.WithValue(requestContext, contextKeyContext, dflContext)
+	return context.WithValue(requestContext, contextKeyContext, dflContext)
 }

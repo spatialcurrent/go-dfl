@@ -8,13 +8,13 @@
 package request
 
 import (
-  "fmt"
+	"fmt"
 )
 
 type ErrMissingContextValue struct {
-  Name string
+	Name string
 }
 
 func (e *ErrMissingContextValue) Error() string {
-  return fmt.Sprintf("missing context value for name %s", e.Name)
+	return fmt.Sprintf("missing context value for name %s", e.Name)
 }

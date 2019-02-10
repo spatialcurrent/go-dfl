@@ -8,13 +8,13 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 import (
-  "github.com/spatialcurrent/go-dfl/dfl/cache"
+	"github.com/spatialcurrent/go-dfl/dfl/cache"
 )
 
 func WithCache(requestContext context.Context, c *cache.Cache) context.Context {
-  return context.WithValue(requestContext, contextKeyCache, c)
+	return context.WithValue(requestContext, contextKeyCache, c)
 }

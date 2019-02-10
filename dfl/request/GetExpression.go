@@ -8,13 +8,13 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 func GetExpression(ctx context.Context) (string, error) {
-  exp, ok := ctx.Value(contextKeyExpression).(string)
-  if ! ok {
-    return "", &ErrMissingContextValue{Name: contextKeyExpression.String()}
-  }
-  return exp, nil
+	exp, ok := ctx.Value(contextKeyExpression).(string)
+	if !ok {
+		return "", &ErrMissingContextValue{Name: contextKeyExpression.String()}
+	}
+	return exp, nil
 }

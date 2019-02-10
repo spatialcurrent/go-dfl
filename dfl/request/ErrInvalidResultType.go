@@ -8,14 +8,14 @@
 package request
 
 import (
-  "fmt"
-  "reflect"
+	"fmt"
+	"reflect"
 )
 
 type ErrInvalidResultType struct {
-  Type reflect.Type
+	Type reflect.Type
 }
 
 func (e *ErrInvalidResultType) Error() string {
-  return fmt.Sprintf("invalid result type %s", e.Type.Name())
+	return fmt.Sprintf("invalid result type %s", e.Type.Name())
 }

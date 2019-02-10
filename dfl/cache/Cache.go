@@ -27,11 +27,11 @@ type Cache struct {
 // Has returns true if the cache has the Node for the given expression in the cache.
 func (c *Cache) Has(exp string) bool {
 	v, ok := c.nodes.Load(exp)
-	if ! ok {
+	if !ok {
 		return false
 	}
 	n, ok := v.(dfl.Node)
-	if ! ok {
+	if !ok {
 		return false
 	}
 	if n == nil {
@@ -44,11 +44,11 @@ func (c *Cache) Has(exp string) bool {
 // Otherwise, Get returns (nil, false).
 func (c *Cache) Get(exp string) (dfl.Node, bool) {
 	v, ok := c.nodes.Load(exp)
-	if ! ok {
+	if !ok {
 		return nil, false
 	}
 	n, ok := v.(dfl.Node)
-	if ! ok {
+	if !ok {
 		return nil, false
 	}
 	if n == nil {
@@ -68,7 +68,7 @@ func (c *Cache) Set(exp string, node dfl.Node) {
 func (c *Cache) ParseCompile(exp string) (dfl.Node, error) {
 	node, ok := c.Get(exp)
 	if ok {
-		return node ,nil
+		return node, nil
 	}
 
 	node, err := dfl.ParseCompile(exp)
@@ -89,7 +89,6 @@ func (c *Cache) MustParseCompile(exp string) dfl.Node {
 	}
 	return node
 }
-
 
 // NewCache returns a new node cache
 func New() *Cache {

@@ -8,13 +8,13 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 import (
-  "github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
 func WithFunctions(requestContext context.Context, funcs dfl.FunctionMap) context.Context {
-  return context.WithValue(requestContext, contextKeyFunctions, funcs)
+	return context.WithValue(requestContext, contextKeyFunctions, funcs)
 }

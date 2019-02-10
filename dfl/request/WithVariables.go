@@ -8,9 +8,9 @@
 package request
 
 import (
-  "context"
+	"context"
 )
 
 func WithVariables(requestContext context.Context, variables map[string]interface{}) context.Context {
-  return context.WithValue(requestContext, contextKeyVariables, variables)
+	return context.WithValue(requestContext, contextKeyVariables, variables)
 }
