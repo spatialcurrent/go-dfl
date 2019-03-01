@@ -15,6 +15,8 @@ func UnescapeString(in string) string {
 				return in[0:i] + "\\" + UnescapeString(in[i+2:])
 			case 'n':
 				return in[0:i] + "\n" + UnescapeString(in[i+2:])
+			case 'r':
+				return in[0:i] + "\r" + UnescapeString(in[i+2:])
 			case 't':
 				return in[0:i] + "\t" + UnescapeString(in[i+2:])
 			}

@@ -91,7 +91,7 @@ func ParseList(in string) ([]Node, error) {
 			if i+1 == len(in) || in[i+1] == ',' {
 				s = strings.TrimSpace(s)
 				if syntax.IsQuoted(s) {
-					nodes = append(nodes, &Literal{Value: s[1 : len(s)-1]})
+					nodes = append(nodes, &Literal{Value: UnescapeString(s[1 : len(s)-1])})
 				} else if syntax.IsAttribute(s) {
 					attr, _, err := ParseAttribute(s, "")
 					if err != nil {

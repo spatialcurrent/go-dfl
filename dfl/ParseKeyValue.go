@@ -19,7 +19,7 @@ import (
 
 func parseKeyOrValueString(s string) (Node, error) {
 	if syntax.IsQuoted(s) {
-		return &Literal{Value: s[1 : len(s)-1]}, nil
+		return &Literal{Value: UnescapeString(s[1 : len(s)-1])}, nil
 	} else if syntax.IsAttribute(s) {
 		attr, _, err := ParseAttribute(s, "")
 		if err != nil {

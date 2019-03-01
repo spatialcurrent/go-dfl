@@ -657,13 +657,14 @@ func trimString(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 	}
 
 	switch a := args[0].(type) {
-	case string:
-		return strings.TrimSpace(a), nil
 	case []byte:
 		return []byte(strings.TrimSpace(string(a))), nil
 	}
 
-	return "", errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
+	if err := af.Trim.Validate(args); err != nil {
+		return Null{}, errors.Wrap(err, "Invalid arguments")
+	}
+	return af.Trim.Run(args)
 }
 
 func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
