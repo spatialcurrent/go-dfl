@@ -28,7 +28,7 @@ import (
 
 func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
-	if len(args) != 1 {
+	if len(args) > 2 {
 		return Null{}, errors.New("Invalid number of arguments to toDict.")
 	}
 
@@ -41,6 +41,16 @@ func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 	if l == 0 {
 		return map[string]interface{}{}, nil
 	}
+
+	validKeys := map[string]struct{}{}
+	if len(args) == 2 {
+		keys, err := af.ToStringSet.ValidateRun([]interface{}{args[1]})
+		if err != nil {
+			return Null{}, errors.New("Invalid arguments for toDict function " + reflect.TypeOf(args[1]).String())
+		}
+		validKeys = keys.(map[string]struct{})
+	}
+
 	m := map[interface{}]interface{}{}
 	for i := 0; i < l; i++ {
 		x := v.Index(i).Interface()
@@ -52,7 +62,16 @@ func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 		if v2.Len() != 2 {
 			return Null{}, errors.New("Invalid length for item for toDict function " + fmt.Sprint(v2.Len()))
 		}
-		m[v2.Index(0).Interface()] = v2.Index(1).Interface()
+		k := v2.Index(0).Interface()
+		valid := true
+		if len(validKeys) > 0 {
+			if _, ok := validKeys[fmt.Sprint(k)]; !ok {
+				valid = false
+			}
+		}
+		if valid {
+			m[k] = v2.Index(1).Interface()
+		}
 	}
 	return m, nil
 }
@@ -316,7 +335,7 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 }
 
 func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-	if len(args) != 2 && len(args) != 3 {
+	if len(args) < 2 || len(args) > 4 {
 		return 0, errors.New("Invalid number of arguments to group.")
 	}
 
@@ -334,38 +353,53 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 	}
 
 	outputLimit := -1
-	if len(args) == 3 {
-		if t := reflect.TypeOf(args[2]); t.Kind() != reflect.Int {
-			return 0, errors.New("Invalid max count for groupArray " + t.String())
+	if len(args) == 4 {
+		if i, ok := args[3].(int); ok {
+			outputLimit = i
+		} else {
+			return 0, errors.New("Invalid max count for groupArray " + reflect.TypeOf(args[3]).String())
 		}
-		outputLimit = args[2].(int)
 	}
 
-	var node Node
+	var nodeKeys Node
 	t := reflect.TypeOf(args[1])
 	if t.Kind() == reflect.String {
 		n, err := ParseCompile(args[1].(string))
 		if err != nil {
 			return 0, errors.Wrap(err, "error parsing expression for filter()")
 		}
-		node = n
+		nodeKeys = n
 	} else if n, ok := args[1].(Node); ok {
-		node = n
+		nodeKeys = n
 	} else {
 		return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
+	}
+	var nodeOutput Node
+	if len(args) >= 3 {
+		if str, ok := args[2].(string); ok {
+			n, err := ParseCompile(str)
+			if err != nil {
+				return 0, errors.Wrap(err, "error parsing expression for filter()")
+			}
+			nodeOutput = n
+		} else if n, ok := args[2].(Node); ok {
+			nodeOutput = n
+		} else {
+			return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[2]).String() + ", " + fmt.Sprint(t))
+		}
 	}
 
 	originalSlice := reflect.ValueOf(args[0])
 	originalLength := originalSlice.Len()
 
-	if _, ok := node.(Lengther); !ok {
+	if _, ok := nodeKeys.(Lengther); !ok {
 		return 0, errors.New("cannot get length from node")
 	}
 
-	outputMap := CreateGroups(node.(Lengther).Len())
+	outputMap := CreateGroups(nodeKeys.(Lengther).Len())
 	for i := 0; i < originalLength; i++ {
 		obj := originalSlice.Index(i)
-		_, keys, err := EvaluateArray(node, vars, obj.Interface(), funcs, quotes)
+		_, keys, err := EvaluateArray(nodeKeys, vars, obj.Interface(), funcs, quotes)
 		if err != nil {
 			return 0, errors.Wrap(err, "error evaluating object "+fmt.Sprint(obj.Interface()))
 		}
@@ -381,10 +415,22 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 				}
 				currentMap = next
 			} else {
-				if next.IsValid() {
-					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.Append(next, obj))
+
+				var outputObject reflect.Value
+				if nodeOutput != nil {
+					_, o, err := nodeOutput.Evaluate(vars, obj.Interface(), funcs, quotes)
+					if err != nil {
+						return 0, errors.Wrap(err, "error evaluating output object "+fmt.Sprint(obj.Interface()))
+					}
+					outputObject = reflect.ValueOf(o)
 				} else {
-					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf([]interface{}{obj.Interface()}))
+					outputObject = obj
+				}
+
+				if next.IsValid() {
+					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.Append(next, outputObject))
+				} else {
+					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf([]interface{}{outputObject.Interface()}))
 				}
 			}
 		}
@@ -597,7 +643,7 @@ func mapArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, a
 	var node Node
 	t := reflect.TypeOf(args[1])
 	if t.Kind() == reflect.String {
-		n, err := ParseCompile(args[1].(string))
+		n, err := ParseCompile(strings.TrimSpace(args[1].(string)))
 		if err != nil {
 			return 0, errors.Wrap(err, "error parsing expression for map("+(args[1].(string))+")")
 		}

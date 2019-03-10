@@ -15,6 +15,7 @@ import (
 
 import (
 	"github.com/pkg/errors"
+	"gopkg.in/russross/blackfriday.v2"
 )
 
 import (
@@ -39,6 +40,28 @@ func NewFuntionMapWithDefaults() FunctionMap {
 				}
 			}(fn)
 		}
+	}
+
+	funcs["md"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+		if len(args) != 1 {
+			return 0, errors.New("Invalid number of arguments to md.")
+		}
+
+		switch s := args[0].(type) {
+		case string:
+			unsafe := strings.TrimSpace(string(blackfriday.Run(
+				[]byte(s),
+				blackfriday.WithExtensions(blackfriday.NoExtensions),
+				blackfriday.WithRenderer(blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{
+					Flags: blackfriday.HTMLFlagsNone,
+				})),
+			)))
+			if strings.HasPrefix(unsafe, "<p>") && strings.HasSuffix(unsafe, "</p>") {
+				unsafe = unsafe[3 : len(unsafe)-4]
+			}
+			return unsafe, nil
+		}
+		return Null{}, errors.New("Invalid argument of type " + reflect.TypeOf(args[0]).String())
 	}
 
 	funcs["filter"] = filterArray

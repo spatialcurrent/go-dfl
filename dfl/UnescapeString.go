@@ -7,6 +7,10 @@
 
 package dfl
 
+import (
+	"strconv"
+)
+
 func UnescapeString(in string) string {
 	for i, c := range in {
 		if c == '\\' {
@@ -19,6 +23,11 @@ func UnescapeString(in string) string {
 				return in[0:i] + "\r" + UnescapeString(in[i+2:])
 			case 't':
 				return in[0:i] + "\t" + UnescapeString(in[i+2:])
+			case 'u':
+				v, _, _, err := strconv.UnquoteChar("\\u"+in[i+2:i+6], '"')
+				if err == nil {
+					return in[0:i] + string(v) + UnescapeString(in[i+6:])
+				}
 			}
 		}
 	}
