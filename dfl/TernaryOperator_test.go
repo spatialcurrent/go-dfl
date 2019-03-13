@@ -36,6 +36,11 @@ func TestTernaryOperator(t *testing.T) {
 		NewTestCase("((@a == null) ? 10 : 20) == 10", ctx, true),
 		NewTestCase("((@a == null) ? 10 : 20) | @ += 30", ctx, 40),
 		NewTestCase("((@a != null) ? 10 : 50) | @ - 20", ctx, 30),
+		NewTestCase(
+			"map(@, '(@name == foo) ? (@ + {name: bar}) : @')",
+			[]interface{}{map[string]interface{}{"name": "foo"}},
+			[]interface{}{map[interface{}]interface{}{"name": "bar"}},
+		),
 	}
 
 	for _, testCase := range testCases {
@@ -47,7 +52,7 @@ func TestTernaryOperator(t *testing.T) {
 		_, got, err := node.Evaluate(map[string]interface{}{}, testCase.Context, NewFuntionMapWithDefaults(), DefaultQuotes)
 		if err != nil {
 			t.Errorf(errors.Wrap(err, "Error evaluating expression \""+testCase.Expression+"\"").Error())
-		} else if got != testCase.Result {
+		} else if !reflect.DeepEqual(got, testCase.Result) {
 			t.Errorf("TestAttribute(%q) == %v (%q), want %v (%q)", testCase.Expression, got, reflect.TypeOf(got), testCase.Result, reflect.TypeOf(testCase.Result))
 		}
 	}

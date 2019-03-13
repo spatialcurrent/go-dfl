@@ -19,8 +19,22 @@ import (
 //
 func ParseSub(s string, remainder string) (Node, string, error) {
 
-	if len(remainder) == 0 || (len(remainder) >= 2 && remainder[0] == ':' && remainder[1] != '=') {
+	// If there is no remainder
+	if len(remainder) == 0 {
 		return Parse(s)
+	}
+
+	// If the remainder starts with a break
+	if len(remainder) >= 2 && remainder[0] == ':' && remainder[1] == ' ' {
+		n, subRemainder, err := Parse(s)
+		if err != nil {
+			return n, remainder, err
+		}
+		if len(subRemainder) > 0 {
+			return n, remainder, errors.New("interior sub should not have a remainder: " + subRemainder)
+		}
+
+		return n, remainder, err
 	}
 
 	var root Node
@@ -40,4 +54,5 @@ func ParseSub(s string, remainder string) (Node, string, error) {
 	}
 
 	return root, remainder, nil
+
 }

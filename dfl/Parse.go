@@ -81,13 +81,16 @@ func Parse(in string) (Node, string, error) {
 			backticks == 0 {
 			if s_lc == "?" && in[i+1] != '.' && in[i+1] != ':' {
 
+				original := strings.TrimSpace(remainder)
+
 				t, remainder, err := Parse(strings.TrimSpace(remainder))
 				if err != nil {
 					return t, remainder, err
 				}
 
 				if len(remainder) == 0 {
-					return t, remainder, errors.New("remainder is empty")
+					//return t, remainder, errors.New("remainder is empty")
+					return t, remainder, errors.Wrap(&ErrParseTernary{Original: original, True: t.Dfl(DefaultQuotes, false, 0)}, "remainder is none")
 				}
 
 				f, remainder, err := Parse(strings.TrimSpace(remainder[1:]))
