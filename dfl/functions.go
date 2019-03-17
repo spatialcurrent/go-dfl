@@ -335,7 +335,7 @@ func filterArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}
 }
 
 func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-	if len(args) < 2 || len(args) > 4 {
+	if len(args) < 2 || len(args) > 6 {
 		return 0, errors.New("Invalid number of arguments to group.")
 	}
 
@@ -361,6 +361,32 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 		}
 	}
 
+	var nodeAccumulator Node
+	var initialValue interface{}
+
+	if len(args) >= 5 {
+		t := reflect.TypeOf(args[1])
+		if t.Kind() == reflect.String {
+			n, err := ParseCompile(args[4].(string))
+			if err != nil {
+				return 0, errors.Wrap(err, "error parsing aggregation for groupArray")
+			}
+			nodeAccumulator = n
+		} else if n, ok := args[4].(Node); ok {
+			nodeAccumulator = n
+		} else {
+			return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
+		}
+
+		if len(args) >= 6 {
+			_, iv, err := ParseCompileEvaluate(args[5].(string), vars, map[string]interface{}{}, funcs, quotes)
+			if err != nil {
+				return 0, errors.Wrap(err, "error parsing initial value for groupArray")
+			}
+			initialValue = iv
+		}
+	}
+
 	var nodeKeys Node
 	t := reflect.TypeOf(args[1])
 	if t.Kind() == reflect.String {
@@ -374,6 +400,7 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 	} else {
 		return 0, errors.New("Invalid arguments for filterArray " + reflect.TypeOf(args[0]).String() + ", " + fmt.Sprint(t))
 	}
+
 	var nodeOutput Node
 	if len(args) >= 3 {
 		if str, ok := args[2].(string); ok {
@@ -428,9 +455,25 @@ func groupArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 				}
 
 				if next.IsValid() {
-					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.Append(next, outputObject))
+					if nodeAccumulator != nil {
+						_, accumulatedValue, err := nodeAccumulator.Evaluate(vars, []interface{}{next.Interface(), outputObject.Interface()}, funcs, quotes)
+						if err != nil {
+							return 0, errors.Wrap(err, "error evaluating accumuator")
+						}
+						currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(accumulatedValue))
+					} else {
+						currentMap.SetMapIndex(reflect.ValueOf(key), reflect.Append(reflect.ValueOf(next.Interface()), outputObject))
+					}
 				} else {
-					currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf([]interface{}{outputObject.Interface()}))
+					if initialValue != nil && nodeAccumulator != nil {
+						_, accumulatedValue, err := nodeAccumulator.Evaluate(vars, []interface{}{initialValue, outputObject.Interface()}, funcs, quotes)
+						if err != nil {
+							return 0, errors.Wrap(err, "error evaluating accumuator")
+						}
+						currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(accumulatedValue))
+					} else {
+						currentMap.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf([]interface{}{outputObject.Interface()}))
+					}
 				}
 			}
 		}
