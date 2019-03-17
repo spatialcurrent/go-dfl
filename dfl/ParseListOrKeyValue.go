@@ -86,7 +86,12 @@ func ParseListOrKeyValue(in string) (bool, []Node, map[Node]Node, error) {
 			leftcurlybrackets == rightcurlybrackets {
 			// If end of input or argument
 			if i+1 == len(in) {
-				return true, []Node{&Literal{Value: TryConvertString(in)}}, map[Node]Node{}, nil
+				value, _, err := Parse(in)
+				if err != nil {
+					return true, make([]Node, 0), map[Node]Node{}, errors.Wrap(err, "error parsing single value in set")
+				}
+				return true, []Node{value}, map[Node]Node{}, nil
+				//return true, []Node{&Literal{Value: TryConvertString(in)}}, map[Node]Node{}, nil
 			} else if in[i+1] == ',' {
 				nodes, err := ParseList(in)
 				return true, nodes, map[Node]Node{}, err
