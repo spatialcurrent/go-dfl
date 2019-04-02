@@ -21,6 +21,7 @@ import (
 import (
 	"github.com/spatialcurrent/go-adaptive-functions/af"
 	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-simple-serializer/gss"
 )
 
 // FunctionMap is a map of functions by string that are reference by name in the Function Node.
@@ -40,6 +41,39 @@ func NewFuntionMapWithDefaults() FunctionMap {
 				}
 			}(fn)
 		}
+	}
+
+	funcs["parse"]  = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+		if len(args) != 2 {
+			return 0, errors.New("Invalid number of arguments to parse.")
+		}
+
+		str, ok := args[0].(string)
+		if !ok {
+			return 0, errors.New("Invalid arguments to parse.")
+		}
+
+		f, ok := args[1].(string)
+		if !ok {
+			return 0, errors.New("Invalid arguments to parse.")
+		}
+
+		t, err := gss.GetType([]byte(str), f)
+		if err != nil {
+			return "", errors.Wrap(err, "error creating new object for format "+f)
+		}
+
+		return gss.DeserializeString(
+			str,
+			f,
+			gss.NoHeader,
+			gss.NoComment,
+			true,
+			0,
+			gss.NoLimit,
+			t,
+			false,
+			false)
 	}
 
 	funcs["md"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {

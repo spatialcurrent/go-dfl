@@ -28,7 +28,7 @@ import (
 
 func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
-	if len(args) > 2 {
+	if len(args) > 3 {
 		return Null{}, errors.New("Invalid number of arguments to toDict.")
 	}
 
@@ -707,7 +707,7 @@ func mapArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, a
 		for i := 0; i < length; i++ {
 			_, y, err := node.Evaluate(vars, original.Index(i).Interface(), funcs, quotes)
 			if err != nil {
-				return 0, errors.Wrap(err, "error extracting value from map element in map")
+				return 0, errors.Wrap(err, fmt.Sprint("error evaluating value for element:", original.Index(i).Interface()))
 			}
 			values = append(values, y)
 		}
@@ -722,7 +722,7 @@ func mapArray(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, a
 		for _, k := range original.MapKeys() {
 			_, y, err := node.Evaluate(vars, original.MapIndex(k).Interface(), funcs, quotes)
 			if err != nil {
-				return 0, errors.Wrap(err, "error extracting value from map element in map")
+				return 0, errors.Wrap(err, fmt.Sprint("error extracting value from map element in map:", original.MapIndex(k).Interface()))
 			}
 			values.SetMapIndex(k, reflect.ValueOf(y))
 		}
