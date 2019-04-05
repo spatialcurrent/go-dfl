@@ -92,9 +92,16 @@ func (f Function) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 			if err != nil {
 				return vars, &Null{}, err
 			}
-			values = append(values, value)
+			if _, ok := value.(Null); ok {
+				values = append(values, nil)
+			} else {
+				values = append(values, value)
+			}
 		}
 		v, err := fn(funcs, vars, ctx, values, quotes)
+		if err != nil {
+			return vars, v, errors.Wrap(err, "error evaluating function with name "+f.Name)
+		}
 		return vars, v, err
 	} else {
 		return vars, "", errors.New("attempted to evaluate unknown function " + f.Name)

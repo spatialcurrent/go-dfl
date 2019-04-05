@@ -43,7 +43,7 @@ func NewFuntionMapWithDefaults() FunctionMap {
 		}
 	}
 
-	funcs["parse"]  = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+	funcs["parse"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 		if len(args) != 2 {
 			return 0, errors.New("Invalid number of arguments to parse.")
 		}
