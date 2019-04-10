@@ -7,6 +7,10 @@
 
 package dfl
 
+import (
+	"github.com/pkg/errors"
+)
+
 // And is a BinaryOperator which represents the logical boolean AND operation of left and right values.
 type And struct {
 	*BinaryOperator
@@ -50,7 +54,7 @@ func (a And) Compile() Node {
 func (a And) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	vars, lv, err := a.Left.Evaluate(vars, ctx, funcs, quotes)
 	if err != nil {
-		return vars, false, err
+		return vars, false, errors.Wrap(err, "error evaluating left node")
 	}
 	switch lv.(type) {
 	case bool:
@@ -59,12 +63,13 @@ func (a And) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 		}
 		vars, rv, err := a.Right.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
-			return vars, false, err
+			return vars, false, errors.Wrap(err, "error evaluating right node")
 		}
 		switch rv.(type) {
 		case bool:
 			return vars, rv.(bool), nil
 		}
+		return vars, false, errors.Wrap(&ErrorEvaluate{Node: a, Quotes: quotes}, "right value is not a bool")
 	}
-	return vars, false, &ErrorEvaluate{Node: a, Quotes: quotes}
+	return vars, false, errors.Wrap(&ErrorEvaluate{Node: a, Quotes: quotes}, "left value is not a bool")
 }
