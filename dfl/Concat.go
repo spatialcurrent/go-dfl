@@ -9,7 +9,6 @@ package dfl
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Concat concatenates the string representation of all the arguments
@@ -30,40 +29,41 @@ func (c Concat) Suffix() string {
 
 // Dfl returns the DFL expression representation of this node.
 func (c Concat) Dfl(quotes []string, pretty bool, tabs int) string {
-	if pretty {
-		if len(c.Arguments) > 0 {
-			if len(c.Arguments) == 1 {
-				switch arg := c.Arguments[0].(type) {
-				case *Attribute:
-					return arg.Dfl(quotes, false, tabs)
-				case *Function:
-					if len(arg.Arguments) == 0 {
+	/*
+		if pretty {
+			if len(c.Arguments) > 0 {
+				if len(c.Arguments) == 1 {
+					switch arg := c.Arguments[0].(type) {
+					case *Attribute:
 						return arg.Dfl(quotes, false, tabs)
-					} else if len(arg.Arguments) == 1 {
-						switch arg.Arguments[0].(type) {
-						case *Attribute:
+					case *Function:
+						if len(arg.Arguments) == 0 {
 							return arg.Dfl(quotes, false, tabs)
+						} else if len(arg.Arguments) == 1 {
+							switch arg.Arguments[0].(type) {
+							case *Attribute:
+								return arg.Dfl(quotes, false, tabs)
+							}
 						}
 					}
 				}
-			}
-			out := strings.Repeat("  ", tabs) + "("
-			for i, arg := range c.Arguments {
-				out += "\n" + arg.Dfl(quotes, pretty, tabs+1)
-				if i < len(c.Arguments)-1 {
-					out += " + "
-				} else {
-					out += "\n"
+				out := strings.Repeat("  ", tabs) + "("
+				for i, arg := range c.Arguments {
+					out += "\n" + arg.Dfl(quotes, pretty, tabs+1)
+					if i < len(c.Arguments)-1 {
+						out += " + "
+					} else {
+						out += "\n"
+					}
 				}
+				out += strings.Repeat("  ", tabs)
+				out += ")"
+				return out
 			}
-			out += strings.Repeat("  ", tabs)
-			out += ")"
-			return out
-		}
-		return strings.Repeat("  ", tabs) + Null{}.Dfl()
-	}
+			return strings.Repeat("  ", tabs) + Null{}.Dfl()
+		}*/
 
-	return "(" + FormatNodes(c.Arguments, " + ", quotes, pretty, tabs) + ")"
+	return "(" + FormatList(FormatNodes(c.Arguments, quotes, pretty, tabs), "+", pretty, tabs) + ")"
 }
 
 // Sql returns the SQL representation of this node as a string

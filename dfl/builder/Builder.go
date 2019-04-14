@@ -47,7 +47,7 @@ func (b Builder) Pretty(pretty bool) Builder {
 	return Builder{
 		indent:    b.indent,
 		quotes:    b.quotes,
-		pretty:    b.pretty,
+		pretty:    pretty,
 		tabs:      b.tabs,
 		left:      b.left,
 		operator:  b.operator,
@@ -148,11 +148,12 @@ func (b Builder) Dfl() string {
 		str += " "
 	}
 	str += b.operator
-	if b.pretty && b.left != nil {
+	/*if b.pretty && b.left != nil {
 		str += "\n"
 	} else {
 		str += " "
-	}
+	}*/
+	str += " "
 	if b.trimRight {
 		str += strings.TrimLeftFunc(b.right.Dfl(b.quotes, b.pretty, b.tabs), unicode.IsSpace)
 	} else {

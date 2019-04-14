@@ -18,17 +18,11 @@ func (d Dictionary) Len() int {
 }
 
 func (d Dictionary) Dfl(quotes []string, pretty bool, tabs int) string {
-	str := "{"
-	i := 0
+	values := make([]string, 0)
 	for k, v := range d.Nodes {
-		if i > 0 {
-			str += ", "
-		}
-		str += k.Dfl(quotes, pretty, tabs) + ":" + v.Dfl(quotes, pretty, tabs)
-		i += 1
+		values = append(values, k.Dfl(quotes, pretty, tabs)+": "+v.Dfl(quotes, pretty, tabs))
 	}
-	str = str + "}"
-	return str
+	return "{" + FormatList(values, ",", pretty, tabs) + "}"
 }
 
 // Sql returns the SQL representation of this node as a string

@@ -32,14 +32,14 @@ func (p Pipe) Dfl(quotes []string, pretty bool, tabs int) string {
 		case *Literal:
 			switch p.Left.(*Literal).Value.(type) {
 			case string, int, []byte, Null:
-				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, false, tabs) + " | " + p.Right.Dfl(quotes, false, tabs)
+				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, pretty, tabs) + " | " + p.Right.Dfl(quotes, pretty, tabs)
 			}
 		}
 		switch p.Right.(type) {
 		case *Literal:
 			switch p.Right.(*Literal).Value.(type) {
 			case string, int, []byte, Null:
-				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, false, tabs) + " | " + p.Right.Dfl(quotes, false, tabs)
+				return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, pretty, tabs) + " | " + p.Right.Dfl(quotes, pretty, tabs)
 			}
 		}
 		return strings.Repeat("  ", tabs) + p.Left.Dfl(quotes, pretty, tabs) + " | " + "\n" + p.Right.Dfl(quotes, pretty, tabs)

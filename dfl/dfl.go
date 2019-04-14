@@ -71,6 +71,7 @@
 //
 package dfl
 
+var DefaultTab = "  "
 var DefaultQuotes = []string{"'", "\"", "`"}
 
 var SqlArrayPrefix = "{"

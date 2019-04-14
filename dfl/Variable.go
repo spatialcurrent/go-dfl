@@ -21,9 +21,6 @@ type Variable struct {
 }
 
 func (v Variable) Dfl(quotes []string, pretty bool, tabs int) string {
-	if pretty {
-		return strings.Repeat("  ", tabs) + syntax.VariablePrefix + v.Name
-	}
 	return syntax.VariablePrefix + v.Name
 }
 

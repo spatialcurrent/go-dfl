@@ -8,13 +8,10 @@
 package dfl
 
 // FormatNodes formats an array of nodes to a string.
-func FormatNodes(nodes []Node, delim string, quotes []string, pretty bool, tabs int) string {
-	str := ""
-	for i, arg := range nodes {
-		if i > 0 {
-			str += delim
-		}
-		str += arg.Dfl(quotes, pretty, tabs)
+func FormatNodes(nodes []Node, quotes []string, pretty bool, tabs int) []string {
+	values := make([]string, 0)
+	for _, node := range nodes {
+		values = append(values, node.Dfl(quotes, pretty, tabs))
 	}
-	return str
+	return values
 }

@@ -23,15 +23,7 @@ func (a Array) Len() int {
 
 // Dfl returns the DFL representation of this node as a string
 func (a Array) Dfl(quotes []string, pretty bool, tabs int) string {
-	str := "["
-	for i, x := range a.Nodes {
-		if i > 0 {
-			str += ", "
-		}
-		str += x.Dfl(quotes, pretty, tabs)
-	}
-	str = str + "]"
-	return str
+	return "[" + FormatList(FormatNodes(a.Nodes, quotes, pretty, tabs), ",", pretty, tabs) + "]"
 }
 
 // Sql returns the SQL representation of this node as a string

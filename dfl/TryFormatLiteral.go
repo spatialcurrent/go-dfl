@@ -34,6 +34,9 @@ func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int)
 
 	switch value := value.(type) {
 	case string:
+		if len(value) == 0 {
+			return quotes[0] + quotes[0]
+		}
 		str := EscapeString(value)
 		if strings.ContainsAny(str, "\\-+=,.`'\"?:[]()\n\t ") {
 			return quotes[0] + str + quotes[0]

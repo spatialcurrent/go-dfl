@@ -21,14 +21,7 @@ type Literal struct {
 }
 
 func (l Literal) Dfl(quotes []string, pretty bool, tabs int) string {
-
-	str := TryFormatLiteral(l.Value, quotes, pretty, tabs)
-
-	if pretty {
-		str = strings.Repeat("  ", tabs) + str
-	}
-
-	return str
+	return TryFormatLiteral(l.Value, quotes, pretty, tabs)
 }
 
 // Sql returns the SQL representation of this node as a string

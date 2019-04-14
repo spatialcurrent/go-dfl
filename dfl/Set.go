@@ -23,15 +23,7 @@ func (s Set) Len() int {
 }
 
 func (s Set) Dfl(quotes []string, pretty bool, tabs int) string {
-	str := "{"
-	for i, x := range s.Nodes {
-		if i > 0 {
-			str += ", "
-		}
-		str += x.Dfl(quotes, pretty, tabs)
-	}
-	str = str + "}"
-	return str
+	return "{" + FormatList(FormatNodes(s.Nodes, quotes, pretty, tabs), ",", pretty, tabs) + "}"
 }
 
 // Sql returns the SQL representation of this node as a string

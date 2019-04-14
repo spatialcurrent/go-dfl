@@ -28,6 +28,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -37,7 +38,10 @@ import (
 
 import (
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
+	//"github.com/spf13/pflag"
 )
 
 import (
@@ -47,6 +51,86 @@ import (
 var GO_DFL_DEFAULT_QUOTES = []string{"'", "\"", "`"}
 
 func main() {
+
+	rootCommand := cobra.Command{
+		Use:   "dfl [flags]",
+		Short: "CLI for Dynamic Filter Language",
+		Long:  "CLI for Dynamic Filter Language",
+	}
+
+	completionCommandLong := ""
+	if _, err := os.Stat("/etc/bash_completion.d/"); !os.IsNotExist(err) {
+		completionCommandLong = "To install completion scripts run:\ndfl completion > /etc/bash_completion.d/dfl"
+	} else {
+		if _, err := os.Stat("/usr/local/etc/bash_completion.d/"); !os.IsNotExist(err) {
+			completionCommandLong = "To install completion scripts run:\ndfl completion > /usr/local/etc/bash_completion.d/dfl"
+		} else {
+			completionCommandLong = "To install completion scripts run:\ndfl completion > .../bash_completion.d/dfl"
+		}
+	}
+
+	completionCommand := &cobra.Command{
+		Use:   "completion",
+		Short: "Generates bash completion scripts",
+		Long:  completionCommandLong,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return rootCommand.GenBashCompletion(os.Stdout)
+		},
+	}
+	rootCommand.AddCommand(completionCommand)
+
+	fmtCommand := &cobra.Command{
+		Use:   "fmt",
+		Short: "Formats a dfl expression",
+		Long:  "Formats a dfl expression",
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			err := cmd.ParseFlags(args)
+			if err != nil {
+				return err
+			}
+
+			flag := cmd.Flags()
+
+			v := viper.New()
+			v.BindPFlags(flag)
+			v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+			v.AutomaticEnv()
+
+			in, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				return err
+			}
+
+			node, _, err := dfl.Parse(strings.TrimSpace(dfl.RemoveComments(string(in))))
+			if err != nil {
+				return err
+			}
+
+			if v.GetBool("compile") {
+				node = node.Compile()
+			}
+
+			out := node.Dfl(dfl.DefaultQuotes, v.GetBool("pretty"), v.GetInt("tabs"))
+
+			fmt.Println(out)
+
+			return nil
+		},
+	}
+	flags := fmtCommand.Flags()
+	flags.BoolP("compile", "c", false, "compile expression")
+	flags.BoolP("pretty", "p", false, "pretty output")
+	flags.IntP("tabs", "t", 0, "tabs")
+	rootCommand.AddCommand(fmtCommand)
+
+	if err := rootCommand.Execute(); err != nil {
+		panic(err)
+	}
+
+}
+
+func old() {
 
 	start := time.Now()
 

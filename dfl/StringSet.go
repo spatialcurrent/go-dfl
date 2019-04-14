@@ -8,6 +8,7 @@
 package dfl
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -20,6 +21,10 @@ func (set StringSet) Dfl(quotes []string, pretty bool, tabs int) string {
 	values := make([]string, 0, len(set))
 	for v := range set {
 		values = append(values, TryFormatLiteral(v, quotes, pretty, tabs))
+	}
+	if pretty {
+		fmt.Println("Printing Pretty STringset:", values)
+		return "{\n" + strings.Join(values, ",\n"+strings.Repeat(DefaultTab, tabs)) + "}"
 	}
 	return "{" + strings.Join(values, ", ") + "}"
 }
