@@ -271,6 +271,14 @@ func Parse(in string) (Node, string, error) {
 					}
 					return &Xor{&BinaryOperator{Right: right}}, remainder, nil
 
+				} else if s_lc == "print" {
+
+					node, remainder, err := Parse(remainder)
+					if err != nil {
+						return node, remainder, err
+					}
+					return &Print{&UnaryOperator{Node: node}}, remainder, nil
+
 				} else if s_lc == "not" || (s_lc == "!" && in[i+1] != '=') {
 
 					node, remainder, err := Parse(remainder)

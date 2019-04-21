@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // Function is a refrenced function in a DFL filter.  The actual function in a given FunctionMap is derefernced by name.
@@ -20,6 +21,10 @@ type Function struct {
 func (f Function) Dfl(quotes []string, pretty bool, tabs int) string {
 	if len(f.Arguments) == 0 {
 		return f.Name + "()"
+	}
+
+	if pretty {
+		return f.Name + "(" + "\n" + FormatList(FormatNodes(f.Arguments, quotes, pretty, tabs), ",", pretty, tabs+1) + "\n" + strings.Repeat(DefaultTab, tabs) + ")"
 	}
 
 	return f.Name + "(" + FormatList(FormatNodes(f.Arguments, quotes, pretty, tabs), ",", pretty, tabs) + ")"

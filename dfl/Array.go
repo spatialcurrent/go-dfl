@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"reflect"
+	"strings"
 )
 
 // Array is a Node representing an array of values, which can be either a Literal or Attribute.
@@ -23,6 +24,15 @@ func (a Array) Len() int {
 
 // Dfl returns the DFL representation of this node as a string
 func (a Array) Dfl(quotes []string, pretty bool, tabs int) string {
+	if len(a.Nodes) == 0 {
+		return "[]"
+	}
+	if len(a.Nodes) == 1 {
+		return "[" + strings.TrimSpace(a.Nodes[0].Dfl(quotes, pretty, tabs)) + "]"
+	}
+	if pretty {
+		return "[" + "\n" + FormatList(FormatNodes(a.Nodes, quotes, pretty, tabs), ",", pretty, tabs+1) + "\n" + strings.Repeat(DefaultTab, tabs) + "]"
+	}
 	return "[" + FormatList(FormatNodes(a.Nodes, quotes, pretty, tabs), ",", pretty, tabs) + "]"
 }
 

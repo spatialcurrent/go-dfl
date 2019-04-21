@@ -26,14 +26,10 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-	"reflect"
 	"strings"
-	"time"
 )
 
 import (
@@ -41,14 +37,70 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
-	//"github.com/spf13/pflag"
 )
 
 import (
 	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-reader-writer/grw"
+	stringify "github.com/spatialcurrent/go-stringify"
 )
 
-var GO_DFL_DEFAULT_QUOTES = []string{"'", "\"", "`"}
+var DefaultQuotes = []string{"'", "\"", "`"}
+
+func parseContextArguments(args []string, funcs dfl.FunctionMap) (map[string]interface{}, error) {
+	ctx := map[string]interface{}{}
+	for _, a := range args {
+		if !strings.Contains(a, "=") {
+			return ctx, errors.New("Context attribute \"" + a + "\" does not contain \"=\".")
+		}
+		pair := strings.SplitN(a, "=", 2)
+		value, _, err := dfl.Parse(strings.TrimSpace(pair[1]))
+		if err != nil {
+			return ctx, errors.Wrap(err, "Could not parse context variable")
+		}
+		value = value.Compile()
+		switch value.(type) {
+		case dfl.Array:
+			_, arr, err := value.(dfl.Array).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, DefaultQuotes[1:])
+			if err != nil {
+				return ctx, errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0]))
+			}
+			ctx[strings.TrimSpace(pair[0])] = arr
+		case dfl.Set:
+			_, arr, err := value.(dfl.Set).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, DefaultQuotes[1:])
+			if err != nil {
+				return ctx, errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0]))
+			}
+			ctx[strings.TrimSpace(pair[0])] = arr
+		case dfl.Literal:
+			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
+		case *dfl.Literal:
+			ctx[strings.TrimSpace(pair[0])] = value.(*dfl.Literal).Value
+		default:
+			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(pair[1])
+		}
+	}
+	return ctx, nil
+}
+
+func parseInitialVariables(str string, funcs dfl.FunctionMap, quotes []string) (map[string]interface{}, error) {
+	vars := map[string]interface{}{}
+	if len(str) > 0 {
+		_, result, err := dfl.ParseCompileEvaluateMap(
+			str,
+			dfl.NoVars,
+			dfl.NoContext,
+			funcs,
+			quotes)
+		if err != nil {
+			return vars, errors.Wrap(err, "error parsing initial dfl vars as map")
+		}
+		if m, ok := stringify.StringifyMapKeys(result).(map[string]interface{}); ok {
+			vars = m
+		}
+	}
+	return vars, nil
+}
 
 func main() {
 
@@ -93,16 +145,26 @@ func main() {
 			flag := cmd.Flags()
 
 			v := viper.New()
-			v.BindPFlags(flag)
+			err = v.BindPFlags(flag)
+			if err != nil {
+				return err
+			}
 			v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 			v.AutomaticEnv()
 
-			in, err := ioutil.ReadAll(os.Stdin)
+			inputUri := v.GetString("uri")
+
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			if err != nil {
+				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+			}
+
+			inputBytes, err := inputReader.ReadAllAndClose()
 			if err != nil {
 				return err
 			}
 
-			node, _, err := dfl.Parse(strings.TrimSpace(dfl.RemoveComments(string(in))))
+			node, _, err := dfl.Parse(strings.TrimSpace(dfl.RemoveComments(string(inputBytes))))
 			if err != nil {
 				return err
 			}
@@ -119,189 +181,152 @@ func main() {
 		},
 	}
 	flags := fmtCommand.Flags()
+	flags.StringP("uri", "u", "stdin", "uri to DFL file")
 	flags.BoolP("compile", "c", false, "compile expression")
 	flags.BoolP("pretty", "p", false, "pretty output")
 	flags.IntP("tabs", "t", 0, "tabs")
 	rootCommand.AddCommand(fmtCommand)
 
+	execCommand := &cobra.Command{
+		Use:   "exec",
+		Short: "executes a DFL expression (parse, compile, and evalutes)",
+		Long:  "executes a DFL expression (parse, compile, and evalutes)",
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			err := cmd.ParseFlags(args)
+			if err != nil {
+				return err
+			}
+
+			flag := cmd.Flags()
+
+			v := viper.New()
+			err = v.BindPFlags(flag)
+			if err != nil {
+				return err
+			}
+			v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+			v.AutomaticEnv()
+
+			inputUri := v.GetString("uri")
+
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			if err != nil {
+				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+			}
+
+			inputBytes, err := inputReader.ReadAllAndClose()
+			if err != nil {
+				return err
+			}
+
+			node, _, err := dfl.Parse(strings.TrimSpace(dfl.RemoveComments(string(inputBytes))))
+			if err != nil {
+				return err
+			}
+
+			node = node.Compile()
+
+			funcs := dfl.DefaultFunctionMap
+			quotes := dfl.DefaultQuotes
+
+			ctx := map[string]interface{}{}
+
+			if v.GetBool("env") {
+				for _, e := range os.Environ() {
+					pair := strings.SplitN(e, "=", 2)
+					ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(strings.TrimSpace(pair[1]))
+				}
+			}
+
+			if v.GetBool("args") {
+				m, errArgs := parseContextArguments(args, funcs)
+				if errArgs != nil {
+					return errors.Wrap(errArgs, "error parsing context from arguments")
+				}
+				for k, v := range m {
+					ctx[k] = v
+				}
+			}
+
+			vars := map[string]interface{}{}
+			if str := strings.TrimSpace(v.GetString("vars")); len(str) > 0 {
+				m, errVars := parseInitialVariables(str, funcs, quotes)
+				if errVars != nil {
+					return errors.Wrap(errVars, "error parsing initial variables")
+				}
+				vars = m
+			}
+
+			_, result, err := node.Evaluate(vars, ctx, funcs, quotes)
+			if err != nil {
+				return errors.Wrap(err, "error evaluating")
+			}
+
+			result = stringify.StringifyMapKeys(result)
+
+			pretty := v.GetBool("pretty")
+
+			outString := ""
+			if v.GetBool("json") {
+				if pretty {
+					outputBytes, errJSON := json.MarshalIndent(result, "", "  ")
+					if errJSON != nil {
+						return errors.Wrap(errJSON, "error marshalling result")
+					}
+					outString = string(outputBytes)
+				} else {
+					outputBytes, errJSON := json.Marshal(result)
+					if errJSON != nil {
+						return errors.Wrap(errJSON, "error marshalling result")
+					}
+					outString = string(outputBytes)
+				}
+			} else if v.GetBool("yaml") {
+				outputBytes, errYAML := yaml.Marshal(result)
+				if errYAML != nil {
+					return errors.Wrap(errYAML, "error marshalling result")
+				}
+				outString = string(outputBytes)
+			} else {
+				outString = dfl.TryFormatLiteral(result, quotes, v.GetBool("pretty"), v.GetInt("tabs"))
+			}
+
+			outputUri := v.GetString("output-uri")
+
+			outputWriter, err := grw.WriteToResource(outputUri, "none", v.GetBool("append"), nil)
+			if err != nil {
+				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+			}
+
+			_, err = outputWriter.WriteString(outString)
+			if err != nil {
+				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+			}
+
+			err = outputWriter.Close()
+			if err != nil {
+				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+			}
+
+			return nil
+		},
+	}
+	flags = execCommand.Flags()
+	flags.StringP("input-uri", "i", "stdin", "input uri to DFL file")
+	flags.StringP("output-uri", "o", "stdout", "output uri to DFL file")
+	flags.StringP("vars", "v", "", "vars")
+	flags.BoolP("args", "a", false, "load context attributes from arguments")
+	flags.BoolP("env", "e", false, "load context attributes from environment variables")
+	flags.BoolP("pretty", "p", false, "pretty output")
+	flags.BoolP("json", "j", false, "json output")
+	flags.BoolP("yaml", "y", false, "yaml output")
+	flags.Bool("append", false, "append output")
+	flags.IntP("tabs", "t", 0, "tabs")
+	rootCommand.AddCommand(execCommand)
+
 	if err := rootCommand.Execute(); err != nil {
 		panic(err)
 	}
 
-}
-
-func old() {
-
-	start := time.Now()
-
-	var filter_text string
-
-	var load_env bool
-	var verbose bool
-	var version bool
-	var sql bool
-	var pretty bool
-	var dry_run bool
-	var help bool
-
-	flag.StringVar(&filter_text, "f", "", "The DFL expression to evaulate")
-	flag.BoolVar(&sql, "sql", false, "Prints SQL version of expression to stdout")
-	flag.BoolVar(&pretty, "pretty", false, "Prints pretty version of expression to stdout")
-
-	flag.BoolVar(&load_env, "env", false, "Load environment variables")
-	flag.BoolVar(&verbose, "verbose", false, "Provide verbose output")
-	flag.BoolVar(&version, "version", false, "Prints version to stdout")
-	flag.BoolVar(&dry_run, "dry_run", false, "Do a dry run (parse and compile expression but do not evaluate)")
-	flag.BoolVar(&help, "help", false, "Print help")
-
-	flag.Parse()
-
-	if help {
-		fmt.Println("Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]")
-		fmt.Println("Options:")
-		flag.PrintDefaults()
-		os.Exit(0)
-	} else if len(os.Args) == 1 {
-		fmt.Println("Error: Provided no arguments.")
-		fmt.Println("Run \"dfl -help\" for more information.")
-		os.Exit(0)
-	} else if len(os.Args) == 2 && os.Args[1] == "help" {
-		fmt.Println("Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]")
-		fmt.Println("Options:")
-		flag.PrintDefaults()
-		os.Exit(0)
-	}
-
-	if version {
-		fmt.Println(dfl.Version)
-		os.Exit(0)
-	}
-
-	ctx := map[string]interface{}{}
-
-	if load_env {
-		for _, e := range os.Environ() {
-			pair := strings.SplitN(e, "=", 2)
-			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(strings.TrimSpace(pair[1]))
-		}
-	}
-
-	funcs := dfl.NewFuntionMapWithDefaults()
-
-	for _, a := range flag.Args() {
-		if !strings.Contains(a, "=") {
-			log.Fatal(errors.New("Context attribute \"" + a + "\" does not contain \"=\"."))
-		}
-		pair := strings.SplitN(a, "=", 2)
-		value, _, err := dfl.Parse(strings.TrimSpace(pair[1]))
-		if err != nil {
-			log.Fatal(errors.Wrap(err, "Could not parse context variable"))
-		}
-		value = value.Compile()
-		switch value.(type) {
-		case dfl.Array:
-			_, arr, err := value.(dfl.Array).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, GO_DFL_DEFAULT_QUOTES[1:])
-			if err != nil {
-				log.Fatal(errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0])))
-			}
-			ctx[strings.TrimSpace(pair[0])] = arr
-		case dfl.Set:
-			_, arr, err := value.(dfl.Set).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, GO_DFL_DEFAULT_QUOTES[1:])
-			if err != nil {
-				log.Fatal(errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0])))
-			}
-			ctx[strings.TrimSpace(pair[0])] = arr
-		case dfl.Literal:
-			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
-		case *dfl.Literal:
-			ctx[strings.TrimSpace(pair[0])] = value.(*dfl.Literal).Value
-		default:
-			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(pair[1])
-		}
-	}
-
-	root, _, err := dfl.Parse(filter_text)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "error parsing filter expression"))
-	}
-
-	if pretty {
-		fmt.Println("# Pretty Version \n" + root.Dfl(dfl.DefaultQuotes[1:], true, 0) + "\n")
-	}
-
-	if sql {
-		fmt.Println("# SQL Version \n" + root.Sql(pretty, 0) + "\n")
-	}
-
-	if verbose {
-
-		fmt.Println("******************* Context *******************")
-		out, err := yaml.Marshal(ctx)
-		if err != nil {
-			fmt.Println("Error marshaling context to yaml.")
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println(string(out))
-
-		fmt.Println("******************* Parsed *******************")
-		out, err = yaml.Marshal(root.Map())
-		if err != nil {
-			fmt.Println("Error marshaling expression to yaml.")
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println(string(out))
-
-	}
-
-	root = root.Compile()
-
-	if verbose {
-		fmt.Println("******************* Compiled *******************")
-		out, err := yaml.Marshal(root.Map())
-		if err != nil {
-			fmt.Println("Error marshaling expression to yaml.")
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		fmt.Println("# YAML Version\n" + string(out))
-		fmt.Println("# DFL Version\n" + GO_DFL_DEFAULT_QUOTES[0] + root.Dfl(GO_DFL_DEFAULT_QUOTES[1:], false, 0) + GO_DFL_DEFAULT_QUOTES[0])
-		if sql {
-			fmt.Println("# SQL Version\n" + root.Sql(pretty, 0) + "\n")
-		}
-	}
-
-	if dry_run {
-		os.Exit(0)
-	}
-
-	_, result, err := root.Evaluate(map[string]interface{}{}, ctx, funcs, GO_DFL_DEFAULT_QUOTES[1:])
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "error evaluating expression"))
-	}
-
-	switch result.(type) {
-	case bool:
-		result_bool := result.(bool)
-		if verbose {
-			fmt.Println("******************* Result *******************")
-			fmt.Println(dfl.TryFormatLiteral(result, GO_DFL_DEFAULT_QUOTES[1:], false, 0))
-			elapsed := time.Since(start)
-			fmt.Println("Done in " + elapsed.String())
-		}
-		if result_bool {
-			os.Exit(0)
-		} else {
-			os.Exit(1)
-		}
-	default:
-		if verbose {
-			fmt.Println("******************* Result *******************")
-			fmt.Println("Type:", reflect.TypeOf(result))
-			fmt.Println("Value:", dfl.TryFormatLiteral(result, GO_DFL_DEFAULT_QUOTES[1:], false, 0))
-			elapsed := time.Since(start)
-			fmt.Println("Done in " + elapsed.String())
-		}
-	}
 }

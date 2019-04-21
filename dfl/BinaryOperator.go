@@ -40,7 +40,7 @@ func (bo BinaryOperator) Dfl(operator string, quotes []string, pretty bool, tabs
 				return b.Dfl()
 			}
 		}
-		return b.Pretty(true).Tabs(tabs + 1).Dfl()
+		return b.Pretty(true).Tabs(tabs).Dfl()
 	}
 	return b.Dfl()
 }

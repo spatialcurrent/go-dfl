@@ -19,7 +19,7 @@ type Equal struct {
 }
 
 func (e Equal) Dfl(quotes []string, pretty bool, tabs int) string {
-	return e.BinaryOperator.Dfl("==", quotes, pretty, tabs)
+	return e.BinaryOperator.Dfl("==", quotes, pretty, tabs+1)
 }
 
 // Sql returns the SQL representation of this node as a string

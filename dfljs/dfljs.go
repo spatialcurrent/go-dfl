@@ -5,10 +5,6 @@
 //
 // =================================================================
 
-// Package syntax includes functions for parsing syntax.
+// Package dfljs contains functions for the JavaScript build of DFL.
 //
-package syntax
-
-var AttributePrefix = "@"
-
-var VariablePrefix = "$"
+package dfljs

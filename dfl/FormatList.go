@@ -13,7 +13,7 @@ import (
 
 func FormatList(values []string, delim string, pretty bool, tabs int) string {
 	if pretty {
-		return "\n" + strings.Repeat(DefaultTab, tabs+1) + strings.Join(values, delim+"\n"+strings.Repeat(DefaultTab, tabs+1)) + "\n" + strings.Repeat(DefaultTab, tabs)
+		return strings.Repeat(DefaultTab, tabs) + strings.Join(values, delim+"\n"+strings.Repeat(DefaultTab, tabs))
 	}
 	return strings.Join(values, delim+" ")
 }

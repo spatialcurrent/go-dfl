@@ -7,6 +7,10 @@
 
 package dfl
 
+import (
+	"strings"
+)
+
 // Dictionary is a Node representing a dictionary of key value pairs.
 type Dictionary struct {
 	Nodes map[Node]Node
@@ -18,11 +22,18 @@ func (d Dictionary) Len() int {
 }
 
 func (d Dictionary) Dfl(quotes []string, pretty bool, tabs int) string {
+	if len(d.Nodes) == 0 {
+		return "{}"
+	}
 	values := make([]string, 0)
 	for k, v := range d.Nodes {
-		values = append(values, k.Dfl(quotes, pretty, tabs)+": "+v.Dfl(quotes, pretty, tabs))
+		values = append(values, k.Dfl(quotes, pretty, tabs+1)+": "+v.Dfl(quotes, pretty, tabs+1))
+	}
+	if pretty {
+		return "{" + "\n" + FormatList(values, ",", pretty, tabs+1) + "\n" + strings.Repeat(DefaultTab, tabs) + "}"
 	}
 	return "{" + FormatList(values, ",", pretty, tabs) + "}"
+
 }
 
 // Sql returns the SQL representation of this node as a string

@@ -5,6 +5,8 @@
 //
 // =================================================================
 
+// Package builder is for building DFL expressions.
+//
 package builder
 
 import (
@@ -144,20 +146,18 @@ func (b Builder) Dfl() string {
 		str += "\n"
 	}
 	if b.left != nil {
-		str += b.left.Dfl(b.quotes, b.pretty, b.tabs)
+		if b.pretty {
+			str += strings.Repeat(indentSpace, b.tabs+1)
+		}
+		str += b.left.Dfl(b.quotes, b.pretty, b.tabs+1)
 		str += " "
 	}
 	str += b.operator
-	/*if b.pretty && b.left != nil {
-		str += "\n"
-	} else {
-		str += " "
-	}*/
 	str += " "
 	if b.trimRight {
 		str += strings.TrimLeftFunc(b.right.Dfl(b.quotes, b.pretty, b.tabs), unicode.IsSpace)
 	} else {
-		str += b.right.Dfl(b.quotes, b.pretty, b.tabs)
+		str += b.right.Dfl(b.quotes, b.pretty, b.tabs+1)
 	}
 	if b.pretty {
 		str += "\n"

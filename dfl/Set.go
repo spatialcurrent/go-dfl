@@ -10,6 +10,7 @@ package dfl
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Set is a Node representing a set of values, which can be either a Literal or Attribute.
@@ -23,6 +24,12 @@ func (s Set) Len() int {
 }
 
 func (s Set) Dfl(quotes []string, pretty bool, tabs int) string {
+	if len(s.Nodes) == 0 {
+		return "{}"
+	}
+	if pretty {
+		return "{" + "\n" + FormatList(FormatNodes(s.Nodes, quotes, pretty, tabs), ",", pretty, tabs+1) + "\n" + strings.Repeat(DefaultTab, tabs) + "}"
+	}
 	return "{" + FormatList(FormatNodes(s.Nodes, quotes, pretty, tabs), ",", pretty, tabs) + "}"
 }
 

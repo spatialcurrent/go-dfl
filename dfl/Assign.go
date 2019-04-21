@@ -22,7 +22,7 @@ type Assign struct {
 func (a Assign) Dfl(quotes []string, pretty bool, tabs int) string {
 	b := a.Builder(":=", quotes, tabs)
 	if pretty {
-		b = b.Indent(tabs).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
+		b = b.Indent(tabs + 1).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
 		switch a.Left.(type) {
 		case *Attribute:
 			switch a.Right.(type) {

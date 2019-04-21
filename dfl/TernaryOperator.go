@@ -21,7 +21,11 @@ type TernaryOperator struct {
 
 func (to TernaryOperator) Dfl(quotes []string, pretty bool, tabs int) string {
 	if pretty {
-		return strings.Repeat("  ", tabs) + "(\n" + to.Left.Dfl(quotes, pretty, tabs+1) + " ? " + to.True.Dfl(quotes, pretty, tabs+1) + " : " + "\n" + to.False.Dfl(quotes, pretty, tabs+1) + "\n" + strings.Repeat("  ", tabs) + ")"
+		return "(\n" +
+			to.Left.Dfl(quotes, pretty, tabs+1) + " ? " +
+			to.True.Dfl(quotes, pretty, tabs+1) + " : " +
+			to.False.Dfl(quotes, pretty, tabs+2) + "\n" +
+			strings.Repeat(DefaultTab, tabs) + ")"
 	}
 	return "(" + to.Left.Dfl(quotes, pretty, tabs) + " ? " + to.True.Dfl(quotes, pretty, tabs) + " : " + to.False.Dfl(quotes, pretty, tabs) + ")"
 }
