@@ -208,7 +208,7 @@ func main() {
 			v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 			v.AutomaticEnv()
 
-			inputUri := v.GetString("uri")
+			inputUri := v.GetString("input-uri")
 
 			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
 			if err != nil {
