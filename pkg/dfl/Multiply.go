@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 
 // Multiply is a NumericBinaryOperator that represents the mathematical multiplication of two nodes.
@@ -58,7 +58,7 @@ func (m Multiply) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 		return vars, 0, err
 	}
 
-	v, err := af.Multiply.ValidateRun([]interface{}{lv, rv})
+	v, err := af.Multiply.ValidateRun(lv, rv)
 	if err != nil {
 		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: m, Quotes: quotes}.Error())
 	}

@@ -9,18 +9,18 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"reflect"
 	"strings"
 )
 
-// AssignMultiply is a BinaryOperator which sets the multiplied value of the left side and right side to the attribute or variable defined by the left side.
-type AssignMultiply struct {
+// AssignAdd is a BinaryOperator which sets the added value of the left side and right side to the attribute or variable defined by the left side.
+type AssignAdd struct {
 	*BinaryOperator
 }
 
-func (a AssignMultiply) Dfl(quotes []string, pretty bool, tabs int) string {
-	b := a.Builder("*=", quotes, tabs)
+func (a AssignAdd) Dfl(quotes []string, pretty bool, tabs int) string {
+	b := a.Builder("+=", quotes, tabs)
 	if pretty {
 		b = b.Indent(tabs).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
 		switch a.Left.(type) {
@@ -35,12 +35,12 @@ func (a AssignMultiply) Dfl(quotes []string, pretty bool, tabs int) string {
 				return b.Dfl()
 			}
 		}
-		return a.BinaryOperator.Dfl("*= ", quotes, pretty, tabs)
+		return a.BinaryOperator.Dfl("+=", quotes, pretty, tabs)
 	}
 	return b.Dfl()
 }
 
-func (a AssignMultiply) Sql(pretty bool, tabs int) string {
+func (a AssignAdd) Sql(pretty bool, tabs int) string {
 	if pretty {
 		switch left := a.Left.(type) {
 		case *Variable:
@@ -60,25 +60,25 @@ func (a AssignMultiply) Sql(pretty bool, tabs int) string {
 
 }
 
-func (a AssignMultiply) Map() map[string]interface{} {
-	return a.BinaryOperator.Map("assignmultiply", a.Left, a.Right)
+func (a AssignAdd) Map() map[string]interface{} {
+	return a.BinaryOperator.Map("assignadd", a.Left, a.Right)
 }
 
 // Compile returns a compiled version of this node.
-func (a AssignMultiply) Compile() Node {
+func (a AssignAdd) Compile() Node {
 	left := a.Left.Compile()
 	right := a.Right.Compile()
-	return &AssignMultiply{&BinaryOperator{Left: left, Right: right}}
+	return &AssignAdd{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (a AssignMultiply) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	switch left := a.Left.(type) {
 	case Attribute:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err
 		}
-		value, err := af.Multiply.ValidateRun([]interface{}{lv, rv})
+		value, err := af.Add.ValidateRun(lv, rv)
 		if err != nil {
 			return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
 		}
@@ -113,7 +113,7 @@ func (a AssignMultiply) Evaluate(vars map[string]interface{}, ctx interface{}, f
 		if err != nil {
 			return vars, 0, err
 		}
-		value, err := af.Multiply.ValidateRun([]interface{}{lv, rv})
+		value, err := af.Add.ValidateRun(lv, rv)
 		if err != nil {
 			return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
 		}

@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/spatialcurrent/go-dfl/dfl/syntax"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 	"strings"
 )
 

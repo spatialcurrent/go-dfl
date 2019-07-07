@@ -21,7 +21,7 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"github.com/spatialcurrent/go-counter/counter"
 	"github.com/spatialcurrent/go-reader-writer/grw"
 )

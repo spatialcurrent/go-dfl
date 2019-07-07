@@ -8,7 +8,7 @@
 package dfl
 
 import (
-	"github.com/spatialcurrent/go-dfl/dfl/builder"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/builder"
 )
 
 // BinaryOperator is a DFL Node that represents the binary operator of a left value and right value.

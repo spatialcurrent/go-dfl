@@ -12,7 +12,7 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"github.com/spatialcurrent/go-reader-writer/grw"
 )
 
@@ -128,7 +128,7 @@ func (i In) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functio
 		}
 	}
 
-	value, err := af.In.ValidateRun([]interface{}{lv, rv})
+	value, err := af.In.ValidateRun(lv, rv)
 	if err != nil {
 		return vars, false, errors.Wrap(err, ErrorEvaluate{Node: i, Quotes: quotes}.Error())
 	}

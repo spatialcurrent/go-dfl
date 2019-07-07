@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 
 // Divide is a NumericBinaryOperator that represents the mathematical division of two nodes.
@@ -58,7 +58,7 @@ func (d Divide) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Fun
 		return vars, 0, err
 	}
 
-	v, err := af.Divide.ValidateRun([]interface{}{lv, rv})
+	v, err := af.Divide.ValidateRun(lv, rv)
 	if err != nil {
 		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: d, Quotes: quotes}.Error())
 	}

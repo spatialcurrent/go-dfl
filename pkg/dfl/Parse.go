@@ -16,7 +16,7 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-dfl/dfl/syntax"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 )
 
 // Parse parses a DFL expression into an an Abstract Synatax Tree (AST).

@@ -42,6 +42,8 @@ func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int)
 			return quotes[0] + str + quotes[0]
 		}
 		return str
+	case map[string]interface{}:
+		return NewDictionary(value).Dfl(quotes, pretty, tabs)
 	case map[string]struct{}:
 		return StringSet(value).Dfl(quotes, pretty, tabs)
 	case StringSet:

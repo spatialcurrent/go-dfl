@@ -17,7 +17,7 @@ import (
 
 import (
 	"github.com/spatialcurrent/go-dfl/dfl"
-	"github.com/spatialcurrent/go-dfl/dfl/cache"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/cache"
 )
 
 func Evaluate(ctx context.Context) (map[string]interface{}, interface{}, error) {

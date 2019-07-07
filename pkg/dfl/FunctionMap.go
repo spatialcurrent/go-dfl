@@ -19,9 +19,9 @@ import (
 )
 
 import (
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"github.com/spatialcurrent/go-reader-writer/grw"
-	"github.com/spatialcurrent/go-simple-serializer/gss"
+	"github.com/spatialcurrent/go-simple-serializer/pkg/gss"
 )
 
 // FunctionMap is a map of functions by string that are reference by name in the Function Node.
@@ -34,10 +34,11 @@ func NewFuntionMapWithDefaults() FunctionMap {
 		for _, alias := range fn.Aliases {
 			funcs[alias] = func(fn af.Function) func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 				return func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
-					if err := fn.Validate(args); err != nil {
+					out, err := fn.ValidateRun(args...)
+					if err != nil {
 						return Null{}, errors.Wrap(err, "Invalid arguments")
 					}
-					return fn.Run(args)
+					return out, nil
 				}
 			}(fn)
 		}
@@ -63,17 +64,15 @@ func NewFuntionMapWithDefaults() FunctionMap {
 			return "", errors.Wrap(err, "error creating new object for format "+f)
 		}
 
-		return gss.DeserializeString(
-			str,
-			f,
-			gss.NoHeader,
-			gss.NoComment,
-			true,
-			0,
-			gss.NoLimit,
-			t,
-			false,
-			false)
+		return gss.DeserializeBytes(&gss.DeserializeBytesInput{
+			Bytes:     []byte(str),
+			Type:      t,
+			Format:    f,
+			Header:    []interface{}{},
+			Comment:   "",
+			SkipLines: 0,
+			Limit:     -1,
+		})
 	}
 
 	funcs["md"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {

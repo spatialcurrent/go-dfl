@@ -16,6 +16,18 @@ type Dictionary struct {
 	Nodes map[Node]Node
 }
 
+func NewDictionary(m map[string]interface{}) *Dictionary {
+	nodes := map[Node]Node{}
+	for k, v := range m {
+		if d, ok := v.(map[string]interface{}); ok {
+			nodes[&Literal{Value: k}] = NewDictionary(d)
+		} else {
+			nodes[&Literal{Value: k}] = &Literal{Value: v}
+		}
+	}
+	return &Dictionary{Nodes: nodes}
+}
+
 // Len returns the length of the underlying array.
 func (d Dictionary) Len() int {
 	return len(d.Nodes)

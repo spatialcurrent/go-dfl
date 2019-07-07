@@ -9,18 +9,18 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"reflect"
 	"strings"
 )
 
-// AssignAdd is a BinaryOperator which sets the added value of the left side and right side to the attribute or variable defined by the left side.
-type AssignAdd struct {
+// AssignSubtract is a BinaryOperator which sets the value of the left side subtracted by the right side to the attribute or variable defined by the left side.
+type AssignSubtract struct {
 	*BinaryOperator
 }
 
-func (a AssignAdd) Dfl(quotes []string, pretty bool, tabs int) string {
-	b := a.Builder("+=", quotes, tabs)
+func (a AssignSubtract) Dfl(quotes []string, pretty bool, tabs int) string {
+	b := a.Builder("-=", quotes, tabs)
 	if pretty {
 		b = b.Indent(tabs).Pretty(pretty).Tabs(tabs + 1).TrimRight(pretty)
 		switch a.Left.(type) {
@@ -35,12 +35,12 @@ func (a AssignAdd) Dfl(quotes []string, pretty bool, tabs int) string {
 				return b.Dfl()
 			}
 		}
-		return a.BinaryOperator.Dfl("+=", quotes, pretty, tabs)
+		return a.BinaryOperator.Dfl("-= ", quotes, pretty, tabs)
 	}
 	return b.Dfl()
 }
 
-func (a AssignAdd) Sql(pretty bool, tabs int) string {
+func (a AssignSubtract) Sql(pretty bool, tabs int) string {
 	if pretty {
 		switch left := a.Left.(type) {
 		case *Variable:
@@ -60,30 +60,27 @@ func (a AssignAdd) Sql(pretty bool, tabs int) string {
 
 }
 
-func (a AssignAdd) Map() map[string]interface{} {
-	return a.BinaryOperator.Map("assignadd", a.Left, a.Right)
+func (a AssignSubtract) Map() map[string]interface{} {
+	return a.BinaryOperator.Map("assignsubtract", a.Left, a.Right)
 }
 
 // Compile returns a compiled version of this node.
-func (a AssignAdd) Compile() Node {
+func (a AssignSubtract) Compile() Node {
 	left := a.Left.Compile()
 	right := a.Right.Compile()
-	return &AssignAdd{&BinaryOperator{Left: left, Right: right}}
+	return &AssignSubtract{&BinaryOperator{Left: left, Right: right}}
 }
 
-func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
+func (a AssignSubtract) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	switch left := a.Left.(type) {
 	case Attribute:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err
 		}
-		value, err := af.Add.ValidateRun([]interface{}{lv, rv})
+		value, err := af.Subtract.ValidateRun(lv, rv)
 		if err != nil {
 			return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
-		}
-		if len(left.Name) == 0 {
-			return vars, value, nil
 		}
 		if t := reflect.TypeOf(ctx); t.Kind() != reflect.Map {
 			ctx = map[string]interface{}{}
@@ -113,7 +110,7 @@ func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 		if err != nil {
 			return vars, 0, err
 		}
-		value, err := af.Add.ValidateRun([]interface{}{lv, rv})
+		value, err := af.Subtract.ValidateRun(lv, rv)
 		if err != nil {
 			return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
 		}

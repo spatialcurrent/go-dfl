@@ -10,7 +10,7 @@ package dfl
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 
 // Add is a BinaryOperator that represents the addition of two nodes.
@@ -87,7 +87,7 @@ func (a Add) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 		return vars, 0, err
 	}
 
-	v, err := af.Add.ValidateRun([]interface{}{lv, rv})
+	v, err := af.Add.ValidateRun(lv, rv)
 	if err != nil {
 		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: a, Quotes: quotes}.Error())
 	}

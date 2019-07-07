@@ -5,16 +5,24 @@
 //
 // =================================================================
 
-package request
+package shell
 
 import (
-	"context"
+	"fmt"
 )
 
 import (
-	"github.com/spatialcurrent/go-dfl/dfl/cache"
+	"github.com/spf13/viper"
 )
 
-func WithCache(requestContext context.Context, c *cache.Cache) context.Context {
-	return context.WithValue(requestContext, contextKeyCache, c)
+func UpdateLine(v *viper.Viper, vars map[string]interface{}, quotes []string, line string) error {
+
+	varsBytes, err := FormatOutput(v, vars, quotes)
+	if err != nil {
+		return err
+	}
+
+	fmt.Print("(" + string(varsBytes) + ") > " + line)
+
+	return nil
 }

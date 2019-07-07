@@ -8,8 +8,7 @@
 package dfl
 
 import (
-	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-dfl/dfl/syntax"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 	"strings"
 )
 
@@ -43,7 +42,7 @@ func (v Variable) Compile() Node {
 
 func (v Variable) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	if len(v.Name) == 0 {
-		return vars, ctx, errors.New("variable")
+		return vars, vars, nil
 	}
 	value, err := Extract(v.Name, vars, vars, ctx, funcs, quotes)
 	return vars, value, err

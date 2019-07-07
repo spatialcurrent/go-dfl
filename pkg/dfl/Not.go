@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-dfl/dfl/builder"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/builder"
 )
 
 // Not is a UnaryOperator that inverts the boolean value of the children Node.

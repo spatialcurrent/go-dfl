@@ -9,7 +9,7 @@ package dfl
 
 import (
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/af"
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 
 type Subtract struct {
@@ -52,7 +52,7 @@ func (s Subtract) Evaluate(vars map[string]interface{}, ctx interface{}, funcs F
 		return vars, 0, err
 	}
 
-	v, err := af.Subtract.ValidateRun([]interface{}{lv, rv})
+	v, err := af.Subtract.ValidateRun(lv, rv)
 	if err != nil {
 		return vars, 0, errors.Wrap(err, ErrorEvaluate{Node: s, Quotes: quotes}.Error())
 	}
