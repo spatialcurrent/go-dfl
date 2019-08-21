@@ -10,9 +10,7 @@ package dfl
 import (
 	"regexp"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

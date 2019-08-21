@@ -9,7 +9,9 @@ package dfl
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
+
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 

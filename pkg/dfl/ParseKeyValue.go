@@ -9,12 +9,11 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
+
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 )
 
 func parseKeyOrValueString(s string) (Node, error) {

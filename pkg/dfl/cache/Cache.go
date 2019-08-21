@@ -9,13 +9,9 @@ package cache
 
 import (
 	"sync"
-)
 
-import (
 	"github.com/pkg/errors"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 

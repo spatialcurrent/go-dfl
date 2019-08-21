@@ -11,16 +11,12 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 	"gopkg.in/russross/blackfriday.v2"
-)
 
-import (
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
-	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
 	"github.com/spatialcurrent/go-simple-serializer/pkg/gss"
 )
 

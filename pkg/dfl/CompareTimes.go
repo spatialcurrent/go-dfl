@@ -11,9 +11,7 @@ import (
 	"fmt"
 	"reflect"
 	"time"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

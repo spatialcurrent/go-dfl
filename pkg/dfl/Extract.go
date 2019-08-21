@@ -11,15 +11,11 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
-)
 
-import (
-	"github.com/spatialcurrent/go-reader-writer/grw"
-	"github.com/spatialcurrent/go-try-get/gtg"
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-try-get/pkg/gtg"
 )
 
 func parseExtractPath(path string) (int, int, int, int, error) {

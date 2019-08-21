@@ -10,9 +10,7 @@ package dfl
 import (
 	"fmt"
 	"reflect"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

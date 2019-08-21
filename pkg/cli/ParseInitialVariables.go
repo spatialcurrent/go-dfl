@@ -9,13 +9,9 @@ package cli
 
 import (
 	"github.com/pkg/errors"
-)
 
-import (
 	"github.com/spatialcurrent/go-stringify/pkg/stringify"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 

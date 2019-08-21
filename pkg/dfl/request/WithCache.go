@@ -9,9 +9,7 @@ package request
 
 import (
 	"context"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/pkg/dfl/cache"
 )
 

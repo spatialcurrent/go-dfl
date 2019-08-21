@@ -8,8 +8,9 @@
 package dfl
 
 import (
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Function is a refrenced function in a DFL filter.  The actual function in a given FunctionMap is derefernced by name.

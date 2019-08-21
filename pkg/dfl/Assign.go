@@ -9,9 +9,10 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"reflect"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Assign is a BinaryOperator which sets the value of the right side to the attribute or variable defined by the left side.

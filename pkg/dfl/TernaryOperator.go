@@ -8,8 +8,9 @@
 package dfl
 
 import (
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // TernaryOperator is a DFL Node that represents the ternary operator of a condition, true value, and false value.

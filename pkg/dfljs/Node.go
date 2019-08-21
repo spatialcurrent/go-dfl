@@ -10,8 +10,9 @@ package dfljs
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-dfl/dfl"
 	"honnef.co/go/js/console"
+
+	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
 // Node is a struct that wraps a dfl.Node and dfl.FunctionMap to provide an api to dfl.js.

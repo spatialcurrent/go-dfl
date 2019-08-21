@@ -10,8 +10,9 @@ package dfljs
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-dfl/dfl"
 	"honnef.co/go/js/console"
+
+	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
 // Parse parses a DFL expression and returns a dfljs.Node object that can be used by JavaScript.

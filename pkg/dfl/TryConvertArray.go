@@ -8,8 +8,9 @@
 package dfl
 
 import (
-	"github.com/spatialcurrent/go-counter/counter"
 	"reflect"
+
+	"github.com/spatialcurrent/go-counter/pkg/counter"
 )
 
 // TryConvertArray attempts to convert the []interface{} array into []int, []int64, []float64, or []string, if possible.

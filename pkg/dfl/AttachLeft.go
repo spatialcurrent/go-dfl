@@ -9,8 +9,9 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"reflect"
+
+	"github.com/pkg/errors"
 )
 
 // AttachLeft attaches the left Node as the left child node to the parent root Node.

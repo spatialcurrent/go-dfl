@@ -11,9 +11,7 @@ import (
 	"reflect"
 	"testing"
 	"time"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

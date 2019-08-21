@@ -8,9 +8,10 @@
 package dfl
 
 import (
-	"github.com/pkg/errors"
 	"strings"
 	"unicode"
+
+	"github.com/pkg/errors"
 )
 
 // ParseVariable parses a Variable Node from an input string

@@ -9,9 +9,8 @@ package shell
 
 import (
 	"fmt"
-)
+	"os"
 
-import (
 	"github.com/spf13/viper"
 )
 
@@ -22,7 +21,7 @@ func UpdateLine(v *viper.Viper, vars map[string]interface{}, quotes []string, li
 		return err
 	}
 
-	fmt.Print("(" + string(varsBytes) + ") > " + line)
+	fmt.Fprintf(os.Stdout, "(%s) > %s", string(varsBytes), line)
 
 	return nil
 }

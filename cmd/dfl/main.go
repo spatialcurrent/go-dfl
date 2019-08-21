@@ -27,36 +27,32 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
-)
 
-import (
-	"github.com/atotto/clipboard"
 	"github.com/eiannone/keyboard"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
 
-import (
-	"github.com/spatialcurrent/go-dfl/pkg/cli"
-	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
 	"github.com/spatialcurrent/go-stringify/pkg/stringify"
-)
 
-import (
+	"github.com/spatialcurrent/go-dfl/pkg/cli"
 	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 	"github.com/spatialcurrent/go-dfl/pkg/shell"
 )
 
+//"github.com/atotto/clipboard"
+
+//"github.com/ahmetb/go-cursor"
+
 var DefaultQuotes = []string{"'", "\"", "`"}
 
 func main() {
-
-	funcs := dfl.DefaultFunctionMap
-	quotes := dfl.DefaultQuotes
 
 	rootCommand := cobra.Command{
 		Use:   "dfl [flags]",
@@ -142,6 +138,9 @@ func main() {
 		Short: "executes a DFL expression (parse, compile, and evalutes)",
 		Long:  "executes a DFL expression (parse, compile, and evalutes)",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			funcs := dfl.DefaultFunctionMap
+			quotes := dfl.DefaultQuotes
 
 			err := cmd.ParseFlags(args)
 			if err != nil {
@@ -256,6 +255,9 @@ func main() {
 		Short: "executes a DFL expression (parse, compile, and evalutes)",
 		Long:  "executes a DFL expression (parse, compile, and evalutes)",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			quotes := dfl.DefaultQuotes
+
 			v := viper.New()
 			err := v.BindPFlags(cmd.Flags())
 			if err != nil {
@@ -274,7 +276,7 @@ func main() {
 			}
 
 			if v.GetBool("args") {
-				m, errArgs := cli.ParseContextArguments(args, funcs, quotes)
+				m, errArgs := cli.ParseContextArguments(args, dfl.DefaultFunctionMap, quotes)
 				if errArgs != nil {
 					return errors.Wrap(errArgs, "error parsing context from arguments")
 				}
@@ -283,117 +285,140 @@ func main() {
 				}
 			}
 
-			history := make([]string, 0)
-
 			errKeyboard := keyboard.Open()
 			if errKeyboard != nil {
 				return errors.Wrap(errKeyboard, "error creating keyboard")
 			}
 			defer keyboard.Close()
 
+			s := shell.New()
+
+			s.Executor.Funcs["read"] = func(funcs dfl.FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+				fmt.Println("Args:", args)
+				if len(args) == 0 {
+					return make([]byte, 0), nil
+				}
+				path, err := homedir.Expand(fmt.Sprint(args[0]))
+				if err != nil {
+					return make([]byte, 0), err
+				}
+				fmt.Println("Path:", path)
+				return ioutil.ReadFile(path)
+			}
+
+			s.PrintHeader()
+
 			for {
 
-				err := shell.UpdateLine(v, vars, quotes, "")
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err.Error())
-				}
+				s.ResetLine()
+				s.UpdateScreen()
 
-				cursor := 0
-				line := ""
 				for {
-					char, key, err := keyboard.GetKey()
 
+					char, key, err := s.GetKey()
 					if err != nil {
 						return errors.Wrap(err, "error reading input from keyboard")
 					}
 
 					if key == keyboard.KeyCtrlC {
-						fmt.Print("\n")
+						fmt.Print("^C\n")
+						return nil
+					}
+
+					if key == keyboard.KeyCtrlZ {
+						fmt.Print("^Z\n")
 						return nil
 					}
 
 					if key == keyboard.KeyCtrlX {
-						err := clipboard.WriteAll(line)
+						err := s.CutLine()
 						if err != nil {
 							return errors.Wrap(err, "error writing to clipboard")
-						}
-						line = ""
-						shell.ClearLine()
-						err = shell.UpdateLine(v, vars, quotes, "")
-						if err != nil {
-							fmt.Fprintln(os.Stderr, err.Error())
 						}
 						continue
 					}
 
 					if key == keyboard.KeyCtrlV {
-						p, err := clipboard.ReadAll()
+						err := s.PasteLine()
 						if err != nil {
 							return errors.Wrap(err, "error reading from clipboard")
 						}
-						fmt.Print(p)
-						line += p
 						continue
 					}
 
 					if key == keyboard.KeyEnter {
 						fmt.Print("\n")
-						lineTrimmed := strings.TrimSpace(line)
+						lineTrimmed := strings.TrimSpace(s.Line)
 						if len(lineTrimmed) > 0 && lineTrimmed[len(lineTrimmed)-1] == '|' {
-							line = lineTrimmed + " "
+							//s.Line = lineTrimmed + " "
+							s.Line = lineTrimmed + "\n"
 							continue
 						}
 						break
 					}
 
 					if key == keyboard.KeySpace {
-						line += " "
-						fmt.Print(" ")
+						s.WriteString(" ")
+						continue
+					}
+
+					if key == keyboard.KeyArrowLeft {
+						s.MoveLeft()
+						continue
+					}
+
+					if key == keyboard.KeyArrowRight {
+						s.MoveRight()
+						continue
+					}
+
+					if key == keyboard.KeyArrowDown {
+						if s.History.Cursor == 0 {
+							continue
+						}
+						if s.History.Cursor == 1 {
+							s.History.Forward()
+							s.SetLine("")
+						} else if s.History.Cursor > 1 {
+							s.History.Forward()
+							s.SetLine(s.History.Line())
+						}
+						s.ClearLine()
+						s.UpdateScreen()
+					}
+
+					if key == keyboard.KeyArrowUp {
+						if s.History.Cursor < s.History.Len() {
+							s.History.Back()
+							s.SetLine(s.History.Line())
+							s.ClearLine()
+							s.UpdateScreen()
+						}
 						continue
 					}
 
 					switch key {
-					case keyboard.KeyArrowUp, keyboard.KeyArrowDown, keyboard.KeyArrowLeft, keyboard.KeyArrowRight, keyboard.KeyDelete, keyboard.KeyBackspace, keyboard.KeyBackspace2, keyboard.KeyEsc:
+					case keyboard.KeyDelete, keyboard.KeyBackspace, keyboard.KeyBackspace2, keyboard.KeyEsc:
 						switch key {
-						case keyboard.KeyArrowLeft, keyboard.KeyArrowRight:
-						case keyboard.KeyArrowUp:
-							if cursor < len(history) {
-								cursor += 1
-								line = history[len(history)-cursor]
-							}
-						case keyboard.KeyArrowDown:
-							if cursor == 1 {
-								cursor--
-								line = ""
-							} else if cursor > 1 {
-								cursor--
-								line = history[len(history)-cursor]
-							}
 						case keyboard.KeyDelete, keyboard.KeyBackspace, keyboard.KeyBackspace2:
-							if len(line) > 0 {
-								cursor = 0
-								line = line[0 : len(line)-1]
+							if len(s.Line) > 0 {
+								s.History.Cursor = 0
+								s.Backspace()
 							}
 						case keyboard.KeyEsc:
-							cursor = 0
-							line = ""
-						}
-						shell.ClearLine()
-						err := shell.UpdateLine(v, vars, quotes, line)
-						if err != nil {
-							fmt.Fprintln(os.Stderr, err.Error())
+							s.History.Cursor = 0
+							s.Line = ""
+							s.ClearLine()
+							s.UpdateScreen()
 						}
 					default:
-						fmt.Print(string(char))
-						line += string(char)
+						s.WriteString(string(char))
 					}
 
 				}
 
-				lineTrimmed := strings.TrimSpace(dfl.RemoveComments(string(line)))
+				lineTrimmed := s.CleanLine()
 
-				//fmt.Println("line:", line)
-				//fmt.Println("line:", []byte(line))
 				if len(lineTrimmed) > 0 {
 
 					if lineTrimmed == "exit" || lineTrimmed == "quit" {
@@ -401,62 +426,58 @@ func main() {
 					}
 
 					if lineTrimmed == "help" {
-						shell.PrintHelp()
+						s.PrintHelp()
 						continue
 					}
 
 					if lineTrimmed == "history" || lineTrimmed == "!" {
-						shell.PrintHistory(history)
+						s.PrintHistory()
 						continue
 					}
 
 					if lineTrimmed == "examples" {
-						shell.PrintExamples()
+						s.PrintExamples()
 						continue
 					}
 
 					if lineTrimmed == "funcs" || lineTrimmed == "functions" {
-						shell.PrintFunctions(funcs)
+						s.PrintFunctions()
 						continue
 					}
 
-					if lineTrimmed[0] == '!' {
+					if lineTrimmed == "!!" {
+						lineTrimmed = s.History.Last()
+						fmt.Println(lineTrimmed)
+					} else if lineTrimmed[0] == '!' {
 						cursor, err := strconv.Atoi(lineTrimmed[1:])
 						if err != nil {
 							fmt.Fprintln(os.Stderr, errors.Wrapf(err, "command %q not found", lineTrimmed[1:]))
 							continue
 						}
-						if cursor > 0 && cursor <= len(history) {
-							lineTrimmed = history[cursor-1]
+						if cursor > 0 && cursor <= s.History.Len() {
+							lineTrimmed = s.History.Get(cursor - 1)
+							fmt.Println(lineTrimmed)
 						} else {
 							fmt.Fprintln(os.Stderr, errors.Wrapf(err, "command %d not found", cursor))
 							continue
 						}
 					} else {
-						if len(history) == 0 || history[len(history)-1] != lineTrimmed {
-							history = append(history, lineTrimmed)
+						if s.History.Empty() || s.History.Last() != lineTrimmed {
+							s.History.Push(lineTrimmed)
 						}
 					}
 
-					node, err := dfl.ParseCompile(lineTrimmed)
+					outputObject, err := s.Exec(lineTrimmed)
 					if err != nil {
 						fmt.Fprintln(os.Stderr, err)
 						continue
 					}
 
-					newVars, ctx, err := node.Evaluate(vars, nil, funcs, quotes)
-					if err != nil {
-						fmt.Fprintln(os.Stderr, err)
+					if outputObject == nil {
 						continue
 					}
 
-					vars = newVars
-
-					if ctx == nil {
-						continue
-					}
-
-					outputBytes, err := shell.FormatOutput(v, ctx, quotes)
+					outputBytes, err := shell.FormatOutput(v, outputObject, quotes)
 					if err != nil {
 						fmt.Fprintln(os.Stderr, err)
 						continue

@@ -8,8 +8,9 @@
 package dfl
 
 import (
-	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 	"strings"
+
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 )
 
 // Attribute is a Node representing the value of an attribute in the context map.

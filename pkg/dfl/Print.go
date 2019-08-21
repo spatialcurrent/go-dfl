@@ -9,6 +9,7 @@ package dfl
 
 import (
 	"fmt"
+
 	"github.com/spatialcurrent/go-dfl/pkg/dfl/builder"
 )
 

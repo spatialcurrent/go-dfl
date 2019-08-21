@@ -9,15 +9,11 @@ package dfl
 
 import (
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
-)
 
-import (
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
-	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
 )
 
 // In is a BinaryOperator that evaluates to true if the left value is in the right value.

@@ -9,9 +9,7 @@ package cache
 
 import (
 	"testing"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/dfl"
 )
 

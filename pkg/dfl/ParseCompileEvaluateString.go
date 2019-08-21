@@ -9,8 +9,9 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"reflect"
+
+	"github.com/pkg/errors"
 )
 
 // ParseCompileEvaluateString parses the expression, compiles the node, evaluates on the given context, and returns a result of kind string if valid, otherwise returns and error.

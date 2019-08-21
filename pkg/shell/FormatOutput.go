@@ -10,15 +10,11 @@ package shell
 import (
 	"encoding/json"
 	"fmt"
-)
 
-import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 

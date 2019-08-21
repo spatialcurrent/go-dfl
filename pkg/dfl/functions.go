@@ -14,16 +14,12 @@ import (
 	"reflect"
 	"strings"
 	"unicode"
-)
 
-import (
 	"github.com/pkg/errors"
-)
 
-import (
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
-	"github.com/spatialcurrent/go-counter/counter"
-	"github.com/spatialcurrent/go-reader-writer/grw"
+	"github.com/spatialcurrent/go-counter/pkg/counter"
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
 )
 
 func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
@@ -765,7 +761,8 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 		content := make([]byte, 0)
 		i := 0
 		for i = 0; ; i++ {
-			b, err := a.ReadAt(i)
+			b := make([]byte, 1)
+			_, err := a.ReadAt(b, int64(i))
 			if err != nil {
 				if err == io.EOF {
 					return make([]byte, 0), nil
@@ -773,8 +770,8 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 					return make([]byte, 0), errors.Wrap(err, "error reading byte at position "+fmt.Sprint(i)+" in trimStringLeft")
 				}
 			}
-			if !unicode.IsSpace(bytes.Runes([]byte{b})[0]) {
-				content = append(content, b)
+			if !unicode.IsSpace(bytes.Runes(b)[0]) {
+				content = append(content, b...)
 				break
 			}
 		}

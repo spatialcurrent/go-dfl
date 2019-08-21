@@ -10,9 +10,7 @@ package dfl
 import (
 	"fmt"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

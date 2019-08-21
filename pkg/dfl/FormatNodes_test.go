@@ -9,9 +9,7 @@ package dfl
 
 import (
 	"testing"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

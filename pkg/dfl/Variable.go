@@ -8,8 +8,9 @@
 package dfl
 
 import (
-	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 	"strings"
+
+	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 )
 
 // Variable is a Node representing the value of a temporary variable.

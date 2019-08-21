@@ -8,10 +8,12 @@
 package dfl
 
 import (
-	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"reflect"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 )
 
 // AssignMultiply is a BinaryOperator which sets the multiplied value of the left side and right side to the attribute or variable defined by the left side.

@@ -9,8 +9,9 @@ package dfl
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Pipe is a BinaryOperator which represents the "|" pipe operation of left and right values.

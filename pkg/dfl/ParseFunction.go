@@ -9,9 +9,7 @@ package dfl
 
 import (
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

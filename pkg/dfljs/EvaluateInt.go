@@ -10,8 +10,9 @@ package dfljs
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/pkg/errors"
-	"github.com/spatialcurrent/go-dfl/dfl"
 	"honnef.co/go/js/console"
+
+	"github.com/spatialcurrent/go-dfl/dfl"
 )
 
 // EvaluateInt provides a simple function that parses, compiles, and executes an expression against a context object and returns an integer.

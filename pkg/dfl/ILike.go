@@ -15,9 +15,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 )
 

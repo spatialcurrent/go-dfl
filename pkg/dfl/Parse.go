@@ -9,13 +9,9 @@ package dfl
 
 import (
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
-)
 
-import (
 	"github.com/spatialcurrent/go-dfl/pkg/dfl/syntax"
 )
 

@@ -19,6 +19,7 @@ package main
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+
 	"github.com/spatialcurrent/go-dfl/dfl"
 	"github.com/spatialcurrent/go-dfl/dfljs"
 )
