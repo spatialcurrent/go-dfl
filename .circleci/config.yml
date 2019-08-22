@@ -46,7 +46,7 @@ jobs:
       - run: make deps_gopherjs
       - run: make deps_javascript
       - run: npm run test:clean
-      - run: make run_example_c
+      #- run: make run_example_c
       - run: make run_example_cpp
       - run: make run_example_javascript
       - run: make run_example_python
