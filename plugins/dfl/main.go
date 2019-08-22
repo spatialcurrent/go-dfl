@@ -43,7 +43,11 @@ func buildContext(argc C.int, argv **C.char) map[string]interface{} {
 		return map[string]interface{}{}
 	}
 
-	tmpslice := (*[1 << 30]*C.char)(unsafe.Pointer(argv))[:length:length]
+	// Instead of using [1 << 30] using [(1 << 29) - 1] instead
+	// as a workaround for 32 bit architectures
+	// https://github.com/docker/docker-credential-helpers/pull/61
+	// https://github.com/golang/go/wiki/cgo#turning-c-arrays-into-go-slices
+	tmpslice := (*[(1 << 29) - 1]*C.char)(unsafe.Pointer(argv))[:length:length]
 	vars := make([]string, length)
 	for i, s := range tmpslice {
 		vars[i] = C.GoString(s)
