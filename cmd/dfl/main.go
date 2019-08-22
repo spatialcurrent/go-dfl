@@ -104,9 +104,9 @@ func main() {
 
 			inputUri := v.GetString("uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
 			if err != nil {
-				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
 
 			inputBytes, err := inputReader.ReadAllAndClose()
@@ -159,9 +159,9 @@ func main() {
 
 			inputUri := v.GetString("input-uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
 			if err != nil {
-				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
 
 			inputBytes, err := inputReader.ReadAllAndClose()
@@ -221,17 +221,22 @@ func main() {
 
 			outputWriter, err := grw.WriteToResource(outputUri, "none", v.GetBool("append"), nil)
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
 			}
 
 			_, err = outputWriter.Write(outBytes)
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
+			}
+
+			err = outputWriter.Flush()
+			if err != nil {
+				return errors.Wrapf(err, "error flushing dfl file to uri %q", outputUri)
 			}
 
 			err = outputWriter.Close()
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
 			}
 
 			return nil
@@ -488,8 +493,6 @@ func main() {
 				}
 
 			}
-			return nil
-
 		},
 	}
 	flags = shellCommand.Flags()

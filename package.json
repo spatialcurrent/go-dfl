@@ -1,0 +1,39 @@
+{
+  "name": "go-dfl",
+  "version": "0.0.1",
+  "description": "A Go implementation of the Dynamic Filter Language (DFL).",
+  "main": "bin/dfl.js",
+  "scripts": {
+    "lint": "eslint js",
+    "clean": "rm -fr dist/dfl.mod.min.js",
+    "build": "make dist/dfl.mod.min.js",
+    "test": "./node_modules/.bin/jest",
+    "test:clean": "npm run clean && npm run build && npm run test"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spatialcurrent/go-dfl.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/spatialcurrent/go-dfl/issues"
+  },
+  "homepage": "https://github.com/spatialcurrent/go-dfl#readme",
+  "devDependencies": {
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0"
+  },
+  "dependencies": {},
+  "jest": {
+    "roots": [
+      "js"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testEnvironment": "./testEnvironment"
+  }
+}

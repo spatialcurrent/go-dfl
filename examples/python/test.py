@@ -15,15 +15,17 @@ import sys
 lib = cdll.LoadLibrary("dfl.so")
 
 # Define Function Definition
-evaluate = lib.EvaluateBool
-evaluate.argtypes = [c_char_p, c_int, POINTER(POINTER(c_char)), POINTER(c_int)]
-evaluate.restype = c_char_p
+fmt = lib.Format
+fmt.argtypes = [c_char_p, POINTER(c_char_p)]
+fmt.restype = c_char_p
 
-version = lib.Version
-version.argtypes = []
-version.restype = c_char_p
+evaluate_bool = lib.EvaluateBool
+evaluate_bool.argtypes = [c_char_p, c_int, POINTER(POINTER(c_char)), POINTER(c_int)]
+evaluate_bool.restype = c_char_p
 
-print "version:", version()
+evaluate_string = lib.EvaluateString
+evaluate_string.argtypes = [c_char_p, c_int, POINTER(POINTER(c_char)), POINTER(c_char_p)]
+evaluate_string.restype = c_char_p
 
 # Define input and output variables
 # Output must be a ctypec_char_p
@@ -32,6 +34,19 @@ ctx = {"a": "2", "population": "45", "featuretype": "road"}
 output_int_pointer = c_int()
 
 print expression
+
+output_expression_pointer = c_char_p()
+
+err = fmt(expression, byref(output_expression_pointer))
+if err != None:
+    print("error: %s" % (str(err, encoding='utf-8')))
+    sys.exit(1)
+
+# Convert from ctype to python string
+output_expression_value = output_expression_pointer.value
+
+print "Formatted Expression: "+output_expression_value
+
 print ctx
 
 # For explanation see https://mail.python.org/pipermail/python-list/2016-June/709889.html
@@ -39,7 +54,7 @@ argv = (POINTER(c_char) * (len(ctx)*2 + 1))()
 for i, arg in enumerate([x for t in ctx.iteritems() for x in t]):
     argv[i] =  create_string_buffer(arg.encode('utf-8'))
 
-err = evaluate(expression, len(ctx)*2, argv, byref(output_int_pointer))
+err = evaluate_bool(expression, len(ctx)*2, argv, byref(output_int_pointer))
 if err != None:
     print "error running test.py: %s" % err
     sys.exit(1)
@@ -49,3 +64,14 @@ output_bool = output_int_pointer.value == 1
 
 # Print output to stdout
 print output_bool
+
+output_string_pointer = c_char_p()
+
+err = evaluate_string("concat(@featuretype, ' ', @population)", len(ctx)*2, argv, byref(output_string_pointer))
+if err != None:
+    print "error running test.py: %s" % err
+    sys.exit(1)
+
+output_string_value = output_string_pointer.value
+
+print output_string_value

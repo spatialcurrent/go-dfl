@@ -12,7 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 
 // Cache is a struct that stores the compiled nodes to prevent expensive parsing and compiling of DFL expressions.

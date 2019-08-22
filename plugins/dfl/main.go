@@ -12,14 +12,28 @@ package main
 
 import (
 	"C"
+	"fmt"
 	"unsafe"
 )
 
 import (
-	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 
 func main() {}
+
+//export Format
+func Format(expression *C.char, outputString **C.char) *C.char {
+
+	node, _, err := dfl.Parse(C.GoString(expression))
+	if err != nil {
+		return C.CString(err.Error())
+	}
+
+	*outputString = C.CString(node.Dfl(dfl.DefaultQuotes, false, 0))
+
+	return nil
+}
 
 func buildContext(argc C.int, argv **C.char) map[string]interface{} {
 
@@ -46,6 +60,8 @@ func buildContext(argc C.int, argv **C.char) map[string]interface{} {
 //export EvaluateBool
 func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char {
 
+	fmt.Println("argc", argc, "argv", argv)
+
 	node, err := dfl.ParseCompile(C.GoString(exp))
 	if err != nil {
 		return C.CString(err.Error())
@@ -67,7 +83,22 @@ func EvaluateBool(exp *C.char, argc C.int, argv **C.char, result *C.int) *C.char
 	return nil
 }
 
-//export Version
-func Version() *C.char {
-	return C.CString(dfl.Version)
+//export EvaluateString
+func EvaluateString(exp *C.char, argc C.int, argv **C.char, result **C.char) *C.char {
+
+	node, err := dfl.ParseCompile(C.GoString(exp))
+	if err != nil {
+		return C.CString(err.Error())
+	}
+
+	vars := map[string]interface{}{}
+
+	_, r, err := node.Evaluate(vars, buildContext(argc, argv), dfl.NewFuntionMapWithDefaults(), dfl.DefaultQuotes)
+	if err != nil {
+		return C.CString(err.Error())
+	}
+
+	*result = C.CString(fmt.Sprint(r))
+
+	return nil
 }

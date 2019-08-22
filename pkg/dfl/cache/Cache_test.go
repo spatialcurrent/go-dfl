@@ -10,7 +10,7 @@ package cache
 import (
 	"testing"
 
-	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 
 func TestCache(t *testing.T) {

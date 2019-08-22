@@ -1,9 +1,8 @@
-bin
-dist
-vendor
-Gopkg.lock
-*.so
-*.h
+__mocks__/
+dist/
+bin/
+node_modules/
+webpack/
 .DS_Store
 .npm
 node_modules

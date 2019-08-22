@@ -22,11 +22,16 @@ main(int argc, char **argv) {
     /// TryConvertString attempts to convert any values into their appropriate type.
     // For example the below values get converted into:
     // {"a":2, "population": 45, "featuretype": "road"}
+    char size = 6;
     char *ctx[] = {"a", "2", "population", "45", "featuretype", "road"};
 
-    // Calculates the size of the ctx array.
-    // Since they are char*, we can calculate with the following math.
-    int size = sizeof(ctx) / sizeof(ctx[0]);
+    printf("ctx %s\n", ctx[2]);
+
+    char** args;
+    args = malloc(size * sizeof(char*));
+    for(unsigned int i = 0; i < size; i++){
+        args[i] = ctx[i];
+    }
 
     // Declare a variable to store the result.
     // 0 = false and 1 = true
@@ -34,13 +39,10 @@ main(int argc, char **argv) {
 
     printf("%s\n", expression);
 
-    char *version = Version();
-    printf("version: %s\n", version);
-
     // EvaluateBool evaulates the expression for true/false, using the variables provided.
     // The size must be passed with the context array.
     // Returns an error as a string if any.
-    err = EvaluateBool(expression, size, ctx, &result);
+    err = EvaluateBool(expression, size, args, &result);
     if (err != NULL) {
         fprintf(stderr, "error: %s\n", err);
         free(err);

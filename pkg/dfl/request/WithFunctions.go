@@ -10,7 +10,7 @@ package request
 import (
 	"context"
 
-	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 
 func WithFunctions(requestContext context.Context, funcs dfl.FunctionMap) context.Context {

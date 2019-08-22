@@ -21,7 +21,6 @@ func UpdateLine(v *viper.Viper, vars map[string]interface{}, quotes []string, li
 		return err
 	}
 
-	fmt.Fprintf(os.Stdout, "(%s) > %s", string(varsBytes), line)
-
-	return nil
+	_, err = fmt.Fprintf(os.Stdout, "(%s) > %s", string(varsBytes), line)
+	return err
 }

@@ -14,7 +14,7 @@
 // A common architecture is to have a client application generate a DFL expression string and submit to a Go application using a rest interface.
 //
 //  import (
-//    "github.com/spatialcurrent/go-dfl/dfl"
+//    "github.com/spatialcurrent/go-dfl/pkg/dfl"
 //  )
 //  root, err := dfl.Parse("<YOUR EXPRESSION>")
 //  if err != nil {
@@ -60,7 +60,7 @@
 // Below are some simple examples.
 //
 //  import (
-//    "github.com/spatialcurrent/go-dfl/dfl"
+//    "github.com/spatialcurrent/go-dfl/pkg/dfl"
 //  )
 //  root, err := dfl.Parse("(@amenity in [restaurant, bar]) or (@craft in [brewery, distillery])")
 //  if err != nil {

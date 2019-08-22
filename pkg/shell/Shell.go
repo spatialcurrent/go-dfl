@@ -77,8 +77,8 @@ func (s *Shell) PrintExamples() {
 # Add Numbers
 $x := 10
 $y := 20
-$x + $y
-`)
+$x + $y`)
+	fmt.Println("")
 }
 
 func (s *Shell) MoveLeft() {
@@ -106,7 +106,7 @@ func (s *Shell) ClearLine() {
 
 func (s *Shell) UpdateScreen() {
 	vars := dfl.TryFormatLiteral(s.Executor.Vars, s.Formatter.Quotes, false, 0)
-	fmt.Fprintf(os.Stdout, "(%s) > %s", vars, s.Line)
+	_, _ = fmt.Fprintf(os.Stdout, "(%s) > %s", vars, s.Line)
 }
 
 func (s *Shell) SetLine(str string) {

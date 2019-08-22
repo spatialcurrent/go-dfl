@@ -12,7 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/spatialcurrent/go-dfl/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
 	"github.com/spatialcurrent/go-dfl/pkg/dfl/cache"
 )
 

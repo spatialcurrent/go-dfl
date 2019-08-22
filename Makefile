@@ -98,19 +98,19 @@ build_cli: bin/dfl_darwin_amd64 bin/dfl_linux_amd64 bin/dfl_windows_amd64.exe bi
 bin/dfl.so:  ## Compile Shared Object for current platform
 	# https://golang.org/cmd/link/
 	# CGO Enabled : https://github.com/golang/go/issues/24068
-	CGO_ENABLED=1 go build -o $(DEST)/dfl.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-simple-serializer/plugins/dfl
+	CGO_ENABLED=1 go build -o $(DEST)/dfl.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-dfl/plugins/dfl
 
 bin/dfl_linux_amd64.so:  ## Compile Shared Object for Linux / amd64
 	# https://golang.org/cmd/link/
 	# CGO Enabled : https://github.com/golang/go/issues/24068
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(DEST)/dfl_linux_amd64.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-simple-serializer/plugins/dfl
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(DEST)/dfl_linux_amd64.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-dfl/plugins/dfl
 
 bin/dfl_linux_armv7.so:  ## Compile Shared Object for Linux / ARMv7
 	# LDFLAGS - https://golang.org/cmd/link/
 	# CGO Enabled  - https://github.com/golang/go/issues/24068
 	# GOARM/GOARCH Compatability Table - https://github.com/golang/go/wiki/GoArm
 	# ARM Cross Compiler Required - https://www.acmesystems.it/arm9_toolchain
-	GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc go build -ldflags "-linkmode external -extldflags -static" -o $(DEST)/dfl_linux_armv7.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-simple-serializer/plugins/dfl
+	GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc go build -ldflags "-linkmode external -extldflags -static" -o $(DEST)/dfl_linux_armv7.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-dfl/plugins/dfl
 
 bin/dfl_linux_armv8.so:   ## Compile Shared Object for Linux / ARMv8
 	# LDFLAGS - https://golang.org/cmd/link/
@@ -118,7 +118,7 @@ bin/dfl_linux_armv8.so:   ## Compile Shared Object for Linux / ARMv8
 	# GOARM/GOARCH Compatability Table - https://github.com/golang/go/wiki/GoArm
 	# ARM Cross Compiler Required - https://www.acmesystems.it/arm9_toolchain
 	# Dependencies - https://www.96boards.org/blog/cross-compile-files-x86-linux-to-96boards/
-	GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc go build -ldflags "-linkmode external -extldflags -static" -o $(DEST)/dfl_linux_armv8.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-simple-serializer/plugins/dfl
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc go build -ldflags "-linkmode external -extldflags -static" -o $(DEST)/dfl_linux_armv8.so -buildmode=c-shared -ldflags "$(LDFLAGS)" -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-dfl/plugins/dfl
 
 build_so: bin/dfl_linux_amd64.so bin/dfl_linux_armv7.so bin/dfl_linux_armv8.so  ## Build Shared Objects (.so)
 
