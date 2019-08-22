@@ -127,7 +127,7 @@ build_so: bin/dfl_linux_amd64.so bin/dfl_linux_armv7.so bin/dfl_linux_armv8.so  
 #
 
 bin/dfl.aar:  ## Build Android Archive Library
-	gomobile bind -target android -javapkg=com.spatialcurrent -o $(DEST)/dfl.aar -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-simple-serializer/pkg/dfl
+	gomobile bind -target android -javapkg=com.spatialcurrent -o $(DEST)/dfl.aar -gcflags="$(GCFLAGS)" github.com/spatialcurrent/go-dfl/pkg/dfl
 
 build_android: bin/dfl.arr  ## Build artifacts for Android
 
@@ -142,10 +142,10 @@ dist/dfl.mod.min.js:  ## Build minified JavaScript module
 	gopherjs build -m -o dist/dfl.mod.min.js github.com/spatialcurrent/go-dfl/cmd/dfl.mod.js
 
 dist/dfl.global.js:  ## Build JavaScript library that attaches to global or window.
-	dfl_JS_EXPORT_GLOBAL=1 gopherjs build -o dist/dfl.global.js github.com/spatialcurrent/go-dfl/cmd/dfl.global.js
+	gopherjs build -o dist/dfl.global.js github.com/spatialcurrent/go-dfl/cmd/dfl.global.js
 
 dist/dfl.global.min.js:  ## Build minified JavaScript library that attaches to global or window.
-	dfl_JS_EXPORT_GLOBAL=1 gopherjs build -m -o dist/dfl.global.min.js github.com/spatialcurrent/go-dfl/cmd/dfl.global.js
+	gopherjs build -m -o dist/dfl.global.min.js github.com/spatialcurrent/go-dfl/cmd/dfl.global.js
 
 build_javascript: dist/dfl.mod.js dist/dfl.mod.min.js dist/dfl.global.js dist/dfl.global.min.js  ## Build artifacts for JavaScript
 
@@ -154,6 +154,7 @@ test_javascript:  ## Run JavaScript tests
 
 lint:  ## Lint JavaScript source code
 	npm run lint
+
 
 #
 # Examples
