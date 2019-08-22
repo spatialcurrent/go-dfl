@@ -28,6 +28,7 @@ help:  ## Print the help documentation
 
 deps_go:  ## Install Go dependencies
 	go get -d -t ./...
+	go get -d honnef.co/go/js/xhr # used in JavaScript build
 
 .PHONY: deps_go_test
 deps_go_test: ## Download Go dependencies for tests
