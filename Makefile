@@ -176,7 +176,7 @@ run_example_cpp: bin/dfl.so bin/dfl_example_cpp  ## Run C++ example
 run_example_python: bin/dfl.so  ## Run Python example
 	LD_LIBRARY_PATH=bin python examples/python/test.py
 
-run_example_javascript: dist/dfl.mod.js  ## Run JavaScript module example
+run_example_javascript: dist/dfl.mod.min.js  ## Run JavaScript module example
 	node examples/js/index.mod.js
 
 ## Clean
