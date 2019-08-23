@@ -26,81 +26,31 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
-)
 
-import (
+	"github.com/eiannone/keyboard"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+
+	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-stringify/pkg/stringify"
+
+	"github.com/spatialcurrent/go-dfl/pkg/cli"
+	"github.com/spatialcurrent/go-dfl/pkg/dfl"
+	"github.com/spatialcurrent/go-dfl/pkg/shell"
 )
 
-import (
-	"github.com/spatialcurrent/go-dfl/dfl"
-	"github.com/spatialcurrent/go-reader-writer/grw"
-	stringify "github.com/spatialcurrent/go-stringify"
-)
+//"github.com/atotto/clipboard"
+
+//"github.com/ahmetb/go-cursor"
 
 var DefaultQuotes = []string{"'", "\"", "`"}
-
-func parseContextArguments(args []string, funcs dfl.FunctionMap) (map[string]interface{}, error) {
-	ctx := map[string]interface{}{}
-	for _, a := range args {
-		if !strings.Contains(a, "=") {
-			return ctx, errors.New("Context attribute \"" + a + "\" does not contain \"=\".")
-		}
-		pair := strings.SplitN(a, "=", 2)
-		value, _, err := dfl.Parse(strings.TrimSpace(pair[1]))
-		if err != nil {
-			return ctx, errors.Wrap(err, "Could not parse context variable")
-		}
-		value = value.Compile()
-		switch value.(type) {
-		case dfl.Array:
-			_, arr, err := value.(dfl.Array).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, DefaultQuotes[1:])
-			if err != nil {
-				return ctx, errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0]))
-			}
-			ctx[strings.TrimSpace(pair[0])] = arr
-		case dfl.Set:
-			_, arr, err := value.(dfl.Set).Evaluate(map[string]interface{}{}, map[string]interface{}{}, funcs, DefaultQuotes[1:])
-			if err != nil {
-				return ctx, errors.Wrap(err, "error evaluating context expression for "+strings.TrimSpace(pair[0]))
-			}
-			ctx[strings.TrimSpace(pair[0])] = arr
-		case dfl.Literal:
-			ctx[strings.TrimSpace(pair[0])] = value.(dfl.Literal).Value
-		case *dfl.Literal:
-			ctx[strings.TrimSpace(pair[0])] = value.(*dfl.Literal).Value
-		default:
-			ctx[strings.TrimSpace(pair[0])] = dfl.TryConvertString(pair[1])
-		}
-	}
-	return ctx, nil
-}
-
-func parseInitialVariables(str string, funcs dfl.FunctionMap, quotes []string) (map[string]interface{}, error) {
-	vars := map[string]interface{}{}
-	if len(str) > 0 {
-		_, result, err := dfl.ParseCompileEvaluateMap(
-			str,
-			dfl.NoVars,
-			dfl.NoContext,
-			funcs,
-			quotes)
-		if err != nil {
-			return vars, errors.Wrap(err, "error parsing initial dfl vars as map")
-		}
-		if m, ok := stringify.StringifyMapKeys(result).(map[string]interface{}); ok {
-			vars = m
-		}
-	}
-	return vars, nil
-}
 
 func main() {
 
@@ -154,9 +104,9 @@ func main() {
 
 			inputUri := v.GetString("uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
 			if err != nil {
-				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
 
 			inputBytes, err := inputReader.ReadAllAndClose()
@@ -180,11 +130,7 @@ func main() {
 			return nil
 		},
 	}
-	flags := fmtCommand.Flags()
-	flags.StringP("uri", "u", "stdin", "uri to DFL file")
-	flags.BoolP("compile", "c", false, "compile expression")
-	flags.BoolP("pretty", "p", false, "pretty output")
-	flags.IntP("tabs", "t", 0, "tabs")
+	cli.InitFmtFlags(fmtCommand.Flags())
 	rootCommand.AddCommand(fmtCommand)
 
 	execCommand := &cobra.Command{
@@ -192,6 +138,9 @@ func main() {
 		Short: "executes a DFL expression (parse, compile, and evalutes)",
 		Long:  "executes a DFL expression (parse, compile, and evalutes)",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			funcs := dfl.DefaultFunctionMap
+			quotes := dfl.DefaultQuotes
 
 			err := cmd.ParseFlags(args)
 			if err != nil {
@@ -210,9 +159,9 @@ func main() {
 
 			inputUri := v.GetString("input-uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, false, nil)
+			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
 			if err != nil {
-				return errors.Wrap(err, "error reading dfl file at uri: "+inputUri)
+				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
 
 			inputBytes, err := inputReader.ReadAllAndClose()
@@ -220,15 +169,10 @@ func main() {
 				return err
 			}
 
-			node, _, err := dfl.Parse(strings.TrimSpace(dfl.RemoveComments(string(inputBytes))))
+			node, err := dfl.ParseCompile(strings.TrimSpace(dfl.RemoveComments(string(inputBytes))))
 			if err != nil {
 				return err
 			}
-
-			node = node.Compile()
-
-			funcs := dfl.DefaultFunctionMap
-			quotes := dfl.DefaultQuotes
 
 			ctx := map[string]interface{}{}
 
@@ -240,7 +184,7 @@ func main() {
 			}
 
 			if v.GetBool("args") {
-				m, errArgs := parseContextArguments(args, funcs)
+				m, errArgs := cli.ParseContextArguments(args, funcs, quotes)
 				if errArgs != nil {
 					return errors.Wrap(errArgs, "error parsing context from arguments")
 				}
@@ -251,7 +195,7 @@ func main() {
 
 			vars := map[string]interface{}{}
 			if str := strings.TrimSpace(v.GetString("vars")); len(str) > 0 {
-				m, errVars := parseInitialVariables(str, funcs, quotes)
+				m, errVars := cli.ParseInitialVariables(str, funcs, quotes)
 				if errVars != nil {
 					return errors.Wrap(errVars, "error parsing initial variables")
 				}
@@ -263,56 +207,42 @@ func main() {
 				return errors.Wrap(err, "error evaluating")
 			}
 
-			result = stringify.StringifyMapKeys(result)
+			result, err = stringify.StringifyMapKeys(result, stringify.NewDefaultStringer())
+			if err != nil {
+				return errors.Wrap(err, "error stringifying result")
+			}
 
-			pretty := v.GetBool("pretty")
-
-			outString := ""
-			if v.GetBool("json") {
-				if pretty {
-					outputBytes, errJSON := json.MarshalIndent(result, "", "  ")
-					if errJSON != nil {
-						return errors.Wrap(errJSON, "error marshalling result")
-					}
-					outString = string(outputBytes)
-				} else {
-					outputBytes, errJSON := json.Marshal(result)
-					if errJSON != nil {
-						return errors.Wrap(errJSON, "error marshalling result")
-					}
-					outString = string(outputBytes)
-				}
-			} else if v.GetBool("yaml") {
-				outputBytes, errYAML := yaml.Marshal(result)
-				if errYAML != nil {
-					return errors.Wrap(errYAML, "error marshalling result")
-				}
-				outString = string(outputBytes)
-			} else {
-				outString = dfl.TryFormatLiteral(result, quotes, v.GetBool("pretty"), v.GetInt("tabs"))
+			outBytes, err := shell.FormatOutput(v, result, quotes)
+			if err != nil {
+				return errors.Wrap(err, "error formatting output")
 			}
 
 			outputUri := v.GetString("output-uri")
 
 			outputWriter, err := grw.WriteToResource(outputUri, "none", v.GetBool("append"), nil)
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
 			}
 
-			_, err = outputWriter.WriteString(outString)
+			_, err = outputWriter.Write(outBytes)
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
+			}
+
+			err = outputWriter.Flush()
+			if err != nil {
+				return errors.Wrapf(err, "error flushing dfl file to uri %q", outputUri)
 			}
 
 			err = outputWriter.Close()
 			if err != nil {
-				return errors.Wrap(err, "error writing dfl file to uri: "+outputUri)
+				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
 			}
 
 			return nil
 		},
 	}
-	flags = execCommand.Flags()
+	flags := execCommand.Flags()
 	flags.StringP("input-uri", "i", "stdin", "input uri to DFL file")
 	flags.StringP("output-uri", "o", "stdout", "output uri to DFL file")
 	flags.StringP("vars", "v", "", "vars")
@@ -324,6 +254,250 @@ func main() {
 	flags.Bool("append", false, "append output")
 	flags.IntP("tabs", "t", 0, "tabs")
 	rootCommand.AddCommand(execCommand)
+
+	shellCommand := &cobra.Command{
+		Use:   "shell",
+		Short: "executes a DFL expression (parse, compile, and evalutes)",
+		Long:  "executes a DFL expression (parse, compile, and evalutes)",
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			quotes := dfl.DefaultQuotes
+
+			v := viper.New()
+			err := v.BindPFlags(cmd.Flags())
+			if err != nil {
+				return err
+			}
+			v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+			v.AutomaticEnv()
+
+			vars := map[string]interface{}{}
+
+			if v.GetBool("env") {
+				for _, e := range os.Environ() {
+					pair := strings.SplitN(e, "=", 2)
+					vars[strings.TrimSpace(pair[0])] = dfl.TryConvertString(strings.TrimSpace(pair[1]))
+				}
+			}
+
+			if v.GetBool("args") {
+				m, errArgs := cli.ParseContextArguments(args, dfl.DefaultFunctionMap, quotes)
+				if errArgs != nil {
+					return errors.Wrap(errArgs, "error parsing context from arguments")
+				}
+				for k, v := range m {
+					vars[k] = v
+				}
+			}
+
+			errKeyboard := keyboard.Open()
+			if errKeyboard != nil {
+				return errors.Wrap(errKeyboard, "error creating keyboard")
+			}
+			defer keyboard.Close()
+
+			s := shell.New()
+
+			s.Executor.Funcs["read"] = func(funcs dfl.FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
+				fmt.Println("Args:", args)
+				if len(args) == 0 {
+					return make([]byte, 0), nil
+				}
+				path, err := homedir.Expand(fmt.Sprint(args[0]))
+				if err != nil {
+					return make([]byte, 0), err
+				}
+				fmt.Println("Path:", path)
+				return ioutil.ReadFile(path)
+			}
+
+			s.PrintHeader()
+
+			for {
+
+				s.ResetLine()
+				s.UpdateScreen()
+
+				for {
+
+					char, key, err := s.GetKey()
+					if err != nil {
+						return errors.Wrap(err, "error reading input from keyboard")
+					}
+
+					if key == keyboard.KeyCtrlC {
+						fmt.Print("^C\n")
+						return nil
+					}
+
+					if key == keyboard.KeyCtrlZ {
+						fmt.Print("^Z\n")
+						return nil
+					}
+
+					if key == keyboard.KeyCtrlX {
+						err := s.CutLine()
+						if err != nil {
+							return errors.Wrap(err, "error writing to clipboard")
+						}
+						continue
+					}
+
+					if key == keyboard.KeyCtrlV {
+						err := s.PasteLine()
+						if err != nil {
+							return errors.Wrap(err, "error reading from clipboard")
+						}
+						continue
+					}
+
+					if key == keyboard.KeyEnter {
+						fmt.Print("\n")
+						lineTrimmed := strings.TrimSpace(s.Line)
+						if len(lineTrimmed) > 0 && lineTrimmed[len(lineTrimmed)-1] == '|' {
+							//s.Line = lineTrimmed + " "
+							s.Line = lineTrimmed + "\n"
+							continue
+						}
+						break
+					}
+
+					if key == keyboard.KeySpace {
+						s.WriteString(" ")
+						continue
+					}
+
+					if key == keyboard.KeyArrowLeft {
+						s.MoveLeft()
+						continue
+					}
+
+					if key == keyboard.KeyArrowRight {
+						s.MoveRight()
+						continue
+					}
+
+					if key == keyboard.KeyArrowDown {
+						if s.History.Cursor == 0 {
+							continue
+						}
+						if s.History.Cursor == 1 {
+							s.History.Forward()
+							s.SetLine("")
+						} else if s.History.Cursor > 1 {
+							s.History.Forward()
+							s.SetLine(s.History.Line())
+						}
+						s.ClearLine()
+						s.UpdateScreen()
+					}
+
+					if key == keyboard.KeyArrowUp {
+						if s.History.Cursor < s.History.Len() {
+							s.History.Back()
+							s.SetLine(s.History.Line())
+							s.ClearLine()
+							s.UpdateScreen()
+						}
+						continue
+					}
+
+					switch key {
+					case keyboard.KeyDelete, keyboard.KeyBackspace, keyboard.KeyBackspace2, keyboard.KeyEsc:
+						switch key {
+						case keyboard.KeyDelete, keyboard.KeyBackspace, keyboard.KeyBackspace2:
+							if len(s.Line) > 0 {
+								s.History.Cursor = 0
+								s.Backspace()
+							}
+						case keyboard.KeyEsc:
+							s.History.Cursor = 0
+							s.Line = ""
+							s.ClearLine()
+							s.UpdateScreen()
+						}
+					default:
+						s.WriteString(string(char))
+					}
+
+				}
+
+				lineTrimmed := s.CleanLine()
+
+				if len(lineTrimmed) > 0 {
+
+					if lineTrimmed == "exit" || lineTrimmed == "quit" {
+						return nil
+					}
+
+					if lineTrimmed == "help" {
+						s.PrintHelp()
+						continue
+					}
+
+					if lineTrimmed == "history" || lineTrimmed == "!" {
+						s.PrintHistory()
+						continue
+					}
+
+					if lineTrimmed == "examples" {
+						s.PrintExamples()
+						continue
+					}
+
+					if lineTrimmed == "funcs" || lineTrimmed == "functions" {
+						s.PrintFunctions()
+						continue
+					}
+
+					if lineTrimmed == "!!" {
+						lineTrimmed = s.History.Last()
+						fmt.Println(lineTrimmed)
+					} else if lineTrimmed[0] == '!' {
+						cursor, err := strconv.Atoi(lineTrimmed[1:])
+						if err != nil {
+							fmt.Fprintln(os.Stderr, errors.Wrapf(err, "command %q not found", lineTrimmed[1:]))
+							continue
+						}
+						if cursor > 0 && cursor <= s.History.Len() {
+							lineTrimmed = s.History.Get(cursor - 1)
+							fmt.Println(lineTrimmed)
+						} else {
+							fmt.Fprintln(os.Stderr, errors.Wrapf(err, "command %d not found", cursor))
+							continue
+						}
+					} else {
+						if s.History.Empty() || s.History.Last() != lineTrimmed {
+							s.History.Push(lineTrimmed)
+						}
+					}
+
+					outputObject, err := s.Exec(lineTrimmed)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err)
+						continue
+					}
+
+					if outputObject == nil {
+						continue
+					}
+
+					outputBytes, err := shell.FormatOutput(v, outputObject, quotes)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err)
+						continue
+					}
+
+					fmt.Println(string(outputBytes))
+
+				}
+
+			}
+		},
+	}
+	flags = shellCommand.Flags()
+	cli.InitOutputFlags(flags)
+	rootCommand.AddCommand(shellCommand)
 
 	if err := rootCommand.Execute(); err != nil {
 		panic(err)

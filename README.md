@@ -2,77 +2,98 @@
 
 # go-dfl
 
-# Description
+## Description
 
 **go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).  **go-dfl** depends on:
 - [go-adaptive-functions](https://github.com/spatialcurrent/go-adaptive-functions) for many of the basic functions.
+- [go-counter](https://github.com/spatialcurrent/go-reader-writer) for reading and writer files.
 - [go-counter](https://github.com/spatialcurrent/go-counter) for counting for statistical functions.
 - [go-try-get](https://github.com/spatialcurrent/go-try-get) for abstracting how to get values by name from unknown objects.
 
 Using cross compilers, this library can also be called by other languages.  This library is cross compiled into a Shared Object file (`*.so`).  The Shared Object file can be called by `C`, `C++`, and `Python` on Linux machines.  See the examples folder for patterns that you can use.  This library is also compiled to pure `JavaScript` using [GopherJS](https://github.com/gopherjs/gopherjs).
 
-# Usage
+## Usage
 
 **CLI**
 
-You can also use the command line tool.
+The command line tool, `dfl`, can be used to easily covert data between formats.  We currently support the following platforms.
 
-```
-Usage: dfl -f INPUT [-verbose] [-version] [-help] [-env] [A=1] [B=2]
-Options:
-  -env
-    	Load environment variables
-  -f string
-    	The DFL expression to evaulate
-  -help
-    	Print help
-  -verbose
-    	Provide verbose output
-  -version
-    	Prints version to stdout
-```
+| GOOS | GOARCH |
+| ---- | ------ |
+| darwin | amd64 |
+| linux | amd64 |
+| windows | amd64 |
+| linux | arm64 |
+
+Pull requests to support other platforms are welcome!  See the [examples](#examples) section below for usage.
 
 **Go**
 
-You can import **go-dfl** as a library with:
+You can install the go-dfl packages with.
 
+
+```shell
+go get -u -d github.com/spatialcurrent/go-dfl/...
 ```
+
+You can then import the `dfl` package with:
+
+```go
 import (
-  "github.com/spatialcurrent/go-dfl/dfl"
+  "github.com/spatialcurrent/go-dfl/pkg/dfl"
 )
 ```
 
-See [dfl](https://godoc.org/github.com/spatialcurrent/go-dfl/dfl) in GoDoc for information on how to use Go API.
+See [dfl](https://godoc.org/github.com/spatialcurrent/go-dfl/pkg/dfl) in GoDoc for information on how to use Go API.
 
-**JavaScript**
+**Node**
 
-```html
-<html>
-  <head>
-    <script src="https://...dfl.js"></script>
-  </head>
-  <body>
-    <script>
-      var exp = "@pop + 10";
-      var root = dfl.Parse(exp).Compile();
-      var result = root.Evaluate({"pop": 10})
-      ...
-    </script>
-  </body>
-</html>
+DFL is built as a module.  In modern JavaScript, the module can be imported using [destructuring assignment](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment).
+
+```javascript
+const { parse, compile, evaluate } = require('./dist/dfl.mod.min.js');
 ```
+
+In legacy JavaScript, you can use the `dfl.global.js` file that simply adds `dfl` to the global scope.
 
 **C**
 
-A variant of the `EvaluateBool` function is exported in a Shared Object file (`*.so`), which can be called by `C`, `C++`, and `Python` programs on Linux machines.  For example:
+A variant of the reader and writer functions are exported in a Shared Object file (`*.so`), which can be called by `C`, `C++`, and `Python` programs on Linux machines.  For complete patterns for `C`, `C++`, and `Python`, see the `examples` folder in this repo.
 
-```
-err = EvaluateBool(expression, size, ctx, &result);
-```
+## Releases
 
-The Go function definition defined in `plugins/dfl/main.go` takes in the expression and context.  For complete patterns for `C`, `C++`, and `Python`, see the `examples` folder.
+**go-dfl** is currently in **alpha**.  See releases at https://github.com/spatialcurrent/go-dfl/releases.  See the **Building** section below to build from scratch.
 
-# Examples:
+**JavaScript**
+
+- `dfl.global.js`, `dfl.global.js.map` - JavaScript global build  with source map
+- `dfl.global.min.js`, `dfl.global.min.js.map` - Minified JavaScript global build with source map
+- `dfl.mod.js`, `dfl.mod.js.map` - JavaScript module build  with source map
+- `dfl.mod.min.js`, `dfl.mod.min.js.map` - Minified JavaScript module with source map
+
+**Darwin**
+
+- `dfl_darwin_amd64` - CLI for Darwin on amd64 (includes `macOS` and `iOS` platforms)
+
+**Linux**
+
+- `dfl_linux_amd64` - CLI for Linux on amd64
+- `dfl_linux_amd64` - CLI for Linux on arm64
+- `dfl_linux_amd64.h`, `dfl_linuxamd64.so` - Shared Object for Linux on amd64
+- `dfl_linux_armv7.h`, `dfl_linux_armv7.so` - Shared Object for Linux on ARMv7
+- `dfl_linux_armv8.h`, `dfl_linux_armv8.so` - Shared Object for Linux on ARMv8
+
+**Windows**
+
+- `dfl_windows_amd64.exe` - CLI for Windows on amd64
+
+## Examples:
+
+### Go
+
+See the examples in the [dfl](https://godoc.org/github.com/spatialcurrent/go-dfl/pkg/dfl) package documentation.
+
+### CLI
 
 **Environment**
 
@@ -131,23 +152,35 @@ You can also use DFL to filter OpenStreetMap features.
 # returns true as exit code 0
 ```
 
-# Building
+## Building
+
+Use `make help` to see help information for each target.
 
 **CLI**
 
-The command line DFL program can be built with the `scripts/build_cli.sh` script.
+The `make build_cli` script is used to build executables for Linux and Windows.
 
 **JavaScript**
 
-You can compile DFL to pure JavaScript with the `scripts/build_javascript.sh` script.
+You can compile DFL to pure JavaScript with the `make build_javascript` script.
 
 **Shared Object**
 
-The `scripts/build_so.sh` script is used to build a Shared Object (`*.go`), which can be called by `C`, `C++`, and `Python` on Linux machines.
+The `make build_so` script is used to build Shared Objects (`*.so`), which can be called by `C`, `C++`, and `Python` on Linux machines.
 
 **Changing Destination**
 
-The default destination for build artifacts is `go-dfl/bin`, but you can change the destination with a CLI argument.  For building on a Chromebook consider saving the artifacts in `/usr/local/go/bin`, e.g., `bash scripts/build_cli.sh /usr/local/go/bin`
+The default destination for build artifacts is `go-dfl/bin`, but you can change the destination with an environment variable.  For building on a Chromebook consider saving the artifacts in `/usr/local/go/bin`, e.g., `DEST=/usr/local/go/bin make build_cli`
+
+## Testing
+
+**Go**
+
+To run Go tests use `make test_go` (or `bash scripts/test.sh`), which runs unit tests, `go vet`, `go vet with shadow`, [errcheck](https://github.com/kisielk/errcheck), [ineffassign](https://github.com/gordonklaus/ineffassign), [staticcheck](https://staticcheck.io/), and [misspell](https://github.com/client9/misspell).
+
+**JavaScript**
+
+To run JavaScript tests, first install [Jest](https://jestjs.io/) using `make deps_javascript`, use [Yarn](https://yarnpkg.com/en/), or another method.  Then, build the JavaScript module with `make build_javascript`.  To run tests, use `make test_javascript`.  You can also use the scripts in the `package.json`.
 
 # Contributing
 
