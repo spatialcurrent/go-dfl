@@ -10,7 +10,6 @@ package dfl
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"reflect"
 	"strings"
 	"unicode"
@@ -19,7 +18,8 @@ import (
 
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
 	"github.com/spatialcurrent/go-counter/pkg/counter"
-	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/cache"
+	"github.com/spatialcurrent/go-reader-writer/pkg/io"
 )
 
 func toDict(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
@@ -78,7 +78,7 @@ func prefix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 		return 0, errors.New("Invalid number of arguments to prefix.")
 	}
 
-	if lv, ok := args[0].(grw.ByteReadCloser); ok {
+	if lv, ok := args[0].(io.ByteReadCloser); ok {
 		switch prefix := args[1].(type) {
 		case []byte:
 			data, err := lv.ReadRange(0, len(prefix)-1)
@@ -120,7 +120,7 @@ func suffix(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, arg
 		return 0, errors.New("Invalid number of arguments to suffix.")
 	}
 
-	if lv, ok := args[0].(grw.ByteReadCloser); ok {
+	if lv, ok := args[0].(io.ByteReadCloser); ok {
 		switch suffix := args[1].(type) {
 		case []byte:
 			data, err := lv.ReadAll()
@@ -733,7 +733,7 @@ func trimString(funcs FunctionMap, vars map[string]interface{}, ctx interface{},
 		return 0, errors.New("Invalid number of arguments to split.")
 	}
 
-	if a, ok := args[0].(grw.ByteReadCloser); ok {
+	if a, ok := args[0].(io.ByteReadCloser); ok {
 		b, err := a.ReadAll()
 		if err != nil {
 			return make([]byte, 0), errors.Wrap(err, "error reading all bytes from *reader.Cache")
@@ -757,7 +757,7 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 		return 0, errors.New("Invalid number of arguments to ltrim.")
 	}
 
-	if a, ok := args[0].(grw.ByteReadCloser); ok {
+	if a, ok := args[0].(io.ByteReadCloser); ok {
 		content := make([]byte, 0)
 		i := 0
 		for i = 0; ; i++ {
@@ -775,7 +775,7 @@ func trimStringLeft(funcs FunctionMap, vars map[string]interface{}, ctx interfac
 				break
 			}
 		}
-		return grw.NewCacheWithContent(a, &content, i), nil
+		return cache.NewCacheWithContent(a, &content, i), nil
 	}
 
 	switch a := args[0].(type) {
@@ -793,7 +793,7 @@ func trimStringRight(funcs FunctionMap, vars map[string]interface{}, ctx interfa
 		return 0, errors.New("Invalid number of arguments to rtrim.")
 	}
 
-	if a, ok := args[0].(grw.ByteReadCloser); ok {
+	if a, ok := args[0].(io.ByteReadCloser); ok {
 		b, err := a.ReadAll()
 		if err != nil {
 			return make([]byte, 0), errors.Wrap(err, "error reading all bytes from *reader.Cache")
@@ -816,7 +816,7 @@ func convertToString(funcs FunctionMap, vars map[string]interface{}, ctx interfa
 		return 0, errors.New("Invalid number of arguments to convertToString.")
 	}
 
-	if a, ok := args[0].(grw.ByteReadCloser); ok {
+	if a, ok := args[0].(io.ByteReadCloser); ok {
 		value, err := a.ReadAll()
 		if err != nil {
 			return "", errors.Wrap(err, "error reading all content from *reader.Cache in covertToString")

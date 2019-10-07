@@ -16,7 +16,7 @@ import (
 	"gopkg.in/russross/blackfriday.v2"
 
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
-	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/io"
 	"github.com/spatialcurrent/go-simple-serializer/pkg/gss"
 )
 
@@ -127,7 +127,7 @@ func NewFuntionMapWithDefaults() FunctionMap {
 
 	funcs["first"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
-		if v, ok := args[0].(grw.ByteReadCloser); ok {
+		if v, ok := args[0].(io.ByteReadCloser); ok {
 			return v.ReadFirst()
 		}
 
@@ -137,13 +137,13 @@ func NewFuntionMapWithDefaults() FunctionMap {
 
 	funcs["last"] = func(funcs FunctionMap, vars map[string]interface{}, ctx interface{}, args []interface{}, quotes []string) (interface{}, error) {
 
-		if v, ok := args[0].(grw.ByteReadCloser); ok {
+		if v, ok := args[0].(io.ByteReadCloser); ok {
 			b, err := v.ReadAll()
 			if err != nil {
 				return byte(0), err
 			}
 			if len(b) == 0 {
-				return byte(0), errors.New("last cannot run on an empty grw.ByteReadCloser")
+				return byte(0), errors.New("last cannot run on an empty io.ByteReadCloser")
 			}
 			return b[len(b)-1], nil
 		}

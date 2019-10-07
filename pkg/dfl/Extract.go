@@ -14,7 +14,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/io"
 	"github.com/spatialcurrent/go-try-get/pkg/gtg"
 )
 
@@ -234,7 +234,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 						return v.Interface(), nil
 					}
 
-					if o, ok := obj.(grw.ByteReadCloser); ok {
+					if o, ok := obj.(io.ByteReadCloser); ok {
 						return o.ReadRange(start, end-1)
 					}
 
@@ -249,7 +249,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 						return s.Slice(start, s.Len()).Interface(), nil
 					}
 
-					if _, ok := obj.(grw.ByteReadCloser); ok {
+					if _, ok := obj.(io.ByteReadCloser); ok {
 						return make([]byte, 0), errors.New("Reader cannot evaluate [start:]")
 					}
 
@@ -302,7 +302,7 @@ func Extract(path string, obj interface{}, vars map[string]interface{}, ctx inte
 					}
 				}
 
-				if o, ok := obj.(grw.ByteReadCloser); ok {
+				if o, ok := obj.(io.ByteReadCloser); ok {
 					slice_index := 0
 					switch i.(type) {
 					case int:

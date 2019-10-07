@@ -104,7 +104,13 @@ func main() {
 
 			inputUri := v.GetString("uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
+			inputReader, _, err := grw.ReadFromResource(&grw.ReadFromResourceInput{
+				Uri:        inputUri,
+				Alg:        "",
+				Dict:       grw.NoDict,
+				BufferSize: 4096,
+				S3Client:   nil,
+			})
 			if err != nil {
 				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
@@ -159,7 +165,13 @@ func main() {
 
 			inputUri := v.GetString("input-uri")
 
-			inputReader, _, err := grw.ReadFromResource(inputUri, "", 4096, nil)
+			inputReader, _, err := grw.ReadFromResource(&grw.ReadFromResourceInput{
+				Uri:        inputUri,
+				Alg:        "",
+				Dict:       grw.NoDict,
+				BufferSize: 4096,
+				S3Client:   nil,
+			})
 			if err != nil {
 				return errors.Wrapf(err, "error reading dfl file at uri %q", inputUri)
 			}
@@ -219,22 +231,14 @@ func main() {
 
 			outputUri := v.GetString("output-uri")
 
-			outputWriter, err := grw.WriteToResource(outputUri, "none", v.GetBool("append"), nil)
-			if err != nil {
-				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
-			}
-
-			_, err = outputWriter.Write(outBytes)
-			if err != nil {
-				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
-			}
-
-			err = outputWriter.Flush()
-			if err != nil {
-				return errors.Wrapf(err, "error flushing dfl file to uri %q", outputUri)
-			}
-
-			err = outputWriter.Close()
+			err = grw.WriteAllAndClose(&grw.WriteAllAndCloseInput{
+				Bytes:    outBytes,
+				Uri:      outputUri,
+				Alg:      "",
+				Dict:     grw.NoDict,
+				Append:   v.GetBool("append"),
+				S3Client: nil,
+			})
 			if err != nil {
 				return errors.Wrapf(err, "error writing dfl file to uri %q", outputUri)
 			}

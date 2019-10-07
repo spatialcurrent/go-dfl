@@ -56,21 +56,27 @@ deps_javascript:  ## Install dependencies for JavaScript tests
 # Go building, formatting, testing, and installing
 #
 
+.PHONY: fmt
 fmt:  ## Format Go source code
 	go fmt $$(go list ./... )
 
+.PHONY: imports
 imports: ## Update imports in Go source code
 	# If missing, install goimports with: go get golang.org/x/tools/cmd/goimports
 	goimports -w -local github.com/spatialcurrent/go-dfl,github.com/spatialcurrent/ $$(find . -iname '*.go')
 
+.PHONY: vet
 vet: ## Vet Go source code
 	go vet $$(go list ./...)
 
+.PHONY: test_go
 test_go: ## Run Go tests
 	bash scripts/test.sh
 
+.PHONY: build
 build: build_cli build_javascript build_so build_android  ## Build CLI, Shared Objects (.so), JavaScript, and Android
 
+.PHONY: install
 install:  ## Install dfl CLI on current platform
 	go install -gcflags="$(GCFLAGS)" -ldflags="$(LDFLAGS)" github.com/spatialcurrent/go-dfl/cmd/dfl
 
@@ -90,6 +96,7 @@ bin/dfl_windows_amd64.exe:  ## Build dfl CLI for Windows / amd64
 bin/dfl_linux_arm64: ## Build dfl CLI for Linux / arm64
 	GOOS=linux GOARCH=arm64 go build -o $(DEST)/dfl_linux_arm64 -gcflags="$(GCFLAGS)" -ldflags="$(LDFLAGS)" github.com/spatialcurrent/go-dfl/cmd/dfl
 
+.PHONY: build_cli
 build_cli: bin/dfl_darwin_amd64 bin/dfl_linux_amd64 bin/dfl_windows_amd64.exe bin/dfl_linux_arm64  ## Build command line programs
 
 #
