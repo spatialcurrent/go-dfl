@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/spatialcurrent/go-adaptive-functions/pkg/af"
-	"github.com/spatialcurrent/go-reader-writer/pkg/grw"
+	"github.com/spatialcurrent/go-reader-writer/pkg/io"
 )
 
 // In is a BinaryOperator that evaluates to true if the left value is in the right value.
@@ -55,7 +55,7 @@ func (i IIn) Evaluate(vars map[string]interface{}, ctx interface{}, funcs Functi
 		return vars, false, errors.Wrap(err, "Error evaluating right value for "+i.Dfl(quotes, false, 0))
 	}
 
-	if rvr, ok := rv.(grw.ByteReadCloser); ok {
+	if rvr, ok := rv.(io.ByteReadCloser); ok {
 		if lvb, ok := lv.([]byte); ok {
 			lvs := string(lvb)
 			rvb, err := rvr.ReadAll()

@@ -6,7 +6,7 @@
 
 **go-dfl** is a Go implementation of the Dynamic Filter Language (DFL).  **go-dfl** depends on:
 - [go-adaptive-functions](https://github.com/spatialcurrent/go-adaptive-functions) for many of the basic functions.
-- [go-counter](https://github.com/spatialcurrent/go-reader-writer) for reading and writer files.
+- [go-reader-writer](https://github.com/spatialcurrent/go-reader-writer) for reading and writer files.
 - [go-counter](https://github.com/spatialcurrent/go-counter) for counting for statistical functions.
 - [go-try-get](https://github.com/spatialcurrent/go-try-get) for abstracting how to get values by name from unknown objects.
 
