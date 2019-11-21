@@ -36,12 +36,19 @@ func (a Attribute) Sql(pretty bool, tabs int) string {
 
 func (a Attribute) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"attribute": syntax.AttributePrefix + a.Name,
+		"@type": "attribute",
+		"@value": map[string]interface{}{
+			"name": a.Name,
+		},
 	}
 }
 
+func (a Attribute) MarshalMap() (interface{}, error) {
+	return a.Map(), nil
+}
+
 func (a Attribute) Compile() Node {
-	return Attribute{Name: a.Name}
+	return &Attribute{Name: a.Name}
 }
 
 func (a Attribute) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

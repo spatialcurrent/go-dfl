@@ -61,9 +61,9 @@ func parseKeyOrValueString(s string) (Node, error) {
 }
 
 // ParseKeyValue parses a sequence of key value pairs
-func ParseKeyValue(in string) (map[Node]Node, error) {
+func ParseKeyValue(in string) ([]Item, error) {
 
-	nodes := map[Node]Node{}
+	items := []Item{}
 
 	singlequotes := 0
 	doublequotes := 0
@@ -138,16 +138,16 @@ func ParseKeyValue(in string) (map[Node]Node, error) {
 				} else if len(key) > 0 {
 					keyNode, err := parseKeyOrValueString(key)
 					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing key for key-pair")
+						return items, errors.Wrap(err, "error parsing key for key-pair")
 					}
 					valueNode, err := parseKeyOrValueString(strings.TrimSpace(s))
 					if err != nil {
-						return nodes, errors.Wrap(err, "error parsing value for key-pair")
+						return items, errors.Wrap(err, "error parsing value for key-pair")
 					}
-					nodes[keyNode] = valueNode
+					items = append(items, Item{Key: keyNode, Value: valueNode})
 					key = ""
 				} else {
-					return nodes, errors.New("missing key when parsing key-value pairs")
+					return items, errors.New("missing key when parsing key-value pairs")
 				}
 				s = ""
 			}
@@ -156,18 +156,18 @@ func ParseKeyValue(in string) (map[Node]Node, error) {
 	}
 
 	if leftparentheses > rightparentheses {
-		return nodes, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+		return items, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftparentheses < rightparentheses {
-		return nodes, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+		return items, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftcurlybrackets > rightcurlybrackets {
-		return nodes, errors.New("too few closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightcurlybrackets))
+		return items, errors.New("too few closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightcurlybrackets))
 	} else if leftcurlybrackets < rightcurlybrackets {
-		return nodes, errors.New("too many closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightparentheses))
+		return items, errors.New("too many closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftsquarebrackets > rightsquarebrackets {
-		return nodes, errors.New("too few closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+		return items, errors.New("too few closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
 	} else if leftsquarebrackets < rightsquarebrackets {
-		return nodes, errors.New("too many closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+		return items, errors.New("too many closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
 	}
 
-	return nodes, nil
+	return items, nil
 }

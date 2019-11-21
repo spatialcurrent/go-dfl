@@ -42,7 +42,7 @@ func FormatSql(value interface{}, pretty bool, tabs int) string {
 		// Just format sets as slices.
 		return FormatSql(value.Slice(true), pretty, tabs)
 	case Null:
-		return value.Sql()
+		return value.Sql(pretty, tabs)
 	}
 
 	return fmt.Sprint(value)

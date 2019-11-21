@@ -49,7 +49,7 @@ func TryFormatLiteral(value interface{}, quotes []string, pretty bool, tabs int)
 	case StringSet:
 		return value.Dfl(quotes, pretty, tabs)
 	case Null:
-		return value.Dfl()
+		return value.Dfl(quotes, pretty, tabs)
 	}
 
 	return fmt.Sprint(value)

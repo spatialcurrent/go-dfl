@@ -15,7 +15,7 @@ import (
 )
 
 // ParseList parses a list of values.
-func ParseListOrKeyValue(in string) (bool, []Node, map[Node]Node, error) {
+func ParseListOrKeyValue(in string) (bool, []Node, []Item, error) {
 
 	singlequotes := 0
 	doublequotes := 0
@@ -86,33 +86,33 @@ func ParseListOrKeyValue(in string) (bool, []Node, map[Node]Node, error) {
 			if i+1 == len(in) {
 				value, _, err := Parse(in)
 				if err != nil {
-					return true, make([]Node, 0), map[Node]Node{}, errors.Wrap(err, "error parsing single value in set")
+					return true, make([]Node, 0), []Item{}, errors.Wrap(err, "error parsing single value in set")
 				}
-				return true, []Node{value}, map[Node]Node{}, nil
+				return true, []Node{value}, []Item{}, nil
 				//return true, []Node{&Literal{Value: TryConvertString(in)}}, map[Node]Node{}, nil
 			} else if in[i+1] == ',' {
 				nodes, err := ParseList(in)
-				return true, nodes, map[Node]Node{}, err
+				return true, nodes, []Item{}, err
 			} else if in[i+1] == ':' {
-				nodes, err := ParseKeyValue(in)
-				return false, make([]Node, 0), nodes, err
+				items, err := ParseKeyValue(in)
+				return false, make([]Node, 0), items, err
 			}
 		}
 	}
 
 	if leftparentheses > rightparentheses {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+		return true, make([]Node, 0), []Item{}, errors.New("too few closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftparentheses < rightparentheses {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
+		return true, make([]Node, 0), []Item{}, errors.New("too many closing parentheses " + fmt.Sprint(leftparentheses) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftcurlybrackets > rightcurlybrackets {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too few closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightcurlybrackets))
+		return true, make([]Node, 0), []Item{}, errors.New("too few closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightcurlybrackets))
 	} else if leftcurlybrackets < rightcurlybrackets {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too many closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightparentheses))
+		return true, make([]Node, 0), []Item{}, errors.New("too many closing curly brackets " + fmt.Sprint(leftcurlybrackets) + " | " + fmt.Sprint(rightparentheses))
 	} else if leftsquarebrackets > rightsquarebrackets {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too few closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+		return true, make([]Node, 0), []Item{}, errors.New("too few closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
 	} else if leftsquarebrackets < rightsquarebrackets {
-		return true, make([]Node, 0), map[Node]Node{}, errors.New("too many closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
+		return true, make([]Node, 0), []Item{}, errors.New("too many closing square brackets " + fmt.Sprint(leftsquarebrackets) + " | " + fmt.Sprint(rightsquarebrackets))
 	}
 
-	return true, make([]Node, 0), map[Node]Node{}, nil
+	return true, make([]Node, 0), []Item{}, nil
 }

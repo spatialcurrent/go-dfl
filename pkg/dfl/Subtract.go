@@ -26,7 +26,17 @@ func (s Subtract) Sql(pretty bool, tabs int) string {
 }
 
 func (s Subtract) Map() map[string]interface{} {
-	return s.BinaryOperator.Map("subtract", s.Left, s.Right)
+	return map[string]interface{}{
+		"@type": "-",
+		"@value": map[string]interface{}{
+			"left":  s.Left.Map(),
+			"right": s.Right.Map(),
+		},
+	}
+}
+
+func (s Subtract) MarshalMap() (interface{}, error) {
+	return s.Map(), nil
 }
 
 func (s Subtract) Compile() Node {

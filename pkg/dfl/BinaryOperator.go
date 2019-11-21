@@ -14,8 +14,8 @@ import (
 // BinaryOperator is a DFL Node that represents the binary operator of a left value and right value.
 // This struct functions as an embedded struct for many comparator operations.
 type BinaryOperator struct {
-	Left  Node
-	Right Node
+	Left  Node `map:"left"`
+	Right Node `map:"right"`
 }
 
 func (bo BinaryOperator) Builder(operator string, quotes []string, tabs int) builder.Builder {
