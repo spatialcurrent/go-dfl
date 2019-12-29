@@ -30,9 +30,18 @@ func (a Add) Sql(pretty bool, tabs int) string {
 	return a.BinaryOperator.Sql("+", pretty, tabs)
 }
 
-// Map returns a map representation of this node.
 func (a Add) Map() map[string]interface{} {
-	return a.BinaryOperator.Map("+", a.Left, a.Right)
+	return map[string]interface{}{
+		"@type": "+",
+		"@value": map[string]interface{}{
+			"left":  a.BinaryOperator.Left.Map(),
+			"right": a.BinaryOperator.Right.Map(),
+		},
+	}
+}
+
+func (a Add) MarshalMap() (interface{}, error) {
+	return a.Map(), nil
 }
 
 // Compile returns a compiled version of this node.

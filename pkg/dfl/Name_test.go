@@ -5,16 +5,14 @@
 //
 // =================================================================
 
-// Package syntax includes functions for parsing syntax.
-//
-package syntax
+package dfl
 
-var AttributePrefix = "@"
+import (
+	"testing"
 
-var VariablePrefix = "$"
+	"github.com/stretchr/testify/assert"
+)
 
-var DictionaryPrefix = "{"
-
-var DictionarySuffix = "}"
-
-var DictionarySeparator = ":"
+func TestName(t *testing.T) {
+	assert.Equal(t, "AssignAdd", Name(&AssignAdd{}))
+}

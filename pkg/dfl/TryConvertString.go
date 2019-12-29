@@ -42,7 +42,7 @@ func TryConvertString(s string) interface{} {
 	}
 
 	if s_lc == "null" || s_lc == "none" || s_lc == "nil" {
-		return Null{}
+		return &Null{}
 	}
 
 	if s_lc == "true" {

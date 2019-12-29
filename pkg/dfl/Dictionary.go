@@ -13,33 +13,40 @@ import (
 
 // Dictionary is a Node representing a dictionary of key value pairs.
 type Dictionary struct {
-	Nodes map[Node]Node
+	//Nodes map[Node]Node
+	Items []Item
 }
 
 func NewDictionary(m map[string]interface{}) *Dictionary {
-	nodes := map[Node]Node{}
+	items := make([]Item, 0)
 	for k, v := range m {
 		if d, ok := v.(map[string]interface{}); ok {
-			nodes[&Literal{Value: k}] = NewDictionary(d)
+			items = append(items, Item{
+				Key:   &Literal{Value: k},
+				Value: NewDictionary(d),
+			})
 		} else {
-			nodes[&Literal{Value: k}] = &Literal{Value: v}
+			items = append(items, Item{
+				Key:   &Literal{Value: k},
+				Value: &Literal{Value: v},
+			})
 		}
 	}
-	return &Dictionary{Nodes: nodes}
+	return &Dictionary{Items: items}
 }
 
 // Len returns the length of the underlying array.
 func (d Dictionary) Len() int {
-	return len(d.Nodes)
+	return len(d.Items)
 }
 
 func (d Dictionary) Dfl(quotes []string, pretty bool, tabs int) string {
-	if len(d.Nodes) == 0 {
+	if len(d.Items) == 0 {
 		return "{}"
 	}
 	values := make([]string, 0)
-	for k, v := range d.Nodes {
-		values = append(values, k.Dfl(quotes, pretty, tabs+1)+": "+v.Dfl(quotes, pretty, tabs+1))
+	for _, i := range d.Items {
+		values = append(values, i.Key.Dfl(quotes, pretty, tabs+1)+": "+i.Value.Dfl(quotes, pretty, tabs+1))
 	}
 	if pretty {
 		return "{" + "\n" + FormatList(values, ",", pretty, tabs+1) + "\n" + strings.Repeat(DefaultTab, tabs) + "}"
@@ -51,12 +58,11 @@ func (d Dictionary) Dfl(quotes []string, pretty bool, tabs int) string {
 // Sql returns the SQL representation of this node as a string
 func (d Dictionary) Sql(pretty bool, tabs int) string {
 	str := SqlQuote + SqlArrayPrefix
-	i := 0
-	for k, v := range d.Nodes {
+	for i, item := range d.Items {
 		if i > 0 {
 			str += ", "
 		}
-		str += k.Sql(pretty, tabs) + ":" + v.Sql(pretty, tabs)
+		str += item.Key.Sql(pretty, tabs) + ":" + item.Value.Sql(pretty, tabs)
 		i += 1
 	}
 	str = str + SqlArraySuffix + SqlQuote + "::json"
@@ -64,28 +70,40 @@ func (d Dictionary) Sql(pretty bool, tabs int) string {
 }
 
 func (d Dictionary) Map() map[string]interface{} {
-	return map[string]interface{}{
-		"nodes": d.Nodes,
+	items := []map[string]interface{}{}
+	for _, item := range d.Items {
+		items = append(items, item.Map())
 	}
+	return map[string]interface{}{
+		"@type":  "dictionary",
+		"@value": items,
+	}
+}
+
+func (d Dictionary) MarshalMap() (interface{}, error) {
+	return d.Map(), nil
 }
 
 // Compile returns a compiled version of this node.
 func (d Dictionary) Compile() Node {
-	nodes := map[Node]Node{}
-	for k, v := range d.Nodes {
-		nodes[k.Compile()] = v.Compile()
+	items := make([]Item, 0)
+	for _, i := range d.Items {
+		items = append(items, Item{
+			Key:   i.Key.Compile(),
+			Value: i.Value.Compile(),
+		})
 	}
-	return Dictionary{Nodes: nodes}
+	return &Dictionary{Items: items}
 }
 
 func (d Dictionary) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	values := map[interface{}]interface{}{}
-	for k, v := range d.Nodes {
-		_, keyValue, err := k.Evaluate(vars, ctx, funcs, quotes)
+	for _, i := range d.Items {
+		_, keyValue, err := i.Key.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, values, err
 		}
-		_, valueValue, err := v.Evaluate(vars, ctx, funcs, quotes)
+		_, valueValue, err := i.Value.Evaluate(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, values, err
 		}
@@ -96,11 +114,11 @@ func (d Dictionary) Evaluate(vars map[string]interface{}, ctx interface{}, funcs
 
 func (d Dictionary) Attributes() []string {
 	set := make(map[string]struct{})
-	for k, v := range d.Nodes {
-		for _, x := range k.Attributes() {
+	for _, i := range d.Items {
+		for _, x := range i.Key.Attributes() {
 			set[x] = struct{}{}
 		}
-		for _, x := range v.Attributes() {
+		for _, x := range i.Value.Attributes() {
 			set[x] = struct{}{}
 		}
 	}
@@ -113,11 +131,11 @@ func (d Dictionary) Attributes() []string {
 
 func (d Dictionary) Variables() []string {
 	set := make(map[string]struct{})
-	for k, v := range d.Nodes {
-		for _, x := range k.Variables() {
+	for _, i := range d.Items {
+		for _, x := range i.Key.Variables() {
 			set[x] = struct{}{}
 		}
-		for _, x := range v.Variables() {
+		for _, x := range i.Value.Variables() {
 			set[x] = struct{}{}
 		}
 	}

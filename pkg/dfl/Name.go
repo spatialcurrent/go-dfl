@@ -5,16 +5,18 @@
 //
 // =================================================================
 
-// Package syntax includes functions for parsing syntax.
-//
-package syntax
+package dfl
 
-var AttributePrefix = "@"
+import (
+	"fmt"
+	"reflect"
+)
 
-var VariablePrefix = "$"
-
-var DictionaryPrefix = "{"
-
-var DictionarySuffix = "}"
-
-var DictionarySeparator = ":"
+func Name(node Node) string {
+	t := reflect.TypeOf(node)
+	k := t.Kind()
+	if k == reflect.Ptr {
+		return fmt.Sprintf("*%s", t.Elem().Name())
+	}
+	return t.Name()
+}

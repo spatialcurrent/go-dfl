@@ -17,7 +17,7 @@ import (
 //	Literal{Value: ""}
 //	Literal{Value: 0.0}
 type Literal struct {
-	Value interface{} // the field containing the actual value
+	Value interface{}
 }
 
 func (l Literal) Dfl(quotes []string, pretty bool, tabs int) string {
@@ -37,12 +37,19 @@ func (l Literal) Sql(pretty bool, tabs int) string {
 
 func (l Literal) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"value": l.Value,
+		"@type": "literal",
+		"@value": map[string]interface{}{
+			"value": l.Value,
+		},
 	}
 }
 
+func (l Literal) MarshalMap() (interface{}, error) {
+	return l.Map(), nil
+}
+
 func (l Literal) Compile() Node {
-	return l
+	return &Literal{Value: l.Value}
 }
 
 func (l Literal) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

@@ -33,12 +33,19 @@ func (v Variable) Sql(pretty bool, tabs int) string {
 
 func (v Variable) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"variable": syntax.VariablePrefix + v.Name,
+		"@type": "variable",
+		"@value": map[string]interface{}{
+			"name": v.Name,
+		},
 	}
 }
 
+func (v Variable) MarshalMap() (interface{}, error) {
+	return v.Map(), nil
+}
+
 func (v Variable) Compile() Node {
-	return Variable{Name: v.Name}
+	return &Variable{Name: v.Name}
 }
 
 func (v Variable) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

@@ -24,7 +24,17 @@ func (lte LessThanOrEqual) Sql(pretty bool, tabs int) string {
 }
 
 func (lte LessThanOrEqual) Map() map[string]interface{} {
-	return lte.BinaryOperator.Map("<=", lte.Left, lte.Right)
+	return map[string]interface{}{
+		"@type": "<=",
+		"@value": map[string]interface{}{
+			"left":  lte.Left.Map(),
+			"right": lte.Right.Map(),
+		},
+	}
+}
+
+func (lte LessThanOrEqual) MarshalMap() (interface{}, error) {
+	return lte.Map(), nil
 }
 
 func (lte LessThanOrEqual) Compile() Node {
@@ -38,10 +48,10 @@ func (lte LessThanOrEqual) Compile() Node {
 			if err != nil {
 				panic(err)
 			}
-			return Literal{Value: (v <= 0)}
+			return &Literal{Value: (v <= 0)}
 		}
 	}
-	return LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+	return &LessThanOrEqual{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
 func (lte LessThanOrEqual) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

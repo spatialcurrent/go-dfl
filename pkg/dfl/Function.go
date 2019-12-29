@@ -80,7 +80,12 @@ func (f Function) Sql(pretty bool, tabs int) string {
 }
 
 func (f Function) Compile() Node {
-	return f
+	return &Function{
+		Name: f.Name,
+		MultiOperator: &MultiOperator{
+			Arguments: f.MultiOperator.Arguments,
+		},
+	}
 }
 
 func (f Function) Map() map[string]interface{} {
@@ -89,10 +94,16 @@ func (f Function) Map() map[string]interface{} {
 		arguments = append(arguments, a.Map())
 	}
 	return map[string]interface{}{
-		"op":        "function",
-		"name":      f.Name,
-		"arguments": arguments,
+		"@type": "function",
+		"@value": map[string]interface{}{
+			"name":      f.Name,
+			"arguments": arguments,
+		},
 	}
+}
+
+func (f Function) MarshalMap() (interface{}, error) {
+	return f.Map(), nil
 }
 
 func (f Function) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

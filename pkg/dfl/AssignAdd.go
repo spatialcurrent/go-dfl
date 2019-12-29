@@ -63,19 +63,32 @@ func (a AssignAdd) Sql(pretty bool, tabs int) string {
 }
 
 func (a AssignAdd) Map() map[string]interface{} {
-	return a.BinaryOperator.Map("assignadd", a.Left, a.Right)
+	return map[string]interface{}{
+		"@type": "+=",
+		"@value": map[string]interface{}{
+			"left":  a.BinaryOperator.Left.Map(),
+			"right": a.BinaryOperator.Right.Map(),
+		},
+	}
+}
+
+func (a AssignAdd) MarshalMap() (interface{}, error) {
+	return a.Map(), nil
 }
 
 // Compile returns a compiled version of this node.
 func (a AssignAdd) Compile() Node {
-	left := a.Left.Compile()
-	right := a.Right.Compile()
-	return &AssignAdd{&BinaryOperator{Left: left, Right: right}}
+	return &AssignAdd{
+		&BinaryOperator{
+			Left:  a.Left.Compile(),
+			Right: a.Right.Compile(),
+		},
+	}
 }
 
 func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	switch left := a.Left.(type) {
-	case Attribute:
+	case *Attribute:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err
@@ -110,7 +123,7 @@ func (a AssignAdd) Evaluate(vars map[string]interface{}, ctx interface{}, funcs 
 			path = pair[1]
 		}
 		return vars, ctx, nil
-	case Variable:
+	case *Variable:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err

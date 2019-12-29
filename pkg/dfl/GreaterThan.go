@@ -23,7 +23,17 @@ func (gt GreaterThan) Sql(pretty bool, tabs int) string {
 }
 
 func (gt GreaterThan) Map() map[string]interface{} {
-	return gt.BinaryOperator.Map(">", gt.Left, gt.Right)
+	return map[string]interface{}{
+		"@type": ">",
+		"@value": map[string]interface{}{
+			"left":  gt.Left.Map(),
+			"right": gt.Right.Map(),
+		},
+	}
+}
+
+func (gt GreaterThan) MarshalMap() (interface{}, error) {
+	return gt.Map(), nil
 }
 
 func (gt GreaterThan) Compile() Node {
@@ -37,10 +47,10 @@ func (gt GreaterThan) Compile() Node {
 			if err != nil {
 				panic(err)
 			}
-			return Literal{Value: (v > 0)}
+			return &Literal{Value: (v > 0)}
 		}
 	}
-	return GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
+	return &GreaterThan{&NumericBinaryOperator{&BinaryOperator{Left: left, Right: right}}}
 }
 
 func (gt GreaterThan) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {

@@ -75,7 +75,7 @@ func (a AssignMultiply) Compile() Node {
 
 func (a AssignMultiply) Evaluate(vars map[string]interface{}, ctx interface{}, funcs FunctionMap, quotes []string) (map[string]interface{}, interface{}, error) {
 	switch left := a.Left.(type) {
-	case Attribute:
+	case *Attribute:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err
@@ -110,7 +110,7 @@ func (a AssignMultiply) Evaluate(vars map[string]interface{}, ctx interface{}, f
 			path = pair[1]
 		}
 		return vars, ctx, nil
-	case Variable:
+	case *Variable:
 		vars, lv, rv, err := a.EvaluateLeftAndRight(vars, ctx, funcs, quotes)
 		if err != nil {
 			return vars, 0, err

@@ -37,11 +37,17 @@ func (to TernaryOperator) Sql(pretty bool, tabs int) string {
 
 func (to TernaryOperator) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"op":        "ternary",
-		"condition": to.Left.Map(),
-		"true":      to.True.Map(),
-		"false":     to.False.Map(),
+		"@type": "ternary",
+		"@value": map[string]interface{}{
+			"condition": to.Left.Map(),
+			"true":      to.True.Map(),
+			"false":     to.False.Map(),
+		},
 	}
+}
+
+func (to TernaryOperator) MarshalMap() (interface{}, error) {
+	return to.Map(), nil
 }
 
 func (to TernaryOperator) Compile() Node {

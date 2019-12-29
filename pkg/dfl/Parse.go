@@ -229,7 +229,9 @@ func Parse(in string) (Node, string, error) {
 				return &AssignMultiply{&BinaryOperator{Right: right}}, remainder, nil
 
 			} else if len(remainder) == 0 || in[i+1] == ' ' || in[i+1] == '\n' {
-				if syntax.IsQuoted(s) {
+				if syntax.IsNull(s_lc) {
+					return &Null{}, strings.TrimSpace(remainder), nil
+				} else if syntax.IsQuoted(s) {
 					return ParseLiteral(UnescapeString(s[1:len(s)-1]), remainder)
 				} else if syntax.IsAttribute(s) {
 					return ParseAttribute(s, remainder)

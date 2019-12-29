@@ -51,8 +51,15 @@ func (a Array) Sql(pretty bool, tabs int) string {
 
 func (a Array) Map() map[string]interface{} {
 	return map[string]interface{}{
-		"nodes": a.Nodes,
+		"@type": "array",
+		"@value": map[string]interface{}{
+			"nodes": a.Nodes,
+		},
 	}
+}
+
+func (a Array) MarshalMap() (interface{}, error) {
+	return a.Map(), nil
 }
 
 // Compile returns a compiled version of this node.

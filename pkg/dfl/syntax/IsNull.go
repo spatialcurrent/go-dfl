@@ -5,16 +5,9 @@
 //
 // =================================================================
 
-// Package syntax includes functions for parsing syntax.
-//
 package syntax
 
-var AttributePrefix = "@"
-
-var VariablePrefix = "$"
-
-var DictionaryPrefix = "{"
-
-var DictionarySuffix = "}"
-
-var DictionarySeparator = ":"
+// IsNull returns true if the string is a formatted null.
+func IsNull(s string) bool {
+	return s == "null" || s == "none" || s == "nil"
+}

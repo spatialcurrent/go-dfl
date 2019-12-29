@@ -23,7 +23,7 @@ import (
 //	{amenity: bank}
 func ParseSetOrDictionary(in string, remainder string) (Node, string, error) {
 
-	isSet, list, kv, err := ParseListOrKeyValue(in)
+	isSet, list, items, err := ParseListOrKeyValue(in)
 	if err != nil {
 		return &Set{}, remainder, errors.Wrap(err, "error parsing set "+in)
 	}
@@ -32,7 +32,7 @@ func ParseSetOrDictionary(in string, remainder string) (Node, string, error) {
 		if isSet {
 			return &Set{Nodes: list}, remainder, nil
 		}
-		return &Dictionary{Nodes: kv}, remainder, nil
+		return &Dictionary{Items: items}, remainder, nil
 	}
 
 	root, remainder, err := Parse(remainder)
@@ -43,7 +43,7 @@ func ParseSetOrDictionary(in string, remainder string) (Node, string, error) {
 	if isSet {
 		err = AttachLeft(root, &Set{Nodes: list})
 	} else {
-		err = AttachLeft(root, &Dictionary{Nodes: kv})
+		err = AttachLeft(root, &Dictionary{Items: items})
 	}
 
 	if err != nil {
