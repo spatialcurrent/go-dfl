@@ -84,7 +84,26 @@ func (n *Node) Arguments(arguments []dfl.Node) *Node {
 func (n *Node) Node() dfl.Node {
 	switch n.name {
 	case "add", "+":
-		return &dfl.Add{BinaryOperator: &dfl.BinaryOperator{Left: n.left, Right: n.right}}
+		return &dfl.Add{
+			BinaryOperator: &dfl.BinaryOperator{
+				Left:  n.left,
+				Right: n.right,
+			},
+		}
+	case "assign", ":=":
+		return &dfl.Assign{
+			BinaryOperator: &dfl.BinaryOperator{
+				Left:  n.left,
+				Right: n.right,
+			},
+		}
+	case "assignadd", "+=":
+		return &dfl.AssignAdd{
+			BinaryOperator: &dfl.BinaryOperator{
+				Left:  n.left,
+				Right: n.right,
+			},
+		}
 	case "subtract", "-":
 		return &dfl.Subtract{
 			NumericBinaryOperator: &dfl.NumericBinaryOperator{
@@ -92,6 +111,13 @@ func (n *Node) Node() dfl.Node {
 					Left:  n.left,
 					Right: n.right,
 				},
+			},
+		}
+	case "assignsubtract", "-=":
+		return &dfl.AssignSubtract{
+			BinaryOperator: &dfl.BinaryOperator{
+				Left:  n.left,
+				Right: n.right,
 			},
 		}
 	case ">":

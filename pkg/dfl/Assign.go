@@ -62,7 +62,17 @@ func (a Assign) Sql(pretty bool, tabs int) string {
 }
 
 func (a Assign) Map() map[string]interface{} {
-	return a.BinaryOperator.Map("assign", a.Left, a.Right)
+	return map[string]interface{}{
+		"@type": ":=",
+		"@value": map[string]interface{}{
+			"left":  a.BinaryOperator.Left.Map(),
+			"right": a.BinaryOperator.Right.Map(),
+		},
+	}
+}
+
+func (a Assign) MarshalMap() (interface{}, error) {
+	return a.Map(), nil
 }
 
 // Compile returns a compiled version of this node.
